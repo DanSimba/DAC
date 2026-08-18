@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import 'tailwindcss';
 
 @font-face {
@@ -8,29 +10,41 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  font-family: "Elms Sans", sans-serif; 
 }
 
+
+
 :root{
-    --vermelho: #950D14;
+    --marinho: #1d1d36;
+    --rosa: #e50d81;
+    --azure: #27aae1;
+
+    /* --vermelho: #950D14;
+
     --preto: #1A1118;
     --terracota: #C94C3C;
     --marlin: #383740;
     --cinza_lava: #5E646E;
-    --cinza_imp: #97949D;
+    --cinza_imp: #97949D; */
 
     --logo-img: url('/assets/images/MONSTERBANK.jpeg');
 }
 
 @theme{
-    --color-vermelho: var(--vermelho);
+    /* --color-vermelho: var(--vermelho);
     --color-preto: var(--preto);
     --color-terracota: var(--terracota);
     --color-marlin: var(--marlin);
     --color-cinza_lava: var(--cinza_lava);
-    --color-cinza_imp: var(--cinza_imp);
+    --color-cinza_imp: var(--cinza_imp); */
+    --color-marinho: var(--marinho);
+    --color-rosa: var(--rosa);
+    --color-azure: var(--azure);
 
     --background-image-logo: var(--logo-img);
 
     --font-monster: "MonsterHigh", sans-serif;
+    --font-display: "Elms Sans", sans-serif; 
 
 }
