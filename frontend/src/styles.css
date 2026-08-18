@@ -1,3 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@font-face {
+  font-family: "MonsterHigh";
+  src: url("/assets/fonts/runytunesrevisited.regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root{
+    --vermelho: #950D14;
+    --preto: #1A1118;
+    --terracota: #C94C3C;
+    --marlin: #383740;
+    --cinza_lava: #5E646E;
+    --cinza_imp: #97949D;
+
+    --logo-img: url('/assets/images/MONSTERBANK.jpeg');
+}
+
+@theme{
+    --color-vermelho: var(--vermelho);
+    --color-preto: var(--preto);
+    --color-terracota: var(--terracota);
+    --color-marlin: var(--marlin);
+    --color-cinza_lava: var(--cinza_lava);
+    --color-cinza_imp: var(--cinza_imp);
+
+    --background-image-logo: var(--logo-img);
+
+    --font-monster: "MonsterHigh", sans-serif;
+
+}
