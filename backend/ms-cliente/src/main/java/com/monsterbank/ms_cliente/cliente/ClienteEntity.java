@@ -45,8 +45,29 @@ public class ClienteEntity {
 
 
     public ClienteEntity(
-            
+            String cpf,
+            String nome,
+            String email,
+            String telefone,
+            BigDecimal salario,
+            String logradouro,
+            Integer numero,
+            String complemento,
+            String cep,
+            String cidade,
+            String uf
     ){
+     this.cpf=cpf;
+     this.nome=nome;
+     this.email=email;
+     this.telefone=telefone;
+     this.salario=salario;
+     this.logradouro=logradouro;
+     this.numero = numero;
+     this.complemento=complemento;
+     this.cep=cep;
+     this.cidade=cidade;
+     this.uf=uf;
 
     }
 
