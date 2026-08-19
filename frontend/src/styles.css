@@ -49,4 +49,8 @@
     --font-monster: "MonsterHigh", sans-serif;
     --font-display: "Elms Sans", sans-serif; 
 
+    --font-weight-title: 700; /*títulos grandes (Montserrat em cinza)*/
+    --font-weight-cont: 500; /*textos, subtítulos (nunito sans)*/
+    --font-weight-bold: 800;
+
 }
