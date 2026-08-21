@@ -28,7 +28,8 @@
     --cinza_lava: #5E646E;
     --cinza_imp: #97949D; */
 
-    --logo-img: url('/assets/images/MONSTERBANK.jpeg');
+    --logo-img: url('/assets/images/pngegg.png');
+    --icon-img: url('/assets/images/pngegg (1).png');
 }
 
 @theme{
@@ -43,8 +44,13 @@
     --color-azure: var(--azure);
 
     --background-image-logo: var(--logo-img);
+    --background-image-icon: var(--icon-img);
 
     --font-monster: "MonsterHigh", sans-serif;
     --font-display: "Elms Sans", sans-serif; 
+
+    --font-weight-title: 700; /*títulos grandes (Montserrat em cinza)*/
+    --font-weight-cont: 500; /*textos, subtítulos (nunito sans)*/
+    --font-weight-bold: 800;
 
 }
