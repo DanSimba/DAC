@@ -4,10 +4,11 @@ import { UserType } from '../../../../enumeration/user-type';
 import { ClientStatus } from '../../../../enumeration/client-status';
 import { Account } from '../../../../models/account.model';
 import { ManagerStatus } from '../../../../enumeration/manager-status';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-client-home-page',
-  imports: [],
+  imports: [MatIconModule],
   templateUrl: './client-home-page.html',
   styleUrl: './client-home-page.css',
 })
@@ -22,7 +23,7 @@ export class ClientHomePage {
         salary   : 20000,
         address  : {
           cep          : 'a',
-          address      : 'a',
+          street      : 'a',
           number       : 'a',
           complement   : 'a',
           neighborhood : 'a',
