@@ -8,6 +8,6 @@ import { ClientService } from '../../../../application/client/services/client-se
   styleUrl: './client-nav-bar.css',
 })
 export class ClientNavBar {
-  clienService = inject(ClientService)
+  clientService = inject(ClientService)
   
 }
