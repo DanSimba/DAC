@@ -1,3 +1,20 @@
-<div class="flex flex-col w-screen h-full bg-red-700 px-[8vw]">
-AAAAAA
+<div class="flex flex-col w-[84vw] h-[80vh] items-center px-8 py-4">
+
+    <div class="flex flex-row w-[36vw] h-[24vh] justify-evenly rounded-2xl bg-black/50 border-5 border-solid border-rosa">
+
+        <div class="flex flex-col w-full h-full justify-center items-center text-white font-display {{side()=='sac'?'bg-linear-to-r from-rosa/60 to-[black/50] to-40% text-4xl  text-white':'text-3xl text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
+        (click)="setSide('sac')">
+            Sacar 
+        </div>
+
+        <!-- DEPOSITAR -->
+        <div class="flex flex-col w-full h-full justify-center items-center font-display {{side()=='dep'?'bg-linear-to-l from-rosa/60 to-[black/50] to-40% text-4xl text-white':'text-3xl  text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
+        (click)="setSide('dep')">
+            Depositar 
+        </div>
+    </div>
+
+    <div class="flex flex-row w-full h-full">
+        
+    </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-dep-sac',
@@ -6,4 +6,10 @@ import { Component } from '@angular/core';
   templateUrl: './dep-sac.html',
   styleUrl: './dep-sac.css',
 })
-export class DepSac {}
+export class DepSac {
+  side = signal<string>('');
+
+  setSide(s: string){
+    this.side.set(s);
+  }
+}
