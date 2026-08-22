@@ -6,6 +6,8 @@ import { Account } from '../../../../models/account.model';
 import { ManagerStatus } from '../../../../enumeration/manager-status';
 import { MatIconModule } from '@angular/material/icon';
 import { ClientService } from '../../../../application/client/services/client-service';
+import { Router } from '@angular/router';
+import { sign } from 'crypto';
 
 @Component({
   selector: 'app-client-menu',
@@ -15,42 +17,13 @@ import { ClientService } from '../../../../application/client/services/client-se
 })
 export class ClientMenu {
   clientService = inject(ClientService)
+  private router = inject(Router);
 
-    //MOCKZIN
-  client = signal<Client>({
-        id       : 1,
-        cpf      : '000111222-33',
-        name     : 'razerson nvidio da silva',
-        email    : 'razer@gmail.com',
-        password : 'starwars123',
-        salary   : 20000,
-        address  : {
-          cep          : 'a',
-          street      : 'a',
-          number       : 'a',
-          complement   : 'a',
-          neighborhood : 'a',
-          city         : 'a',
-          uf           : 'a',
-          state        : 'a',
-        },
-        status   : ClientStatus.ACTIVE,
-        type     : UserType.CLIENT,
-  });
+  client = signal<Client>(this.clientService.getClient());
+  account = signal<Account>(this.clientService.getAccount());
 
-  account = signal<Account>({
-        client   : this.client(),
-        number   : '001',
-        balance  : 1000,
-        manager  : {
-              id       : 2,
-              name     : 'dievalson oracle pereira',
-              cpf      : 'dievalson oracle pereira',
-              email    : 'dievalson oracle pereira',
-              password : 'dievalson oracle pereira',
-              status   : ManagerStatus.ACTIVE,
-              type     : UserType.MANAGER
-        },
-        createdAt : '10/10/2012',
-  })
+  logout(){
+    console.log('usuário saiu!!');
+    this.router.navigate([''])
+  }
 }
