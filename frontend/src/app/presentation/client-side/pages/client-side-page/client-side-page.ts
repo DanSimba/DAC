@@ -11,7 +11,7 @@ import { ClientMenu } from '../../components/client-menu/client-menu';
   styleUrl: './client-side-page.css',
 })
 export class ClientSidePage {
-  private clientService = inject(ClientService);
+  clientService = inject(ClientService);
   imo = computed(()=>{
     return this.clientService.getIMO();
   })

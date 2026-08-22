@@ -3,10 +3,11 @@ import { Client } from '../../../../models/client.model';
 import { Account } from '../../../../models/account.model';
 import { MatIconModule } from '@angular/material/icon';
 import { ClientService } from '../../../../application/client/services/client-service';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-client-home-page',
-  imports: [MatIconModule],
+  imports: [MatIconModule, RouterLink],
   templateUrl: './client-home-page.html',
   styleUrl: './client-home-page.css',
 })

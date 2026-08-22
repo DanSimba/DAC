@@ -1,13 +1,8 @@
 import { Component, signal, inject } from '@angular/core';
 import { Client } from '../../../../models/client.model';
-import { UserType } from '../../../../enumeration/user-type';
-import { ClientStatus } from '../../../../enumeration/client-status';
 import { Account } from '../../../../models/account.model';
-import { ManagerStatus } from '../../../../enumeration/manager-status';
-import { MatIconModule } from '@angular/material/icon';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { Router } from '@angular/router';
-import { sign } from 'crypto';
 
 @Component({
   selector: 'app-client-menu',
