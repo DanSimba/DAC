@@ -1,20 +1,43 @@
-<div class="flex flex-col w-[84vw] h-[80vh] items-center px-8 py-4">
+<div class="flex flex-col w-[84vw] h-[88vh] gap-y-4 justify-center">
 
-    <div class="flex flex-row w-[36vw] h-[24vh] justify-evenly rounded-2xl bg-black/50 border-5 border-solid border-rosa">
-
-        <div class="flex flex-col w-full h-full justify-center items-center text-white font-display {{side()=='sac'?'bg-linear-to-r from-rosa/60 to-[black/50] to-40% text-4xl  text-white':'text-3xl text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
-        (click)="setSide('sac')">
-            Sacar 
-        </div>
-
-        <!-- DEPOSITAR -->
-        <div class="flex flex-col w-full h-full justify-center items-center font-display {{side()=='dep'?'bg-linear-to-l from-rosa/60 to-[black/50] to-40% text-4xl text-white':'text-3xl  text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
-        (click)="setSide('dep')">
-            Depositar 
+    <div class="flex flex-row w-[36vw] justify-end">
+        <div class="flex flex-row w-[12vw] h-[6vh] justify-evenly items-center bg-rosa scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_white] cursor-pointer rounded-lg transition-all duration-130"
+        (click)="location.back()">
+               <mat-icon>arrow_backward</mat-icon> Voltar 
         </div>
     </div>
+    
+    <div class="flex flex-col w-full justify-center items-center gap-y-6 px-8">
+        <div class="flex flex-row w-[36vw] h-[20vh] justify-evenly rounded-2xl bg-black/50 {{side()=='sac'?' border-5 border-solid border-rosa': side()=='dep'?' border-5 border-solid border-azure':'border-5 border-solid border-gray-500'}}">
 
-    <div class="flex flex-row w-full h-full">
-        
+            <div class="flex flex-col w-full h-full justify-center items-center text-white font-display {{side()=='sac'?'bg-linear-to-r from-rosa/60 to-[black/50] to-40% text-4xl text-white':'text-3xl text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
+            (click)="setSide('sac')">
+                Sacar 
+            </div>
+
+            <!-- DEPOSITAR -->
+            <div class="flex flex-col w-full h-full justify-center items-center font-display {{side()=='dep'?'bg-linear-to-l from-azure/60 to-[black/50] to-40% text-4xl text-white':'text-3xl  text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
+            (click)="setSide('dep')">
+                Depositar 
+            </div>
+        </div>
+
+        <div class="flex flex-col w-[36vw] h-[30vh] justify-evenly items-center rounded-2xl bg-black/50 {{side()=='sac'?' border-5 border-solid border-rosa scale-105': side()=='dep'?' border-5 border-solid border-azure scale-105':'border-5 border-solid border-gray-500'}} transition-all duration-130">
+            <div class="flex flex-row w-full gap-x-6 items-center justify-center text-3xl text-white font-display font-cont {{side()==''?'text-3xl text-white/50':'text-4xl text-white'}}">
+                Valor:
+                <input type="number" placeholder="00.00"
+                [value]="value()" 
+                (input)="value.set($event.target.valueAsNumber || 0)"
+                class="flex w-[20vw] h-12 p-2 {{side()=='sac'?' border-2 border-solid border-rosa scale-105': side()=='dep'?' border-2 border-solid border-azure scale-105':'border-2 border-solid border-gray-500'}} outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
+                (keydown.enter)="send()">
+                R$
+            </div>
+
+            <div class="flex flex-row w-[14vw] h-[6vh] justify-evenly items-center {{side()=='sac'?' bg-rosa scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_white] cursor-pointer': side()=='dep'?'bg-azure scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_white] cursor-pointer':'bg-gray-500 text-black text-2xl font-display font-title cursor-not-allowed'}} rounded-lg transition-all duration-130"
+            (click)="send()">
+                Enviar <mat-icon>arrow_forward</mat-icon>
+            </div>
+            
+        </div>
     </div>
 </div>
