@@ -1,14 +1,19 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Client } from '../../../models/client.model';
 import { ClientStatus } from '../../../enumeration/client-status';
 import { UserType } from '../../../enumeration/user-type';
 import { Account } from '../../../models/account.model';
 import { ManagerStatus } from '../../../enumeration/manager-status';
+import { OperationModel } from '../../../models/operation.model';
+import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ClientService {
+
+  clientHttpService = inject(ClientHttpService);
   //MOCKZIN
   client = signal<Client>({
         id       : 1,
@@ -70,5 +75,9 @@ export class ClientService {
 
   getIMO(): boolean{
     return this.isMenuOpen()
+  }
+
+  operar(op: OperationModel): Observable<Account>{
+    return this.clientHttpService.operar(op);
   }
 }

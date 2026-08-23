@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PopUp } from '../../../shared/components/pop-up/pop-up';
-import { fail } from 'assert';
+import { ClientService } from '../../../../application/client/services/client-service';
 
 @Component({
   selector: 'app-dep-sac',
@@ -14,6 +14,8 @@ import { fail } from 'assert';
 })
 export class DepSac {
   location = inject(Location);
+
+  clientService = inject(ClientService);
 
   side = signal<string>('');
   value = signal<number>(0);
@@ -27,17 +29,26 @@ export class DepSac {
     const concreteValue = this.value();
 
     if(concreteSide!='' && concreteValue>0){
+        const op: OperationModel = {
+          acc_number: this.clientService.getAccount().number,
+          side:concreteSide,
+          value: concreteValue
+        }
 
-      const op: OperationModel = {
-        side:concreteSide,
-        value: concreteValue
-      }
+        this.clientService.operar(op).subscribe({
+          //VALUE É A CONTA COM O SALDO ATUALIZADO
+          next: (value) => {
+            this.clientService.setAccount(value);
+            this.showPopUp('Operação efetuada com sucesso!!!', 'success');
+          },
+          error: (err)=> {
+            this.showPopUp('Erro ao efetuar operação!!!', 'fail');
+          },
+        });
 
-      console.log('OERAÇÃO: ', op);
-      this.showPopUp('Operação efetuada com sucesso!!!', 'success');
-
+        //console.log('OPERAÇÃO: ', op);
     } else {
-      console.log("Operação inválida!!! ):", concreteValue);
+      //console.log("Operação inválida!!! ):", concreteValue);
       this.showPopUp('Operação inválida!!!', 'fail');
       return
     }
