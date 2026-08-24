@@ -30,6 +30,8 @@
 
     --logo-img: url('/assets/images/pngegg.png');
     --icon-img: url('/assets/images/pngegg (1).png');
+    --bat-img: url('/assets/images/pngegg (2).png');
+    --heart-img: url('/assets/images/pngegg(3).png');
 }
 
 @theme{
@@ -45,6 +47,8 @@
 
     --background-image-logo: var(--logo-img);
     --background-image-icon: var(--icon-img);
+    --background-image-heart: var(--heart-img);
+    --background-image-bat: var(--bat-img);
 
     --font-monster: "MonsterHigh", sans-serif;
     --font-display: "Elms Sans", sans-serif; 
