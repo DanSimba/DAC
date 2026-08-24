@@ -18,7 +18,7 @@ export const routes: Routes = [
     { //todas as telas do lado do cliente
         path:'client',
         component:ClientSidePage,
-        title:'BANCO DA MONSTER HIGH????',
+        title:'BANCO DA MONSTER HIGH!!!',
         children:[
             {
                 path:'',
@@ -27,6 +27,10 @@ export const routes: Routes = [
             {
                 path:'depsac',
                 loadComponent: () => import('../app/presentation/client-side/pages/dep-sac/dep-sac').then(m => m.DepSac)
+            },
+            {
+                path:'transferir',
+                loadComponent: () => import('../app/presentation/client-side/pages/transference/transference').then(m => m.Transference)
             },
         ]
     },

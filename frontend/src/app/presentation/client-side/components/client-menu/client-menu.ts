@@ -2,11 +2,12 @@ import { Component, signal, inject } from '@angular/core';
 import { Client } from '../../../../models/client.model';
 import { Account } from '../../../../models/account.model';
 import { ClientService } from '../../../../application/client/services/client-service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-client-menu',
-  imports: [],
+  imports: [MatIconModule, RouterLink],
   templateUrl: './client-menu.html',
   styleUrl: './client-menu.css',
 })

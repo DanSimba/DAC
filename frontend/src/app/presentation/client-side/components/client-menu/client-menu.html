@@ -1,7 +1,12 @@
 <div class="{{clientService.getIMO()?'flex':'hidden'}} flex-col w-full z-10 h-full gap-4 bg-linear-to-br from-rosa to-marinho to-40% rounded-2xl p-3">
 
     <div class="flex flex-row w-full h-18 justify-between items-center text-3xl font-monster text-white">
-        Menu
+
+        <div class="group flex flex-row items-center justify-start gap-x-2 text-white text-lg transition-all duration-130 cursor-pointer"
+        routerLink="/client">
+            <mat-icon class="hover:scale-120 transition-all duration-130">home</mat-icon> <p class="flex opacity-0 group-hover:opacity-100 transition-all duration-130">Home</p>
+        </div>
+
         <!--BOTÃO PERFIL-->
         <div class="flex w-14 h-14 bg-icon bg-cover hover:cursor-pointer hover:scale-105 transition-all duration-110"
         (click)="clientService.toggleMenu()">
