@@ -1,6 +1,6 @@
 export interface Address {
     cep          : string;
-    address      : string;
+    street       : string;
     number       : string;
     complement   : string;
     neighborhood : string;

@@ -1,4 +1,17 @@
 <!--AQUI FICA O ESQUELETO DA INTERFACE (NAVBAR FIXA E CONTEÚDO)-->
-<div class="flex w-screen h-screen">
-    <router-outlet></router-outlet>
+<div class="relative flex flex-row w-screen h-screen items-center bg-linear-to-t from-azure to-marinho to-40%">
+
+    <div class="absolute {{imo()?'w-[20vw]':'w-0'}} p-2 left-0 h-screen transition-all duration-130">
+        <app-client-menu></app-client-menu>
+    </div>
+
+    <div class="flex flex-col h-full overflow-y-clip scrollbar-none">
+        <app-client-nav-bar></app-client-nav-bar>
+
+        <div class="flex flex-1 w-screen h-full justify-center items-center pb-4">
+                <router-outlet></router-outlet>
+        </div>
+    
+    </div>
+    
 </div>

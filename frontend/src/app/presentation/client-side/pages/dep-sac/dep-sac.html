@@ -1,0 +1,76 @@
+<div class="relative flex flex-col w-screen h-[90vh] gap-y-4 bg-marinho overflow-y-clip overflow-x-clip scrollbar-none">
+
+    <div class="absolute top-10 flex flex-row w-full px-10 justify-start">
+        <div class="flex flex-row w-[12vw] h-[6vh] justify-evenly items-center bg-rosa scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_white] cursor-pointer rounded-lg transition-all duration-130"
+        (click)="location.back()">
+               <mat-icon>arrow_backward</mat-icon> Voltar 
+        </div>
+    </div>
+    
+    <div class="flex flex-row w-full h-full justify-between items-center">
+            <!--SACAR-->
+            <div class="flex flex-col w-full h-full justify-center items-start text-white font-display {{side()=='sac'?'bg-linear-to-r from-rosa/60 to-[black/50] to-60% text-6xl text-white pl-40':'pl-20 text-5xl text-white/50'}} hover:text-6xl hover:text-white transition-all duration-150 cursor-pointer"
+            (click)="setSide('sac')">
+
+                <div class="flex flex-col w-full h-[70vh] justify-center items-start">
+                    Sacar 
+                </div>
+                
+                <div class="absolute bottom-10 left-0 flex flex-row w-[20vw] h-fit justify-start">
+                    <div class="flex h-50 bg-[image:var(--background-image-bat)] bg-cover rotate-25 {{side()=='sac'?'w-50 ml-10':'w-0'}} transition-all duration-130">
+                    </div>
+                </div>
+            </div>
+
+            <!-- DEADZONE -->
+            <div class="flex w-[160vw] h-full">
+            </div>
+
+            <!-- DEPOSITAR -->
+            <div class="flex flex-col w-full h-full justify-center items-end font-display {{side()=='dep'?'bg-linear-to-l from-azure/60 to-[black/50] to-60% text-6xl text-white pr-40':'pr-20 text-5xl text-white/50'}} hover:text-6xl hover:text-white transition-all duration-150 cursor-pointer"
+            (click)="setSide('dep')">
+                <div class="flex flex-col w-full h-[70vh] justify-center items-end">
+                    Depositar 
+                </div>
+
+                <div class="absolute bottom-10 right-0 flex flex-row w-[20vw] h-fit justify-end">
+                    <div class="flex h-50 bg-[image:var(--background-image-heart)] bg-cover rotate-335 {{side()=='dep'?'w-50 mr-10':'w-0'}} transition-all duration-130">
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <div class="flex flex-col w-full justify-center items-center gap-y-6 px-8">
+        <!-- <div class="flex flex-row w-[36vw] h-[20vh] justify-evenly rounded-2xl bg-black/50 {{side()=='sac'?' border-5 border-solid border-rosa': side()=='dep'?' border-5 border-solid border-azure':'border-5 border-solid border-gray-500'}}">
+
+            <div class="flex flex-col w-full h-full justify-center items-center text-white font-display {{side()=='sac'?'bg-linear-to-r from-rosa/60 to-[black/50] to-40% text-4xl text-white':'text-3xl text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
+            (click)="setSide('sac')">
+                Sacar 
+            </div>
+
+           
+            <div class="flex flex-col w-full h-full justify-center items-center font-display {{side()=='dep'?'bg-linear-to-l from-azure/60 to-[black/50] to-40% text-4xl text-white':'text-3xl  text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
+            (click)="setSide('dep')">
+                Depositar 
+            </div>
+        </div> -->
+
+        <div class="absolute bottom-60 flex flex-col w-[36vw] h-[36vh] justify-evenly items-center rounded-2xl bg-black/50 {{side()=='sac'?' border-5 border-solid border-rosa scale-105': side()=='dep'?' border-5 border-solid border-azure scale-105':'border-5 border-solid border-gray-500'}} transition-all duration-130">
+            <div class="flex flex-row w-full gap-x-6 items-center justify-center text-3xl text-white font-display font-cont {{side()==''?'text-3xl text-white/50':'text-4xl text-white'}}">
+                Valor:
+                <input type="number" placeholder="00.00"
+                [value]="value()" 
+                (input)="value.set($event.target.valueAsNumber || 0)"
+                class="flex w-[20vw] h-12 p-2 {{side()=='sac'?' border-2 border-solid border-rosa scale-105': side()=='dep'?' border-2 border-solid border-azure scale-105':'border-2 border-solid border-gray-500'}} outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
+                (keydown.enter)="send()">
+                R$
+            </div>
+
+            <div class="flex flex-row w-[14vw] h-[10vh] justify-evenly items-center {{side()=='sac'?' bg-rosa scale-105 text-white text-4xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_white] cursor-pointer': side()=='dep'?'bg-azure scale-105 text-white text-4xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_white] cursor-pointer':'bg-gray-500 text-black text-3xl font-display font-title cursor-not-allowed'}} rounded-lg transition-all duration-130"
+            (click)="send()">
+                Enviar <mat-icon>arrow_forward</mat-icon>
+            </div>
+            
+        </div>
+    </div>
+</div>

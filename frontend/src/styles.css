@@ -1,3 +1,60 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import 'tailwindcss';
+
+@font-face {
+  font-family: "MonsterHigh";
+  src: url("/assets/fonts/runytunesrevisited.regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  font-family: "Elms Sans", sans-serif; 
+}
+
+
+
+:root{
+    --marinho: #1d1d36;
+    --rosa: #e50d81;
+    --azure: #27aae1;
+
+    /* --vermelho: #950D14;
+
+    --preto: #1A1118;
+    --terracota: #C94C3C;
+    --marlin: #383740;
+    --cinza_lava: #5E646E;
+    --cinza_imp: #97949D; */
+
+    --logo-img: url('/assets/images/pngegg.png');
+    --icon-img: url('/assets/images/pngegg (1).png');
+    --bat-img: url('/assets/images/pngegg (2).png');
+    --heart-img: url('/assets/images/pngegg(3).png');
+}
+
+@theme{
+    /* --color-vermelho: var(--vermelho);
+    --color-preto: var(--preto);
+    --color-terracota: var(--terracota);
+    --color-marlin: var(--marlin);
+    --color-cinza_lava: var(--cinza_lava);
+    --color-cinza_imp: var(--cinza_imp); */
+    --color-marinho: var(--marinho);
+    --color-rosa: var(--rosa);
+    --color-azure: var(--azure);
+
+    --background-image-logo: var(--logo-img);
+    --background-image-icon: var(--icon-img);
+    --background-image-heart: var(--heart-img);
+    --background-image-bat: var(--bat-img);
+
+    --font-monster: "MonsterHigh", sans-serif;
+    --font-display: "Elms Sans", sans-serif; 
+
+    --font-weight-title: 700; /*títulos grandes (Montserrat em cinza)*/
+    --font-weight-cont: 500; /*textos, subtítulos (nunito sans)*/
+    --font-weight-bold: 800;
+
+}
