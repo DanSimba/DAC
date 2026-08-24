@@ -49,15 +49,19 @@ public class SolicitacaoService {
 
 
     private void validarPorCPF(String cpf){
-        //return 402
+        if(solicitacaoRepository.findByCpf(cpf).isPresent()){
+            throw new CpfUtilizadoException();
+        }
     }
 
     private void validarEmaiSolicitado(String email){
-
+        if(solicitacaoRepository.findByEmail(email).isPresent()){
+            throw new EmailSolicitadoException();
+        }
     }
 
     private void validarEmailCadastrado(String email){
-
+        //chama AUTH
     }
 
 }
