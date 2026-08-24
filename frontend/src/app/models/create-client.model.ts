@@ -1,0 +1,12 @@
+import Decimal from 'decimal.js'
+import { Address } from "./address.model";
+
+export interface CreateClient {
+    cpf      : string;
+    name     : string;
+    phone    : string;
+    email    : string;
+    password : string;
+    salary   : Decimal;
+    address  : Address;
+}
