@@ -1,25 +1,24 @@
-<!-- Container centralizado na tela com margens simples -->
-<div class="mx-auto max-w-2xl p-6 shadow-lg border rounded-lg my-8">
+<div class="mx-auto max-w-2xl p-6 shadow-lg border rounded-lg my-12">
   
   <h2 class="text-2xl font-bold">Solicitação de Autocadastro - BANTADS</h2>
   <p class="text-sm text-gray-600 mb-6">Preencha seus dados para solicitar a abertura de conta.</p>
 
   @if (mensagemSucesso) {
-    <div class="p-3 bg-green-100 border rounded border-green-400 text-green-700">
+    <div class="p-3 bg-green-100 border rounded border-green-400 text-green-700 mb-4">
       {{ mensagemSucesso }}
     </div>
   }
 
   @if (mensagemErro) {
-    <div class="p-3 bg-red-100 border rounded border-red-400 text-red-700">
+    <div class="p-3 bg-red-100 border rounded border-red-400 text-red-700 mb-4">
       {{ mensagemErro }}
     </div>
   }
 
   <form (ngSubmit)="onSubmit()">
     
-    <div class="grid grid-cols-2 gap-4 mb-4"> 
-      <div>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4"> 
+      <div class="md:col-span-8">
         <label class="text-sm font-medium">Nome Completo *</label> 
         <input 
           type="text" 
@@ -30,12 +29,14 @@
         />
       </div>
 
-      <div>
+      <div class="md:col-span-4">
         <label class="text-sm font-medium">CPF *</label>
         <input 
           type="text" 
           name="cpf" 
-          [(ngModel)]="cpf" 
+          [(ngModel)]="cpf"
+          (keydown)="bloquearNaoNumeros($event)"
+          (input)="formatarCPF()"
           maxlength="14"
           class="w-full border border-gray-400 rounded p-2"
           placeholder="000.000.000-00"
@@ -60,7 +61,10 @@
         <input 
           type="text" 
           name="telefone" 
-          [(ngModel)]="telefone" 
+          [(ngModel)]="telefone"
+          (keydown)="bloquearNaoNumeros($event)"
+          (input)="formatarTelefone()"
+          maxlength="15"
           class="w-full border border-gray-400 rounded p-2"
           placeholder="(99) 99999-9999"
         />
@@ -69,20 +73,21 @@
       <div>
         <label class="text-sm font-medium">Salário (R$) *</label>
         <input 
-          type="number" 
+          type="text" 
           name="salario" 
-          [(ngModel)]="salario" 
-          min="0"
+          [(ngModel)]="salarioExibicao"
+          (keydown)="bloquearNaoNumeros($event)"
+          (input)="formatarSalario()" 
           class="w-full border border-gray-400 rounded p-2"
-          placeholder="2500.00"
+          placeholder="R$ 2500.00"
         />
       </div>
     </div>
 
     <h3 class="text-lg font-bold mt-6 mb-3 border-b pb-1">Endereço</h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+      <div class="md:col-span-3">
         <label class="text-sm font-medium">CEP</label>
         <input 
           type="text" 
@@ -95,31 +100,21 @@
         />
       </div>
 
-      <div class="md:col-span-2">
+      <div class="md:col-span-7">
         <label class="text-sm font-medium">Rua</label>
         <input 
           type="text" 
           name="logradouro" 
-          [(ngModel)]="address.street" 
+          [(ngModel)]="address.street"
+          [readonly]="ruaBloqueada"
+          [class.bg-gray-300]="ruaBloqueada"
+          [class.cursor-not-allowed]="ruaBloqueada" 
           class="w-full border border-gray-400 rounded p-2"
           placeholder="Rua / Avenida..."
         />
       </div>
-    </div>
 
-    <div>
-      <label class="text-sm font-medium">Bairro</label>
-      <input 
-        type="text"
-        name="bairro"
-        [(ngModel)]="address.neighborhood"
-        class="w-full border border-gray-400 rounded p-2"
-        placeholder="Centro"
-      />
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div>
+      <div class="md:col-span-2">
         <label class="text-sm font-medium">Número</label>
         <input 
           type="text" 
@@ -129,8 +124,10 @@
           placeholder="123"
         />
       </div>
+    </div>
 
-      <div>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+      <div class="md:col-span-3">
         <label class="text-sm font-medium">Complemento</label>
         <input 
           type="text" 
@@ -141,21 +138,35 @@
         />
       </div>
 
-      <div>
+      <div class="md:col-span-4">
+        <label class="text-sm font-medium">Bairro</label>
+        <input 
+          type="text"
+          name="bairro"
+          [(ngModel)]="address.neighborhood"
+          readonly
+          class="w-full border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
+          placeholder="Jardim das Américas"
+        />
+      </div>
+
+      <div class="md:col-span-5">
         <label class="text-sm font-medium">Cidade / UF</label>
         <div class="flex gap-2">
           <input 
             type="text" 
             name="cidade" 
             [(ngModel)]="address.city" 
-            class="w-2/3 border border-gray-400 rounded p-2"
+            readonly
+            class="w-3/4 border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
             placeholder="Curitiba"
           />
           <input 
             type="text" 
             name="uf" 
             [(ngModel)]="address.uf" 
-            class="w-1/3 border border-gray-400 rounded p-2"
+            readonly
+            class="w-1/4 border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
             placeholder="PR"
           />
         </div>
