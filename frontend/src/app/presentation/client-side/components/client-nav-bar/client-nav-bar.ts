@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { ClientService } from '../../../../application/client/services/client-service';
 
 @Component({
   selector: 'app-client-nav-bar',
@@ -6,4 +7,7 @@ import { Component } from '@angular/core';
   templateUrl: './client-nav-bar.html',
   styleUrl: './client-nav-bar.css',
 })
-export class ClientNavBar {}
+export class ClientNavBar {
+  clientService = inject(ClientService)
+  
+}

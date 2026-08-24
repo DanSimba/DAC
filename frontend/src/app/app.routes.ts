@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomePage } from './presentation/shared/pages/home-page/home-page';
 import { ClientSidePage } from './presentation/client-side/pages/client-side-page/client-side-page';
-import { Autocadastro } from './pages/autocadastro/autocadastro';
+import { Autocadastro } from './presentation/shared/pages/autocadastro/autocadastro';
 
 export const routes: Routes = [
     {//home deslogado
@@ -23,7 +23,11 @@ export const routes: Routes = [
             {
                 path:'',
                 loadComponent: () => import('../app/presentation/client-side/pages/client-home-page/client-home-page').then(m => m.ClientHomePage)
-            }
+            },
+            {
+                path:'depsac',
+                loadComponent: () => import('../app/presentation/client-side/pages/dep-sac/dep-sac').then(m => m.DepSac)
+            },
         ]
     },
     { // Teste do ViaCEP

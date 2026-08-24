@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Viacep } from '../../services/viacep';
+import { Viacep } from '../../../../services/viacep';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ViacepResponse } from '../../models/viacep-response.model';
-import { Address } from '../../models/address.model';
+import { ViacepResponse } from '../../../../models/viacep-response.model';
+import { Address } from '../../../../models/address.model';
 import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({

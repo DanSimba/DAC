@@ -1,0 +1,29 @@
+<div class="{{clientService.getIMO()?'flex':'hidden'}} flex-col w-full z-10 h-full gap-4 bg-linear-to-br from-rosa to-marinho to-40% rounded-2xl p-3">
+
+    <div class="flex flex-row w-full h-18 justify-between items-center text-3xl font-monster text-white">
+        Menu
+        <!--BOTÃO PERFIL-->
+        <div class="flex w-14 h-14 bg-icon bg-cover hover:cursor-pointer hover:scale-105 transition-all duration-110"
+        (click)="clientService.toggleMenu()">
+        </div>
+    </div>
+
+    <div class="flex flex-col w-full h-full gap-y-2 rounded-xl">
+        <div class="flex flex-row w-full">
+            <p class="text-white text-xl font-display font-title">Nome: {{client().name}}</p>
+        </div>
+        <span class="group flex flex-row w-fit hover:justify-between items-center gap-2 text-xl font-display font-title text-white">
+                Conta: {{account().number}}
+        </span>
+        <span class="group flex flex-row w-fit hover:justify-between items-center gap-2 p-2 text-xl font-display font-title text-white bg-white/30 rounded-xl transition-all duration-150">
+                <p class="whitespace-nowrap">Saldo:</p> <p class="max-w-0 group-hover:max-w-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-180">{{account().balance}}R$</p>
+        </span>
+    </div>
+    
+    <div class="flex flex-col w-full pb-4 items-center">
+        <div class="flex flex-row w-[16vw] h-[8vh] justify-center items-center bg-rosa rounded-xl text-2xl text-white font-display font-title hover:scale-108 hover:bg-red-500 transition-all duration-130 hover:shadow-[4px_4px_0px_white]"
+        (click)="logout()">
+                Sair
+        </div>
+    </div>
+</div>

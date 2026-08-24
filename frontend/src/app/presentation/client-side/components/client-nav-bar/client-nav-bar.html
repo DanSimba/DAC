@@ -1,6 +1,14 @@
 <nav class="flex flex-row w-screen h-[10vh] p-10 justify-start bg-rosa border-b-dashed border-b-3 border-b-azure items-center font-monster">
-        <!--BOTÃO PERFIL-->
-        <div class="flex w-18 h-18 bg-icon bg-cover hover:cursor-pointer">
-
+        
+        <div class="{{clientService.getIMO()?'hidden':'flex'}} group flex-row w-fit h-[10vh] items-center transition-all duration-150">
+               <!--BOTÃO PERFIL-->
+                <div class="flex w-16 h-16 bg-icon bg-cover hover:cursor-pointer hover:scale-105 transition-all duration-110"
+                (click)="clientService.toggleMenu()">
+                </div>
+                
+                <p class="text-2xl opacity-0 group-hover:opacity-100 transition-all duration-180">
+                        Menu
+                </p>
         </div>
+        
 </nav>
