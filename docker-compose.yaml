@@ -1,0 +1,5 @@
+services:
+  front-end:
+    build: ./frontend
+    ports: 
+      - 4200:4200
