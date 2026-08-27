@@ -1,11 +1,54 @@
-<div class="flex flex-col w-screen h-[90vh] justify-center items-center gap-y-4 overflow-y-clip overflow-x-clip scrollbar-none">
+<div class="flex flex-col w-screen h-[90vh] py-4 justify-start items-center gap-y-4 overflow-y-clip overflow-x-clip scrollbar-none">
 
-    <div class="flex flex-col w-[58vw] h-[66vh] p-4 bg-black/50 border-5 border-solid border-rosa rounded-2xl">
+    <div class="flex flex-row w-full px-8 gap-x-6 justify-start">
+        <div class="flex flex-row w-[12vw] h-[6vh] justify-evenly items-center bg-rosa scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_var(--color-azure)] cursor-pointer rounded-lg transition-all duration-130"
+        (click)="location.back()">
+               <mat-icon>arrow_backward</mat-icon> Voltar 
+        </div>
 
-        <span class="group flex flex-row w-fit hover:justify-between items-center gap-2 p-2 text-xl font-display font-title text-white bg-white/30 hover:scale-105 rounded-xl transition-all duration-150">
+        <h1 class="text-7xl text-white font-monster">TRANSFERIR</h1>
+    </div>
+
+    <div class="flex flex-col w-[58vw] h-[66vh] justify-between gap-y-2 bg-black/50 border-5 border-solid border-rosa rounded-2xl">
+
+        <span class="group flex flex-row w-fit hover:justify-between items-center mt-4 ml-4 gap-2 p-2 text-xl font-display font-title text-white bg-white/30 hover:scale-105 rounded-xl transition-all duration-150">
                 <p class="whitespace-nowrap">Saldo disponível:</p> <p class="max-w-0 group-hover:max-w-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-180">{{account().balance}}R$</p>
         </span>
 
-        
-    </div>
+        <div class="flex flex-col w-full h-full justify-evenly p-6 gap-y-4">
+            <div class="flex flex-row w-full gap-x-4 items-center text-white text-2xl font-title font-display">
+                <h1>
+                    Número da conta do destinatário:
+                </h1>
+                
+                    <input type="number" placeholder="XXX"
+                    [value]="dest()" 
+                    #destin
+                    (input)="destin.value = destin.value.slice(0, 3); dest.set($event.target.valueAsNumber)"
+                    class="flex w-[20vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
+                    >
+            </div>
+
+            <div class="flex flex-row w-full gap-x-4 items-center text-white text-2xl font-title font-display">
+                <h1>
+                    Valor transferido:
+                </h1>
+                
+                    <input type="number" placeholder="XX.XX" maxlength="11"
+                    [value]="value()" 
+                    (input)="value.set($event.target.valueAsNumber)"
+                    class="flex w-[20vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
+                    >
+                    R$
+            </div>
+        </div>
+
+        <div class="has-[:hover]:bg-linear-to-t from-rosa/60 to-[black/50] to-80% flex flex-row w-full h-[24vh] justify-center items-center pb-6 px-12 transition-all duration-130">
+            
+            <!--ENVIAR-->
+            <div class="group flex flex-row w-fit h-[8vh] justify-center hover:gap-x-6 px-6 items-center bg-rosa rounded-lg text-white text-3xl font-title font-display transition-all duration-130"
+            (click)="send()">
+                Transferir <p class="w-0 group-hover:w-10 opacity-0 group-hover:opacity-100 transition-all duration-130"> <mat-icon>arrow_forward</mat-icon></p>
+            </div>
+        </div>
 </div>

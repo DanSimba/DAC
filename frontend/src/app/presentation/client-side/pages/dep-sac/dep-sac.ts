@@ -1,4 +1,4 @@
-import { Component, inject, Injectable, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { OperationModel } from '../../../../models/operation.model';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';

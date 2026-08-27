@@ -3,7 +3,11 @@
 
 export interface TransferenceModel {
     cpf_origin: string;
-    cpf_destiny: string;
+    name_origin: string;
+    acc_origin: string;
+    
+    acc_destiny: string;
+
     value: number;
     datetime: string; //DATA E HORA
 }
