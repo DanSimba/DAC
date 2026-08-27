@@ -30,8 +30,6 @@ export class Transference {
 
   send(){
 
-    this.sent.set(true);
-
     //VERIFICAÇÕES
     const concreteDest = this.dest()
     const concreteValue = this.value();
@@ -69,6 +67,15 @@ export class Transference {
       }
     })
 
+    this.sent.set(true);
+
+    setTimeout(() => {
+      this.sent.set(false);
+    }, 3000);
+    
+    this.dest.set(null);
+    
+    this.value.set(null);
   }
 
   //POPUP
