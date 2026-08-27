@@ -26,7 +26,12 @@ export class Transference {
   
   value = signal<number|null>(null);
 
+  sent = signal<boolean>(false);
+
   send(){
+
+    this.sent.set(true);
+
     //VERIFICAÇÕES
     const concreteDest = this.dest()
     const concreteValue = this.value();
@@ -53,15 +58,13 @@ export class Transference {
 
     this.clientService.transferir(concreteTransference).subscribe({
       next: (response) => {
-        //JÁ ATUALIZA O SALDO NA TELA
-        this.account.set(response);
+        //JÁ SETA A CONTA ATUALIZADA COM O RETORNO LÁ NO SERVICE
 
-        //ATUALIZA NO CACHE
-        this.clientService.setAccount(response);
+        //ATUALIZA O SALDO NA TELA
+        this.account.set(response);
       }, 
       error: (err) => {
         this.showPopUp('Destinatário não encontrado!!!', 'fail');
-        console.log('ERR: ', err);
         return
       }
     })

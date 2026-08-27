@@ -6,8 +6,9 @@ import { Account } from '../../../models/account.model';
 import { ManagerStatus } from '../../../enumeration/manager-status';
 import { OperationModel } from '../../../models/operation.model';
 import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { TransferenceModel } from '../../../models/transference.model';
+import { response } from 'express';
 
 @Injectable({
   providedIn: 'root',
@@ -79,18 +80,36 @@ export class ClientService {
   }
 
   operar(op: OperationModel): Observable<Account>{
-    return this.clientHttpService.operar(op);
+    return this.clientHttpService.operar(op).pipe(
+      tap({
+        next: (response)=>{
+          this.account.set(response)
+        },
+        error: (err)=>{
+          console.log('err: ', err);
+        }
+      })
+    )
   }
 
   transferir(t: TransferenceModel): Observable<Account>{
-    return this.clientHttpService.transferir(t);
+    return this.clientHttpService.transferir(t).pipe(
+      tap({
+        next: (response)=>{
+          this.account.set(response)
+        },
+        error: (err)=>{
+          console.log('err: ', err);
+        }
+      })
+    )
   }
 
   //RESOLVI FZR UMA FUNÇÃO PRA PEGAR A DATA E HORA DO JEITO QUE O RAZER GOSTA AUTOMATICAMENTE
   getCurrentTimeFormated(): string{
     const date = new Date();
     //console.log('DATA NÃO FORMATADA: ', date);
-    
+
     const formatedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`
     console.log('DATETIME AGR: ', formatedDate);
 
