@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HomePage } from './presentation/shared/pages/home-page/home-page';
 import { ClientSidePage } from './presentation/client-side/pages/client-side-page/client-side-page';
 import { Autocadastro } from './presentation/shared/pages/autocadastro/autocadastro';
+import { clientAuthGuard } from './guards/client-auth-guard';
 
 export const routes: Routes = [
     {//home deslogado
@@ -18,7 +19,8 @@ export const routes: Routes = [
     { //todas as telas do lado do cliente
         path:'client',
         component:ClientSidePage,
-        title:'BANCO DA MONSTER HIGH????',
+        title:'BANCO DA MONSTER HIGH!!!',
+        canActivate: [clientAuthGuard],
         children:[
             {
                 path:'',
@@ -27,6 +29,10 @@ export const routes: Routes = [
             {
                 path:'depsac',
                 loadComponent: () => import('../app/presentation/client-side/pages/dep-sac/dep-sac').then(m => m.DepSac)
+            },
+            {
+                path:'transferir',
+                loadComponent: () => import('../app/presentation/client-side/pages/transference/transference').then(m => m.Transference)
             },
         ]
     },

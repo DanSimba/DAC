@@ -6,18 +6,19 @@ import { Account } from '../../../models/account.model';
 import { ManagerStatus } from '../../../enumeration/manager-status';
 import { OperationModel } from '../../../models/operation.model';
 import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
+import { TransferenceModel } from '../../../models/transference.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ClientService {
 
-  clientHttpService = inject(ClientHttpService);
+  private clientHttpService = inject(ClientHttpService);
   //MOCKZIN
-  client = signal<Client>({
+  private client = signal<Client>({
         id       : 1,
-        cpf      : '000111222-33',
+        cpf      : '00011122233',
         name     : 'razerson nvidio da silva',
         email    : 'razer@gmail.com',
         password : 'starwars123',
@@ -36,7 +37,10 @@ export class ClientService {
         type     : UserType.CLIENT,
   });
 
-  account = signal<Account>({
+  //CONTROLE DE LOGGADO OU NÃO
+  logged = signal<boolean>(true);
+
+  private account = signal<Account>({
       client   : this.client(),
       number   : '001',
       balance  : 1000,
@@ -78,6 +82,39 @@ export class ClientService {
   }
 
   operar(op: OperationModel): Observable<Account>{
-    return this.clientHttpService.operar(op);
+    return this.clientHttpService.operar(op).pipe(
+      tap({
+        next: (response)=>{
+          this.account.set(response)
+        },
+        error: (err)=>{
+          console.log('err: ', err);
+        }
+      })
+    )
+  }
+
+  transferir(t: TransferenceModel): Observable<Account>{
+    return this.clientHttpService.transferir(t).pipe(
+      tap({
+        next: (response)=>{
+          this.account.set(response)
+        },
+        error: (err)=>{
+          console.log('err: ', err);
+        }
+      })
+    )
+  }
+
+  //RESOLVI FZR UMA FUNÇÃO PRA PEGAR A DATA E HORA DO JEITO QUE O RAZER GOSTA AUTOMATICAMENTE
+  getCurrentTimeFormated(): string{
+    const date = new Date();
+    //console.log('DATA NÃO FORMATADA: ', date);
+
+    const formatedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`
+    console.log('DATETIME AGR: ', formatedDate);
+
+    return formatedDate;
   }
 }

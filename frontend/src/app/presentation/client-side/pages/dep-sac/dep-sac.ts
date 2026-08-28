@@ -1,4 +1,4 @@
-import { Component, inject, Injectable, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { OperationModel } from '../../../../models/operation.model';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
@@ -38,11 +38,12 @@ export class DepSac {
         this.clientService.operar(op).subscribe({
           //VALUE É A CONTA COM O SALDO ATUALIZADO
           next: (value) => {
-            this.clientService.setAccount(value);
+            //JÁ SETA A CONTA COM O RETORNO LÁ NO SERVICE
             this.showPopUp('Operação efetuada com sucesso!!!', 'success');
           },
           error: (err)=> {
             this.showPopUp('Erro ao efetuar operação!!!', 'fail');
+            console.log('ERR: ', err);
           },
         });
 
