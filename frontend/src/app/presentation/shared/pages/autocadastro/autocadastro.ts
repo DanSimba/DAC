@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Viacep } from '../../../../application/client/services/viacep';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ViacepResponse } from '../../../../models/viacep-response.model';
-import { Address } from '../../../../models/address.model';
-import { CreateClient } from '../../../../models/create-client.model';
+import { ViacepResponse } from '../../../../domain/address/models/viacep-response.model';
+import { Address } from '../../../../domain/address/models/address.model';
+import { CreateClient } from '../../../../domain/client/models/create-client.model';
 import { NgxMaskDirective } from 'ngx-mask';
 
 import Decimal from 'decimal.js'

@@ -1,13 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { ClientService } from '../../../../application/client/services/client-service';
-import { Client } from '../../../../models/client.model';
-import { Account } from '../../../../models/account.model';
+import { Client } from '../../../../domain/client/models/client.model';
+import { Account } from '../../../../domain/account/models/account.model';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PopUp } from '../../../shared/components/pop-up/pop-up';
-import { TransferenceModel } from '../../../../models/transference.model';
-import { response } from 'express';
+import { TransferenceModel } from '../../../../domain/operations/models/transference.model';
 
 @Component({
   selector: 'app-transference',
