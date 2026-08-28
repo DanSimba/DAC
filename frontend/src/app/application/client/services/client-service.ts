@@ -8,7 +8,6 @@ import { OperationModel } from '../../../models/operation.model';
 import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
 import { Observable, tap } from 'rxjs';
 import { TransferenceModel } from '../../../models/transference.model';
-import { response } from 'express';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +36,9 @@ export class ClientService {
         status   : ClientStatus.ACTIVE,
         type     : UserType.CLIENT,
   });
+
+  //CONTROLE DE LOGGADO OU NÃO
+  logged = signal<boolean>(true);
 
   private account = signal<Account>({
       client   : this.client(),
