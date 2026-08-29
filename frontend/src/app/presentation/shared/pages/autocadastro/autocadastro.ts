@@ -6,6 +6,7 @@ import { ViacepResponse } from '../../../../models/viacep-response.model';
 import { Address } from '../../../../models/address.model';
 import { CreateClient } from '../../../../models/create-client.model';
 import { NgxMaskDirective } from 'ngx-mask';
+import { ClientService } from '../../../../application/client/services/client-service';
 
 import Decimal from 'decimal.js'
 
@@ -49,6 +50,7 @@ export class Autocadastro {
 
   public mensagemSucesso: string = '';
   public mensagemErro: string = '';
+  public clientService: any;
 
   constructor(private viaCepService : Viacep) {}
 
@@ -122,6 +124,18 @@ export class Autocadastro {
 
     this.mensagemErro = '';
     this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.';
+
+    // Envia o cliente para o service
+    this.clientService.createClientRequestclient(this.client).subscribe({
+      next: () => {
+        this.mensagemErro = '';
+        this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.'
+      },
+      error: () => {
+        this.mensagemErro = 'Não foi possível realizar a solicitação de cadastro.';
+        this.mensagemSucesso = ''
+      }
+    });
     
   }
 
