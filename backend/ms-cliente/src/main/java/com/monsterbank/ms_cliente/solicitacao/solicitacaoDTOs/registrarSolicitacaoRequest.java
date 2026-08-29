@@ -1,17 +1,16 @@
 package com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs;
 
-public record registrarSolicitacaoRequest(
+public record RegistrarSolicitacaoRequest(
         String nome,
         String email,
         String cpf,
         String telefone,
         String salario,
-        String logradouro,
-        Integer numero,
-        String complemento,
-        String cep,
-        String cidade,
-        String uf
-) {
-}
-
+        Endereco endereco
+        // String logradouro,
+        // Integer numero,
+        // String complemento,
+        // String cep,
+        // String cidade,
+        // String uf
+) {}

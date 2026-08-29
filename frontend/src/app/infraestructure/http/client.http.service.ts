@@ -13,10 +13,11 @@ import { CreateClient } from '../../models/create-client.model';
 export class ClientHttpService {
   http = inject(HttpClient);
   //private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = 'http://localhost:8080'; // URL exposta somente para teste
 
   // Faz a solicitação de criação do cliente ao API Gateway
-  createClientRequestclient(clientRequest: CreateClient): Observable<void> {
-    return this.http.post<void>(`${'URL'}/client-request`, clientRequest);
+  createClientRequest(clientRequest: CreateClient): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/api/solicitacoes`, clientRequest);
   }
 
 

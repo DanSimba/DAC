@@ -38,6 +38,9 @@ public class SolicitacaoEntity {
     private String cep;
 
     @Column(nullable = false)
+    private String bairro;
+
+    @Column(nullable = false)
     private String cidade;
 
     @Column(nullable = false, length = 2)
@@ -51,6 +54,10 @@ public class SolicitacaoEntity {
 
     private LocalDateTime dataProcessamento;
 
+    private LocalDateTime dataSolicitacao;
+
+    // Mantido protected por necessidade do JPA, caso necessário, alterar para public
+    protected SolicitacaoEntity(){};
 
     public SolicitacaoEntity(
             String cpf,
@@ -62,6 +69,7 @@ public class SolicitacaoEntity {
             Integer numero,
             String complemento,
             String cep,
+            String bairro,
             String cidade,
             String uf)  {
 
@@ -74,10 +82,12 @@ public class SolicitacaoEntity {
         this.numero = numero;
         this.complemento = complemento;
         this.cep = cep;
+        this.bairro = bairro;
         this.cidade = cidade;
         this.uf = uf;
         this.status = StatusSolicitacao.PENDENTE;
-        this.dataProcessamento = LocalDateTime.now();
+        this.dataProcessamento = null;
+        this.dataSolicitacao = LocalDateTime.now();
     }
 
 

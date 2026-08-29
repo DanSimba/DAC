@@ -43,7 +43,6 @@ export class Autocadastro {
     cpf: '',
     phone: '',
     email: '',
-    password: '',
     salary: new Decimal(0),
     address: this.address
   };
@@ -126,7 +125,7 @@ export class Autocadastro {
     this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.';
 
     // Envia o cliente para o service
-    this.clientService.createClientRequestclient(this.client).subscribe({
+    this.clientService.createClientRequest(this.client).subscribe({
       next: () => {
         this.mensagemErro = '';
         this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.'

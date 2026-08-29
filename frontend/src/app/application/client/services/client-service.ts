@@ -120,8 +120,8 @@ export class ClientService {
   }
 
   // Envia o client recebido do component para o httpService fazer a solicitação ao API Gateway
-  createClientRequestclient(clientRequest: CreateClient): Observable<void> {
-    return this.clientHttpService.createClientRequestclient(clientRequest);
+  createClientRequest(clientRequest: CreateClient): Observable<void> {
+    return this.clientHttpService.createClientRequest(clientRequest);
   }
 
 }
