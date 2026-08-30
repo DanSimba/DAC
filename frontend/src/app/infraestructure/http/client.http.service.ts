@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { OperationModel } from '../../models/operation.model';
-import { Account } from '../../models/account.model';
+import { OperationModel } from '../../domain/operations/models/operation.model';
+import { Account } from '../../domain/account/models/account.model';
 import { Transference } from '../../presentation/client-side/pages/transference/transference';
-import { TransferenceModel } from '../../models/transference.model';
+import { TransferenceModel } from '../../domain/operations/models/transference.model';
 
 @Injectable({
   providedIn: 'root',
