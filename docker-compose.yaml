@@ -1,0 +1,9 @@
+services:
+  front-end:
+    build: ./frontend
+    ports: 
+      - 4200:4200
+  api-gateway:
+    build: ./backend/api-gateway
+    ports:
+      - 8080:8080

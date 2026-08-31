@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ViacepResponse } from '../models/viacep-response.model';
+import { ViacepResponse } from '../../../domain/address/models/viacep-response.model';
 
 @Injectable({
   providedIn: 'root',

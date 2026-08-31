@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Viacep } from '../../../../services/viacep';
+import { Viacep } from '../../../../application/client/services/viacep';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ViacepResponse } from '../../../../models/viacep-response.model';
-import { Address } from '../../../../models/address.model';
+import { ViacepResponse } from '../../../../domain/address/models/viacep-response.model';
+import { Address } from '../../../../domain/address/models/address.model';
+import { CreateClient } from '../../../../domain/client/models/create-client.model';
 import { NgxMaskDirective } from 'ngx-mask';
+
+import Decimal from 'decimal.js'
 
 @Component({
   selector: 'app-autocadastro',
@@ -14,12 +17,13 @@ import { NgxMaskDirective } from 'ngx-mask';
 })
 export class Autocadastro {
 
-  public nome: string = '';
-  public cpf: string = '';
-  public email: string = '';
-  public telefone: string = '';
+  // comentado para utilização da model createClient
+  // public nome: string = '';
+  // public cpf: string = '';
+  // public email: string = '';
+  // public telefone: string = '';
   public salarioExibicao: string = '';
-  public salarioNumerico: number | null = null;
+  //public salarioNumerico: Decimal | null = null;
   public ruaBloqueada: boolean = false;
   
   public address : Address = {
@@ -32,17 +36,16 @@ export class Autocadastro {
     uf: '',
     state: ''
   };
-  
-  /* trecho comentado para utilizar as models existentes. Recomenda-se fazer o mesmo com os campos do usuário
-    public cep: string = '';
-    public logradouro: string = '';
-    public numero: string = '';
-    public complemento: string = '';
-    public bairro: string = '';
-    public cidade: string = '';
-    public uf: string = '';
-    public estado: string = '';
-  */
+
+    public client: CreateClient = {
+    name: '',
+    cpf: '',
+    phone: '',
+    email: '',
+    password: '',
+    salary: new Decimal(0),
+    address: this.address
+  };
 
   public mensagemSucesso: string = '';
   public mensagemErro: string = '';
@@ -61,7 +64,7 @@ export class Autocadastro {
 
   // Formata o CPF para xxx.xxx.xxx-xx
   public formatarCPF(): void {
-    let cpfNumeros = this.cpf.replace(/\D/g, '');
+    let cpfNumeros = this.client.cpf.replace(/\D/g, '');
 
     if (cpfNumeros.length > 11) {
       cpfNumeros = cpfNumeros.slice(0, 11);
@@ -71,13 +74,13 @@ export class Autocadastro {
     cpfNumeros = cpfNumeros.replace(/(\d{3})(\d)/, '$1.$2');
     cpfNumeros = cpfNumeros.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 
-    this.cpf = cpfNumeros;
+    this.client.cpf = cpfNumeros;
 
   }
 
   // Formata o telefone com DDD e traço
   public formatarTelefone(): void {
-    let telefoneNumeros = this.telefone.replace(/\D/g, '');
+    let telefoneNumeros = this.client.phone.replace(/\D/g, '');
 
     if (telefoneNumeros.length > 11) {
       telefoneNumeros = telefoneNumeros.slice(0, 11);
@@ -86,7 +89,7 @@ export class Autocadastro {
     telefoneNumeros = telefoneNumeros.replace(/(\d{2})(\d)/, '($1) $2');
     telefoneNumeros = telefoneNumeros.replace(/(\d{5})(\d)/, '$1-$2');
 
-    this.telefone = telefoneNumeros;
+    this.client.phone = telefoneNumeros;
   }
 
   // Formata o salário para exibição e mantém o valor numérico para envio
@@ -95,22 +98,23 @@ export class Autocadastro {
 
     if (!salarioNumeros) {
       this.salarioExibicao = '';
-      this.salarioNumerico = null;
+      //this.salarioNumerico = null;
+      this.client.salary = new Decimal(0);
       return;
     }
 
-    this.salarioNumerico = parseFloat(salarioNumeros) / 100;
-    this.salarioExibicao = this.salarioNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    this.client.salary = new Decimal(salarioNumeros).div(100); // alterado para decimal de acordo com enunciado do trabalho
+    this.salarioExibicao = this.client.salary.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
   public onSubmit(): void {
-    if (!this.nome || !this.cpf || !this.email || this.salarioNumerico === null) {
+    if (!this.client.name || !this.client.cpf || !this.client.email) {
       this.mensagemErro = 'Por favor, preencha os campos obrigatórios (*).';
       this.mensagemSucesso = '';
       return;
     }
 
-    if (this.salarioNumerico <= 0) {
+    if (this.client.salary.comparedTo(0) <= 0) {
       this.mensagemErro = 'O salário deve ser um valor positivo.';
       this.mensagemSucesso = '';
       return;
@@ -127,6 +131,8 @@ export class Autocadastro {
 
     if(cleanCep === '') {
       // Não mostra nada na tela para não atrapalhar a digitação
+      this.clearAddressFromCep();
+      this.mensagemErro = '';
       return;
     } else if(cleanCep.length < 8) {
       this.clearAddressFromCep();
