@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
@@ -22,13 +22,15 @@ export class Transference {
   account = signal<Account>(this.clientService.getAccount());
 
   dest = signal<number|null>(null);
-  
   value = signal<number|null>(null);
+
+  isComplete = computed(()=>{
+    return this.dest()!=null && this.value()!=null;
+  })
 
   sent = signal<boolean>(false);
 
   send(){
-
     //VERIFICAÇÕES
     const concreteDest = this.dest()
     const concreteValue = this.value();
@@ -42,39 +44,40 @@ export class Transference {
       return
     }
 
-    const concreteTransference: TransferenceModel ={
-      cpf_origin: this.client().cpf,
-      name_origin: this.client().name,
-      acc_origin: this.account().number,
-      
-      acc_destiny: concreteDest.toString(),
+    //DEU CERTO
+      const concreteTransference: TransferenceModel ={
+        cpf_origin: this.client().cpf,
+        name_origin: this.client().name,
+        acc_origin: this.account().number,
+        
+        acc_destiny: concreteDest.toString(),
 
-      value: concreteValue,
-      datetime: this.clientService.getCurrentTimeFormated()
-    }
-
-    this.clientService.transferir(concreteTransference).subscribe({
-      next: (response) => {
-        //JÁ SETA A CONTA ATUALIZADA COM O RETORNO LÁ NO SERVICE
-
-        //ATUALIZA O SALDO NA TELA
-        this.account.set(response);
-      }, 
-      error: (err) => {
-        this.showPopUp('Destinatário não encontrado!!!', 'fail');
-        return
+        value: concreteValue,
+        datetime: this.clientService.getCurrentTimeFormated()
       }
-    })
 
-    this.sent.set(true);
+      this.clientService.transferir(concreteTransference).subscribe({
+        next: (response) => {
+          //JÁ SETA A CONTA ATUALIZADA COM O RETORNO LÁ NO SERVICE
 
-    setTimeout(() => {
-      this.sent.set(false);
-    }, 3000);
-    
-    this.dest.set(null);
-    
-    this.value.set(null);
+          //ATUALIZA O SALDO NA TELA
+          this.account.set(response);
+
+          //ANIMAÇÃO MTO FODA E LIMMPA INPUTS
+          this.sent.set(true);
+
+          this.dest.set(null);
+          this.value.set(null);
+
+          setTimeout(() => {
+            this.sent.set(false);
+          }, 3000);
+        }, 
+        error: (err) => {
+          this.showPopUp('Destinatário não encontrado!!!', 'fail');
+          return
+        }
+      })
   }
 
   //POPUP
