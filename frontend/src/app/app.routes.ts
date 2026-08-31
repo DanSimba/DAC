@@ -3,6 +3,7 @@ import { HomePage } from './presentation/shared/pages/home-page/home-page';
 import { ClientSidePage } from './presentation/client-side/pages/client-side-page/client-side-page';
 import { Autocadastro } from './presentation/shared/pages/autocadastro/autocadastro';
 import { clientAuthGuard } from './domain/client/guards/client-auth-guard';
+import { Login } from './presentation/shared/pages/login/login';
 
 export const routes: Routes = [
     {//home deslogado
@@ -39,5 +40,9 @@ export const routes: Routes = [
     { // Teste do ViaCEP
         path: 'autocadastro',
         component: Autocadastro
+     },
+     { // tela de login
+        path: 'login',
+        component: Login
      }
 ];
