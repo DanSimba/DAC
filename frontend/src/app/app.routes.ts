@@ -47,7 +47,18 @@ export const routes: Routes = [
                 path:'',
                 loadComponent: () => import('../app/presentation/manager-side/pages/manager-home-page/manager-home-page').then(m => m.ManagerHomePage)
             },
-
+            {
+                path:'reports',
+                loadComponent: () => import('../app/presentation/manager-side/pages/reports/reports').then(m=>m.Reports)
+            },
+            {
+                path:'clients',
+                loadComponent: () => import('../app/presentation/manager-side/pages/clients/clients').then(m=>m.Clients)
+            },
+            {
+                path:'managers',
+                loadComponent: () => import('../app/presentation/manager-side/pages/managers/managers').then(m=>m.Managers)
+            },
         ]
     },
     { // Teste do ViaCEP
