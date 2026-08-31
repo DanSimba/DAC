@@ -9,14 +9,17 @@
         <h1 class="text-7xl text-white font-monster">EXTRATO</h1>
     </div>
 
-    <div class="flex flex-col w-[78vw] h-[70vh] p-2 gap-y-2 overflow-y-auto scrollbar-none">
+    <div class="flex flex-col w-[78vw] h-[70vh] items-center p-2 gap-y-2">
 
-        <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
-            Data: 
-            <input type="date" [value]="date()"
-            (input)="date.set($event.target.value)"
-            class="w-fit focus:outline-none">
+        <div class="flex flex-row w-full">
+            <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
+                Data: 
+                <input type="date" [value]="date()"
+                (input)="date.set($event.target.value)"
+                class="w-fit focus:outline-none">
+            </div>
         </div>
+        
 
         <!--         
             <div class="w-10 h-10 bg-red-700"
@@ -24,6 +27,14 @@
             </div> 
         -->
             
+        <div class="flex flex-col w-[70vw] h-[60vh] py-2 items-center bg-green-700 overflow-y-auto scrollbar-none">
+
+            <div class="grid w-[68vw] h-full grid-cols-3 gap-4 bg-yellow-700">
+                @for (e of extList; track $index) {
+                    <app-ext-card></app-ext-card>
+                }
+            </div>
+        </div>
 
     </div>
 </div>
