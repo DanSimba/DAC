@@ -14,165 +14,21 @@ export class Extrato {
   location = inject(Location);
 
   extList: ExtratoModel[] = [
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
+    { 
+      type:'dep',
+      id: 20260723
     },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
+    { 
+      type:'sac',
+      id: 20260723
     },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
+    { 
+      type:'transf',
+      id: 20260723
     },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'dep',
-        value: 10
-      },
-      id: 20260809
-    },
-    {
-      type: {
-        acc_number: '011',
-        side: 'sac',
-        value: 111
-      },
-      id: 20260709
+    { 
+      type:'dep',
+      id: 20260723
     },
   ] 
 

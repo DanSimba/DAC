@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { ExtratoModel } from '../../../../domain/operations/models/extrato.model';
 
 @Component({
   selector: 'app-ext-card',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   templateUrl: './ext-card.html',
   styleUrl: './ext-card.css',
 })
-export class ExtCard {}
+export class ExtCard {
+  ext = input.required<ExtratoModel>();
+}
