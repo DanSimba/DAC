@@ -13,5 +13,6 @@ public interface ClienteRepository extends JpaRepository<ClienteEntity, String> 
     Optional<List<ClienteEntity>> findTop50ByOrderByNomeDesc();
 
     Optional<ClienteEntity> findByCpf(String cpf);
+    Optional<List<ClienteEntity>> findByCpfContaining(String cpf);
     Optional<List<ClienteEntity>> findByNomeContaining(String nome);
 }
