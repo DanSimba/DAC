@@ -2,6 +2,7 @@
 // O DESTINO DEVE EXISTIR 
 
 export interface TransferenceModel {
+    type: 'transference';
     cpf_origin: string;
     name_origin: string;
     acc_origin: string;

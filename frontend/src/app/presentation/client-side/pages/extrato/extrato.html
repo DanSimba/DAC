@@ -14,8 +14,8 @@
         <div class="flex flex-row w-full pl-18">
             <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
                 Data: 
-                <input type="date" [value]="date()"
-                (input)="date.set($event.target.value)"
+                <input type="date" 
+                (input)="setDate($event.target.value)"
                 class="w-fit focus:outline-none">
             </div>
         </div>
@@ -30,8 +30,12 @@
         <div class="flex flex-col w-full h-[60vh] px-10 py-2 items-center overflow-y-auto scrollbar-none">
 
             <div class="grid w-full h-full grid-cols-3 gap-y-6">
-                @for (ext of extList; track $index) {
-                    <app-ext-card [ext]="ext"></app-ext-card>
+                @for (ext of filteredList(); track $index) {
+                    @if(ext.instance.type == 'transference'){
+                        <app-ext-card [ext]="ext" [transfInstance]="ext.instance"></app-ext-card> 
+                    } @else {
+                         <app-ext-card [ext]="ext" [operInstance]="ext.instance"></app-ext-card> 
+                    }
                 }
             </div>
         </div>

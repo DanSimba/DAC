@@ -30,9 +30,11 @@ export class DepSac {
 
     if(concreteSide!='' && concreteValue>0){
         const op: OperationModel = {
+          type:'operation',
           acc_number: this.clientService.getAccount().number,
           side:concreteSide,
-          value: concreteValue
+          value: concreteValue,
+          datetime: this.clientService.getCurrentTimeFormated()
         }
 
         this.clientService.operar(op).subscribe({

@@ -46,6 +46,7 @@ export class Transference {
 
     //DEU CERTO
       const concreteTransference: TransferenceModel ={
+        type:'transference',
         cpf_origin: this.client().cpf,
         name_origin: this.client().name,
         acc_origin: this.account().number,
