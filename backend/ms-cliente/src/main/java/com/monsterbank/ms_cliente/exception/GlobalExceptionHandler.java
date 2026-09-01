@@ -26,4 +26,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
     }
 
+    @ExceptionHandler(CpfInvalidoException.class)
+    public ResponseEntity<ErrorResponse> handleCpfInvalido(CpfInvalidoException e){
+        ErrorResponse erro = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+    }
+
+    @ExceptionHandler(MotivoInvalidoException.class)
+    public ResponseEntity<ErrorResponse> handleMotivoInvalido(MotivoInvalidoException e){
+        ErrorResponse erro = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+    }
+
+    @ExceptionHandler(SolicitacaoNaoEncontradaException.class)
+    public ResponseEntity<ErrorResponse> handleSolicitacaoNaoEncontrada(SolicitacaoNaoEncontradaException e){
+        ErrorResponse erro = new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+    }
+
+
 }
