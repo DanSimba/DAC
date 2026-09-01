@@ -20,45 +20,7 @@ export class Extrato implements OnInit{
   account = signal<Account>(this.clientService.getAccount());
 
   //MOCK lista com tds os extratos
-  extList = signal<ExtratoModel[]> ([
-    { 
-      type: 'transf',
-      instance:{
-        type: 'transference',
-        cpf_origin: '11122233355',
-        name_origin: 'pedro torresmos',
-        acc_origin: '003',
-        
-        acc_destiny: this.account().number,
-
-        value: 1000,
-        datetime: '10/10/2010 18:32'
-      },
-      id: 20101010,
-    },
-    { 
-      type: 'dep',
-      instance:{
-        type: 'operation',
-        acc_number: this.account().number,
-        side: 'dep',
-        value: 300,
-        datetime: '01/01/2020 16:02'
-      },
-      id: 20200101,
-    },
-    { 
-      type: 'sac',
-      instance:{
-        type: 'operation',
-        acc_number:  this.account().number,
-        side: 'sac',
-        value: 300,
-        datetime:'19/01/2021 12:33'
-      },
-      id: 20210119,
-    },
-  ]);
+  extList = signal<ExtratoModel[]> (this.clientService.getExtList());
 
   //filtra o extrato pela data
   filteredList= computed(()=>{
@@ -70,7 +32,7 @@ export class Extrato implements OnInit{
   ngOnInit(): void {
     const now = new Date();
     //ganbiarra pra tranformar Date no formato que o input aceita
-    const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getDate()}`
+    const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     //console.log("now: ", nowString)
 
     this.setDate(nowString);

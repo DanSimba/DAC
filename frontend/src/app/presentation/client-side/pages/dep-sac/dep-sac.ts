@@ -17,10 +17,10 @@ export class DepSac {
 
   clientService = inject(ClientService);
 
-  side = signal<string>('');
+  side = signal<'dep'|'sac'|''>('');
   value = signal<number>(0);
 
-  setSide(s: string){
+  setSide(s: 'dep'|'sac'|''){
     this.side.set(s);
   }
 
