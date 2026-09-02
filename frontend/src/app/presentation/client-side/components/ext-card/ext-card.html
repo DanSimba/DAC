@@ -1,18 +1,18 @@
-<div class="flex flex-col w-[28vw] h-[30vh] p-2 bg-black/50 border-5 border-solid {{ext().type=='dep'?'border-azure hover:bg-linear-to-t from-azure/60 to-[black/50] to-40%': ext().type=='sac'?  'border-rosa hover:bg-linear-to-t from-rosa/60 to-[black/50] to-40%':'bg-black/50 border-5 border-solid border-white hover:bg-linear-to-t from-white/60 to-[black/50] to-40%'}} text-white text-2xl font-display font-title hover:scale-105 transition-all duration-130 rounded-xl">
+<div class="flex flex-row w-full h-[20vh] p-2 gap-x-4 bg-black/50 border-5 border-solid {{ext().type=='dep'?'border-azure hover:bg-linear-to-t from-azure/60 to-[black/50] to-40%': ext().type=='sac'?  'border-rosa hover:bg-linear-to-t from-rosa/60 to-[black/50] to-40%':'bg-black/50 border-5 border-solid border-white hover:bg-linear-to-t from-white/60 to-[black/50] to-40%'}} text-white text-2xl font-display font-title hover:scale-105 transition-all duration-130 rounded-xl">
     @if(ext().type == 'dep'){
-        <div class="flex flex-row w-full h-10 justify-between items-center px-2 border-b-1 border-b-white border-solid">
-            <p>Depósito</p> <mat-icon>arrow_downward</mat-icon>  
+        <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
+                <p>Depósito</p> <mat-icon>arrow_downward</mat-icon>   
         </div> 
     }
 
     @if(ext().type == 'sac'){
-        <div class="flex flex-row w-full h-10 justify-between items-center px-2 border-b-1 border-b-white border-solid">
+        <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
             <p>Saque</p> <mat-icon>arrow_upward</mat-icon>  
         </div> 
     }
 
     @if(ext().type == 'transf'){
-        <div class="flex flex-row w-full h-10 justify-between items-center px-2 border-b-1 border-b-white border-solid">
+        <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
             <p>Transferência</p> <mat-icon>swap_horiz</mat-icon>  
         </div> 
     }
@@ -20,12 +20,14 @@
     <div class="flex flex-col w-full h-full justify-center">
 
          @if(ext().type === 'transf'){
-            <p>
+            <div class="flex flex-row w-70 justify-between">
+                <p>
                  De: {{transfInstance()?.acc_origin}}
-            </p>
-            <p>
-                 Para: {{transfInstance()?.acc_destiny}}
-            </p>
+                </p>
+                <p>
+                    Para: {{transfInstance()?.acc_destiny}}
+                </p>
+            </div>
             <p>
                  Valor: {{transfInstance()?.value}}R$
             </p>
