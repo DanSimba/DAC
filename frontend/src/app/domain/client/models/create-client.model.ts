@@ -6,7 +6,6 @@ export interface CreateClient {
     name     : string;
     phone    : string;
     email    : string;
-    password : string;
     salary   : Decimal;
     address  : Address;
 }

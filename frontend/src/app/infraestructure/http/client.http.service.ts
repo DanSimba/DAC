@@ -5,6 +5,7 @@ import { OperationModel } from '../../domain/operations/models/operation.model';
 import { Account } from '../../domain/account/models/account.model';
 import { Transference } from '../../presentation/client-side/pages/transference/transference';
 import { TransferenceModel } from '../../domain/operations/models/transference.model';
+import { CreateClient } from '../../domain/client/models/create-client.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,12 @@ import { TransferenceModel } from '../../domain/operations/models/transference.m
 export class ClientHttpService {
   http = inject(HttpClient);
   //private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = 'http://localhost:8080'; // URL exposta somente para teste
+
+  // Faz a solicitação de criação do cliente ao API Gateway
+  createClientRequest(clientRequest: CreateClient): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/api/solicitacoes`, clientRequest);
+  }
 
 
   //FAZ A OPERAÇÃO CERTA E AI RETORNA A CONTA COM O VALOR ATUALIZADO
