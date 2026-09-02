@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js'
-import { Address } from "./address.model";
+import { Address } from '../../address/models/address.model'
 
 export interface CreateClient {
     cpf      : string;

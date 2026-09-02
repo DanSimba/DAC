@@ -1,6 +1,6 @@
-import { ClientStatus } from "../enumeration/client-status";
-import { UserType } from "../enumeration/user-type";
-import { Address } from "./address.model";
+import { ClientStatus } from "../../../enumeration/client-status";
+import { UserType } from "../../../enumeration/user-type";
+import { Address } from "../../address/models/address.model";
 
 export interface Client {
     id       : number;

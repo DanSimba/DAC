@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { OperationModel } from '../../../../models/operation.model';
+import { OperationModel } from '../../../../domain/operations/models/operation.model';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';

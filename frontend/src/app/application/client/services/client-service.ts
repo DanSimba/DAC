@@ -1,14 +1,14 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { Client } from '../../../models/client.model';
+import { Client } from '../../../domain/client/models/client.model';
 import { ClientStatus } from '../../../enumeration/client-status';
 import { UserType } from '../../../enumeration/user-type';
-import { Account } from '../../../models/account.model';
+import { Account } from '../../../domain/account/models/account.model';
 import { ManagerStatus } from '../../../enumeration/manager-status';
-import { OperationModel } from '../../../models/operation.model';
+import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
 import { Observable, tap } from 'rxjs';
-import { TransferenceModel } from '../../../models/transference.model';
-import { CreateClient } from '../../../models/create-client.model';
+import { TransferenceModel } from '../../../domain/operations/models/transference.model';
+import { CreateClient } from '../../../domain/client/models/create-client.model';
 
 @Injectable({
   providedIn: 'root',

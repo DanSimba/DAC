@@ -141,7 +141,6 @@ public class SolicitacaoEntity {
         return cep;
     }
 
-
     public String getCidade() {
         return cidade;
     }
