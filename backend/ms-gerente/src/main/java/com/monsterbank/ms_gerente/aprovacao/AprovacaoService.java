@@ -1,12 +1,13 @@
-package com.monsterbank.ms_gerente.service;
+package com.monsterbank.ms_gerente.aprovacao;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class GerenteService {
-
+public class AprovacaoService {
+ 
     public String teste(){
         return "Foi";
     }
+
 
 }

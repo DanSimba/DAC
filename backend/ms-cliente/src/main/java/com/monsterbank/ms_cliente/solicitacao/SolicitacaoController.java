@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.registrarSolicitacaoRequest;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 
 @RestController
 @RequestMapping("/api/solicitacoes")
@@ -18,14 +18,13 @@ public class SolicitacaoController {
 
     public SolicitacaoController(
             SolicitacaoService solicitacaoService
-
     ) {
         this.solicitacaoService = solicitacaoService;
     }
 
 
     @PostMapping("/registrar")
-    public ResponseEntity<Void> regitrarSolicitacao(@RequestBody registrarSolicitacaoRequest dto){
+    public ResponseEntity<Void> regitrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto){
         solicitacaoService.registrar(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();

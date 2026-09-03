@@ -9,6 +9,7 @@ import { ClientHttpService } from '../../../infraestructure/http/client.http.ser
 import { Observable, tap } from 'rxjs';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
+import { CreateClient } from '../../../domain/client/models/create-client.model';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class ClientService {
 
   private clientHttpService = inject(ClientHttpService);
   //MOCKZIN
-  private client = signal<Client>({
+  private clientMock = signal<Client>({
         id       : 1,
         cpf      : '00011122233',
         name     : 'razerson nvidio da silva',
@@ -42,7 +43,7 @@ export class ClientService {
   logged = signal<boolean>(true);
 
   private account = signal<Account>({
-      client   : this.client(),
+      client   : this.clientMock(),
       number   : '001',
       balance  : 1000,
       manager  : {
@@ -101,7 +102,7 @@ export class ClientService {
   }
 
   getClient():Client{
-    return this.client();
+    return this.clientMock();
   }
   
   getAccount():Account{
@@ -109,7 +110,7 @@ export class ClientService {
   }
 
   setClient(c:Client){
-    this.client.set(c);
+    this.clientMock.set(c);
   }
 
   setAccount(a:Account){
@@ -167,4 +168,10 @@ export class ClientService {
 
     return formatedDate;
   }
+
+  // Envia o client recebido do component para o httpService fazer a solicitação ao API Gateway
+  createClientRequest(clientRequest: CreateClient): Observable<void> {
+    return this.clientHttpService.createClientRequest(clientRequest);
+  }
+
 }

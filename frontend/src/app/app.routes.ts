@@ -2,7 +2,9 @@ import { Routes } from '@angular/router';
 import { HomePage } from './presentation/shared/pages/home-page/home-page';
 import { ClientSidePage } from './presentation/client-side/pages/client-side-page/client-side-page';
 import { Autocadastro } from './presentation/shared/pages/autocadastro/autocadastro';
+import { ManagerSidePage } from './presentation/manager-side/pages/manager-side-page/manager-side-page';
 import { clientAuthGuard } from './domain/client/guards/client-auth-guard';
+import { Login } from './presentation/shared/pages/login/login';
 
 export const routes: Routes = [
     {//home deslogado
@@ -40,8 +42,35 @@ export const routes: Routes = [
             },
         ]
     },
+    { //telas do lado gerente
+        path:'manager',
+        component:ManagerSidePage,
+        title:'ah é',
+        children:[
+            {
+                path:'',
+                loadComponent: () => import('../app/presentation/manager-side/pages/manager-home-page/manager-home-page').then(m => m.ManagerHomePage)
+            },
+            {
+                path:'reports',
+                loadComponent: () => import('../app/presentation/manager-side/pages/reports/reports').then(m=>m.Reports)
+            },
+            {
+                path:'clients',
+                loadComponent: () => import('../app/presentation/manager-side/pages/clients/clients').then(m=>m.Clients)
+            },
+            {
+                path:'managers',
+                loadComponent: () => import('../app/presentation/manager-side/pages/managers/managers').then(m=>m.Managers)
+            },
+        ]
+    },
     { // Teste do ViaCEP
         path: 'autocadastro',
         component: Autocadastro
+     },
+     { // tela de login
+        path: 'login',
+        component: Login
      }
 ];

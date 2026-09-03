@@ -1,1 +1,16 @@
-<p>manager-side-page works!</p>
+<!--AQUI FICA O ESQUELETO DA INTERFACE (NAVBAR FIXA E CONTEÚDO)-->
+<div class="relative flex flex-row w-screen h-screen items-center bg-linear-to-t from-azure to-marinho to-40%">
+
+    <div class="absolute {{imo()?'w-[20vw]':'w-0'}} p-2 left-0 h-screen transition-all duration-130">
+        <app-manager-menu></app-manager-menu>
+    </div>
+
+    <div class="flex flex-col h-full overflow-y-clip scrollbar-none">
+        <app-manager-nav-bar></app-manager-nav-bar>
+        <div class="flex flex-1 w-screen h-full justify-center items-center pb-4">
+                <router-outlet></router-outlet>
+        </div>
+    
+    </div>
+    
+</div>
