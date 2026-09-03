@@ -1,0 +1,46 @@
+<div class="flex flex-row w-full h-[20vh] p-2 gap-x-4 bg-black/50 border-5 border-solid {{type()=='dep'?'border-azure hover:bg-linear-to-t from-azure/60 to-[black/50] to-40%': type()=='sac'?  'border-rosa hover:bg-linear-to-t from-rosa/60 to-[black/50] to-40%':'bg-black/50 border-5 border-solid border-white hover:bg-linear-to-t from-white/60 to-[black/50] to-40%'}} text-white text-2xl font-display font-title hover:scale-102 transition-all duration-130 rounded-xl">
+    @if(type() == 'dep'){
+        <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
+                <p>Depósito</p> <mat-icon>arrow_downward</mat-icon>   
+        </div> 
+    }
+
+    @if(type() == 'sac'){
+        <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
+            <p>Saque</p> <mat-icon>arrow_upward</mat-icon>  
+        </div> 
+    }
+
+    @if(type() == 'transf'){
+        <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
+            <p>Transferência</p> <mat-icon>swap_horiz</mat-icon>  
+        </div> 
+    }
+
+    <div class="flex flex-col w-full h-full justify-center">
+
+         @if(type() === 'transf'){
+            <div class="flex flex-row w-70 justify-between">
+                <p>
+                 De: {{transfInstance()?.acc_origin}}
+                </p>
+                <p>
+                    Para: {{transfInstance()?.acc_destiny}}
+                </p>
+            </div>
+            <p>
+                 Valor: {{transfInstance()?.value}}R$
+            </p>
+            <p>
+                 Data: {{transfInstance()?.datetime}}
+            </p>
+         } @else{
+            <p>
+                 Valor: {{operInstance()?.value}}R$
+            </p>
+            <p>
+                 Data: {{operInstance()?.datetime}}
+            </p>
+         }
+    </div>
+</div>

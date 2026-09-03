@@ -1,0 +1,59 @@
+<div class="relative flex flex-col w-screen h-[90vh] py-6 justify-start items-center gap-y-6 overflow-x-clip scrollbar-none">
+
+    <div class="flex flex-row w-full px-8 gap-x-6 justify-start items-center">
+        <div class="flex flex-row w-[12vw] h-[6vh] justify-evenly items-center bg-rosa scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_var(--color-azure)] cursor-pointer rounded-lg transition-all duration-130"
+        (click)="location.back()">
+               <mat-icon>arrow_backward</mat-icon> Voltar 
+        </div>
+
+        <h1 class="text-7xl text-white font-monster">EXTRATO</h1>
+    </div>
+
+    <div class="flex flex-col w-full h-[70vh] items-center p-2 gap-y-2">
+
+        <div class="flex flex-row w-full pl-18">
+            <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
+                Data: 
+                <input type="date" 
+                (input)="setDate($event.target.value)"
+                class="w-fit focus:outline-none">
+            </div>
+        </div>
+        
+
+        <!--         
+            <div class="w-10 h-10 bg-red-700"
+            (click)="mostrarData()">
+            </div> 
+        -->
+            
+
+            <div class="flex flex-col w-[70vw] h-[60vh] p-10 gap-y-6 text-white font-title text-2xl overflow-y-auto scrollbar-none">
+                @for (ext of filteredList(); track $index) {
+                    <div class="flex flex-col justify-between p-4 gap-y-4 bg-black/50 border-5 border-solid border-rosa rounded-2xl">
+                        <div class="flex flex-row w-full">
+                            Data: {{formatDateId(ext.id)}}
+                        </div>
+
+                        @for (transf of ext.tranfs; track $index) {
+                            <app-ext-card [transfInstance]="transf"></app-ext-card> 
+                        }
+
+                        @for (oper of ext.opers; track $index) {
+                            <app-ext-card [operInstance]="oper"></app-ext-card> 
+                        }
+                        <!-- @if(ext.instance.type == 'transference'){
+                            <app-ext-card [ext]="ext" [transfInstance]="ext.instance"></app-ext-card> 
+                        } @else {
+                            <app-ext-card [ext]="ext" [operInstance]="ext.instance"></app-ext-card> 
+                        } -->
+
+                        <div class="flex flex-row w-full">
+                            Saldo: {{ext.saldoApos}} R$
+                        </div>
+                    </div>
+                }
+            </div>
+
+    </div>
+</div>

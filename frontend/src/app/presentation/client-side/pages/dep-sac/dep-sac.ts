@@ -17,10 +17,10 @@ export class DepSac {
 
   clientService = inject(ClientService);
 
-  side = signal<string>('');
+  side = signal<'dep'|'sac'|''>('');
   value = signal<number>(0);
 
-  setSide(s: string){
+  setSide(s: 'dep'|'sac'|''){
     this.side.set(s);
   }
 
@@ -30,9 +30,11 @@ export class DepSac {
 
     if(concreteSide!='' && concreteValue>0){
         const op: OperationModel = {
+          type:'operation',
           acc_number: this.clientService.getAccount().number,
           side:concreteSide,
-          value: concreteValue
+          value: concreteValue,
+          datetime: this.clientService.getCurrentTimeFormated()
         }
 
         this.clientService.operar(op).subscribe({

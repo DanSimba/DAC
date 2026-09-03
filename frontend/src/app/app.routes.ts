@@ -36,6 +36,10 @@ export const routes: Routes = [
                 path:'transferir',
                 loadComponent: () => import('../app/presentation/client-side/pages/transference/transference').then(m => m.Transference)
             },
+            {
+                path:'extrato',
+                loadComponent: () => import('../app/presentation/client-side/pages/extrato/extrato').then(m => m.Extrato)
+            },
         ]
     },
     { //telas do lado gerente

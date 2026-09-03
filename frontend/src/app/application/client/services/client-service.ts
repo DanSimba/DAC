@@ -8,6 +8,7 @@ import { OperationModel } from '../../../domain/operations/models/operation.mode
 import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
 import { Observable, tap } from 'rxjs';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
+import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 import { CreateClient } from '../../../domain/client/models/create-client.model';
 
 @Injectable({
@@ -57,6 +58,49 @@ export class ClientService {
       createdAt : '10/10/2012',
   })
 
+  //MOCK lista com tds os extratos
+  private extList = signal<ExtratoModel[]> ([]);
+
+  addExtrato(ext: OperationModel|TransferenceModel){
+    //pega a data em forma de id
+    const now = new Date();
+    //ganbiarra pra tranformar Date no id formato AAAAMMDD
+    const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+    //procura por esse id no extrato (se já tem o dia, coloca ext lá)
+      const extDay = this.extList().find(day => day.id==nowId)
+      if(extDay){
+        if(ext.type == 'operation'){
+          extDay.opers.push(ext);
+          console.log('extrato atualizado: ', this.extList());
+        } else{
+          extDay.tranfs.push(ext);
+          console.log('extrato atualizado: ', this.extList());
+        }
+        return
+      }
+      
+    //caso não ache o dia (primeiro ext do dia), cria um novo
+      const newExt: ExtratoModel = {
+        tranfs: [],
+        opers: [],
+        id: nowId,
+        saldoApos: this.account().balance //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
+      }
+
+      if(ext.type == 'operation'){
+        newExt.opers.push(ext);
+      } else{
+        newExt.tranfs.push(ext);
+      }
+
+      this.extList.update(exts=>[newExt, ...exts]);
+      console.log('extrato atualizado: ', this.extList());
+  }
+
+  getExtList():ExtratoModel[]{
+    return this.extList();
+  }
+
   getClient():Client{
     return this.clientMock();
   }
@@ -83,10 +127,13 @@ export class ClientService {
   }
 
   operar(op: OperationModel): Observable<Account>{
+    //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
+    this.addExtrato(op);
+
     return this.clientHttpService.operar(op).pipe(
       tap({
         next: (response)=>{
-          this.account.set(response)
+          this.account.set(response);
         },
         error: (err)=>{
           console.log('err: ', err);
@@ -96,6 +143,9 @@ export class ClientService {
   }
 
   transferir(t: TransferenceModel): Observable<Account>{
+    //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
+    this.addExtrato(t);
+
     return this.clientHttpService.transferir(t).pipe(
       tap({
         next: (response)=>{
@@ -114,7 +164,7 @@ export class ClientService {
     //console.log('DATA NÃO FORMATADA: ', date);
 
     const formatedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`
-    console.log('DATETIME AGR: ', formatedDate);
+    //console.log('DATETIME AGR: ', formatedDate);
 
     return formatedDate;
   }
