@@ -48,8 +48,11 @@ export class Extrato implements OnInit{
     console.log('date: ', this.date());
   }
   
-
-  mostrarData(){
-    console.log('DATA: ', this.date())
+  //FAZ LITERALMENTE O CONTRARIO DA FUNÇÃO DE CIMA 
+  formatDateId(d:number):string{
+    const dString = d.toString();
+    console.log('DSTRING: ', dString)
+    const formatedDate = `${dString.slice(6,8)}/${dString.slice(4,6)}/${dString.slice(0,4)}`
+    return formatedDate;
   }
 }

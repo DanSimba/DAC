@@ -58,49 +58,42 @@ export class ClientService {
   })
 
   //MOCK lista com tds os extratos
-  private extList = signal<ExtratoModel[]> ([
-      { 
-        type: 'transf',
-        instance:{
-          type: 'transference',
-          cpf_origin: '11122233355',
-          name_origin: 'pedro torresmos',
-          acc_origin: '003',
-          
-          acc_destiny: this.account().number,
-  
-          value: 1000,
-          datetime: '10/10/2010 18:32'
-        },
-        id: 20101010,
-      },
-      { 
-        type: 'dep',
-        instance:{
-          type: 'operation',
-          acc_number: this.account().number,
-          side: 'dep',
-          value: 300,
-          datetime: '01/01/2020 16:02'
-        },
-        id: 20200101,
-      },
-      { 
-        type: 'sac',
-        instance:{
-          type: 'operation',
-          acc_number:  this.account().number,
-          side: 'sac',
-          value: 300,
-          datetime:'19/01/2021 12:33'
-        },
-        id: 20210119,
-      },
-  ]);
+  private extList = signal<ExtratoModel[]> ([]);
 
-  addExtrato(ext: ExtratoModel){
-    //ADD NO TOPO DA LISTA
-    this.extList.update(current => [ext, ...current]);
+  addExtrato(ext: OperationModel|TransferenceModel){
+    //pega a data em forma de id
+    const now = new Date();
+    //ganbiarra pra tranformar Date no id formato AAAAMMDD
+    const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+    //procura por esse id no extrato (se já tem o dia, coloca ext lá)
+      const extDay = this.extList().find(day => day.id==nowId)
+      if(extDay){
+        if(ext.type == 'operation'){
+          extDay.opers.push(ext);
+          console.log('extrato atualizado: ', this.extList());
+        } else{
+          extDay.tranfs.push(ext);
+          console.log('extrato atualizado: ', this.extList());
+        }
+        return
+      }
+      
+    //caso não ache o dia (primeiro ext do dia), cria um novo
+      const newExt: ExtratoModel = {
+        tranfs: [],
+        opers: [],
+        id: nowId,
+        saldoApos: this.account().balance //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
+      }
+
+      if(ext.type == 'operation'){
+        newExt.opers.push(ext);
+      } else{
+        newExt.tranfs.push(ext);
+      }
+
+      this.extList.update(exts=>[newExt, ...exts]);
+      console.log('extrato atualizado: ', this.extList());
   }
 
   getExtList():ExtratoModel[]{
@@ -133,32 +126,13 @@ export class ClientService {
   }
 
   operar(op: OperationModel): Observable<Account>{
-    //ADICIONA O EXTRATO Á MEMÓRIA DO FRONT, DPS ISSO TEM Q ACONTECER NO BACK 
-    //OPÇÕES:
-    //1. O BACK DEVE RETORNAR A CONTA ATUALIZADA E O OBJETO EXTRATO
-    //--OU--
-    //2. O FRONT MONTA O EXTRATO AQ E SÓ MANDA PARA O BACK 
-    // (DPS O FRONT PUXA A LISTA TD DO BANCO AO ENTRAR NA TELA EXTRATO)
-    
-      //pega data agora
-        const now = new Date();
-      //transforma no número usado no id
-        const nowString = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
-      //monta extrato
-        const ext: ExtratoModel = {
-        type: op.side,
-        instance: op,
-        id: +nowString
-      }
-
-      //adiciona à extList
-        this.addExtrato(ext);
-        console.log("extrato com op nova: ", this.extList())
+    //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
+    this.addExtrato(op);
 
     return this.clientHttpService.operar(op).pipe(
       tap({
         next: (response)=>{
-          this.account.set(response)
+          this.account.set(response);
         },
         error: (err)=>{
           console.log('err: ', err);
@@ -168,6 +142,9 @@ export class ClientService {
   }
 
   transferir(t: TransferenceModel): Observable<Account>{
+    //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
+    this.addExtrato(t);
+
     return this.clientHttpService.transferir(t).pipe(
       tap({
         next: (response)=>{

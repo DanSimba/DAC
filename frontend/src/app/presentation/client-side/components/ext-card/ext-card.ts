@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { ExtratoModel } from '../../../../domain/operations/models/extrato.model';
 import { TransferenceModel } from '../../../../domain/operations/models/transference.model';
 import { OperationModel } from '../../../../domain/operations/models/operation.model';
@@ -11,9 +11,12 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './ext-card.css',
 })
 export class ExtCard {
-  ext = input.required<ExtratoModel>();
-
   //PEGA SOMENTE O OBJETO DE DENTRO DA INSTÂNCIA (COM UM ÚNICO TIPO, PRA NÃO FICAR AMBÍGUO)
   transfInstance = input<TransferenceModel>();
   operInstance = input<OperationModel>();
+
+  type = computed(()=>{
+    if(this.operInstance()) return this.operInstance()?.side == 'dep'? 'dep': 'sac';
+    else return 'transf'
+  })
 }

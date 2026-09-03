@@ -63,7 +63,8 @@
                 <input type="number" placeholder="00.00"
                 [value]="value()" 
                 (input)="value.set($event.target.valueAsNumber || 0)"
-                class="flex w-[20vw] h-12 p-2 {{side()=='sac'?' border-2 border-solid border-rosa scale-105': side()=='dep'?' border-2 border-solid border-azure scale-105':'border-2 border-solid border-gray-500'}} outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
+                [disabled]="side()==''"
+                class="flex w-[20vw] h-12 p-2 {{side()=='sac'?' border-2 border-solid border-rosa scale-105': side()=='dep'?' border-2 border-solid border-azure scale-105':'border-2 border-solid border-gray-500 cursor-not-allowed'}} outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
                 (keydown.enter)="send()">
                 R$
             </div>
