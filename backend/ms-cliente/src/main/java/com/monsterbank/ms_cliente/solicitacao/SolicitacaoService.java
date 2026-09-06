@@ -62,6 +62,39 @@ public class SolicitacaoService {
 
     }
 
+
+    public void aprovar(String cpf) {
+        if(!CpfUtils.validar(cpf)){
+            throw new CpfInvalidoException();
+        }
+
+        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+
+        if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
+            throw new SolicitacaoNaoPendenteException();
+        }
+
+        solicitacao.aprovar();
+        solicitacaoRepository.save(solicitacao);
+    }
+
+    public void rejeitar(String cpf, String motivo) {
+
+        if(!CpfUtils.validar(cpf)){
+            throw new CpfInvalidoException();
+        }
+
+        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+
+        if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
+            throw new SolicitacaoNaoPendenteException();
+        }
+
+        solicitacao.rejeitar(motivo);
+        solicitacaoRepository.save(solicitacao);
+    }
+
+
     public List<listarSolicitacoesReturn> listarSolicitacoes(int page){
         PageRequest peageable = PageRequest.of(page, 50);
         List<SolicitacaoEntity> lista = solicitacaoRepository.findAll(peageable).getContent();
@@ -78,61 +111,12 @@ public class SolicitacaoService {
 
     }
 
-    //public Optional<SolicitacaoEntity> procurarSolicitacao(){
-        
-    //}
-
-    public void aprovarSolicitacao(String cpf){
-
-        if(!CpfUtils.validar(cpf)){
-            throw new CpfInvalidoException();
-        }
-
-        Optional<SolicitacaoEntity> solicitacao = solicitacaoRepository.findByCpf(cpf);
-
-        if(solicitacao.isPresent()){
-            solicitacao.get().aprovar();
-            solicitacaoRepository.save(solicitacao.get());
-        }else{
-            throw new SolicitacaoNaoEncontradaException();
-        }
-
-    }
-
-    private void rejeitarSolicitacao(String cpf, String motivo){
-
-        if(!CpfUtils.validar(cpf)) {
-            throw new CpfInvalidoException();
-        }
-
-        if (motivo.isEmpty()){
-            throw new MotivoInvalidoException();
-        }
-
-        Optional<SolicitacaoEntity> solicitacao = solicitacaoRepository.findByCpf(cpf);
-
-        if (solicitacao.isPresent()){
-
-            solicitacao.get().rejeitar(motivo);
-
-            solicitacaoRepository.save(solicitacao.get());
-
-        }else{
-            throw new SolicitacaoNaoEncontradaException();
-        }
-
+    public SolicitacaoEntity getSolicitacaoByCpf(String cpf){
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        return solicitacao;
     }
 
 
-    public void retornarSolicitacaoParaPendente(String cpf){
-
-    }
-
-
-    public void marcarSolicitacaoComoNaoAprovada(String cpf, String motivo){
-
-
-    }
 
 
     private void validarPorCPF(String cpf){
@@ -151,26 +135,26 @@ public class SolicitacaoService {
         //chama AUTH
     }
 
-    public void aprovar(String cpf) {
-       SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
 
-       if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
-        throw new SolicitacaoNaoPendenteException();
-       }
+    //-------------------------Erros SAGA----------------------------------------------------
 
-       solicitacao.aprovar();
-       solicitacaoRepository.save(solicitacao);
+    public void retornarSolicitacaoParaPendente(String cpf){
+
+        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+
+        solicitacao.retornarParaPendente();
+
+        solicitacaoRepository.save(solicitacao);
+
     }
 
-    public void rejeitar(String cpf, String motivo) {
-       SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
 
-       if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
-        throw new SolicitacaoNaoPendenteException();
-       }
+    public void marcarSolicitacaoComoNaoAprovada(String cpf, String motivo){
+        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+        solicitacao.rejeitar(motivo);
+        solicitacaoRepository.save(solicitacao);
 
-       solicitacao.rejeitar(motivo);
-       solicitacaoRepository.save(solicitacao);
     }
+
 
 }

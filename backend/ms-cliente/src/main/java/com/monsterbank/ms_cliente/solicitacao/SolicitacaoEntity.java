@@ -4,6 +4,7 @@ package com.monsterbank.ms_cliente.solicitacao;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -101,6 +102,12 @@ public class SolicitacaoEntity {
     public void rejeitar(String motivo){
         this.status = StatusSolicitacao.NAO_APROVADO;
         this.motivo = motivo;
+        this.dataProcessamento = LocalDateTime.now();
+    }
+
+    public void retornarParaPendente(){
+        this.status = StatusSolicitacao.PENDENTE;
+        this.motivo = null;
         this.dataProcessamento = LocalDateTime.now();
     }
 

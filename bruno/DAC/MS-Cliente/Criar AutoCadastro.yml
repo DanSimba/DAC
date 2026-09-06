@@ -1,0 +1,35 @@
+info:
+  name: Criar AutoCadastro
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:8080/clientes
+  body:
+    type: json
+    data: |-
+      {
+        "nome": "João da Silva",
+        "email": "joao.silva@email.com",
+        "cpf": "52998224725",
+        "telefone": "41999998888",
+        "salario": "3500.00",
+        "endereco": {
+          "cep": "80010000",
+          "logradouro": "Rua XV de Novembro",
+          "numero": 123,
+          "complemento": "Apto 42",
+          "bairro": "Centro",
+          "cidade": "Curitiba",
+          "uf": "PR"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
