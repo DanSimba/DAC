@@ -10,11 +10,11 @@ public class GerenteService {
 
     private final GerenteRepository gerenteRepository;
 
-    GerenteService(GerenteRepository gerenteRepository){
+    GerenteService(GerenteRepository gerenteRepository) {
         this.gerenteRepository = gerenteRepository;
     }
 
-    public GerenteDTO paraDTO(GerenteEntity gerente){
+    public GerenteDTO paraDTO(GerenteEntity gerente) {
         GerenteDTO respostaDTO = new GerenteDTO();
         respostaDTO.setId(gerente.getId());
         respostaDTO.setNome(gerente.getNome());
@@ -24,22 +24,22 @@ public class GerenteService {
         return respostaDTO;
     }
 
-    public List<GerenteDTO> listar(){
+    public List<GerenteDTO> listar() {
         return gerenteRepository.findAll().stream()
-            .filter(GerenteEntity::getAtivo)
-            .map(this::paraDTO)
-            .collect(Collectors.toList());
+                .filter(GerenteEntity::getAtivo)
+                .map(this::paraDTO)
+                .collect(Collectors.toList());
     }
 
-    public GerenteDTO buscaId(Long id){
+    public GerenteDTO buscaId(Long id) {
         GerenteEntity gerente = gerenteRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
         return paraDTO(gerente);
     }
 
-    public GerenteDTO salvar(GerenteDTO gerenteDTO){
+    public GerenteDTO salvar(GerenteDTO gerenteDTO) {
         GerenteEntity gerente = new GerenteEntity();
-        
+
         gerente.setNome(gerenteDTO.getNome());
         gerente.setCpf(gerenteDTO.getCpf());
         gerente.setEmail(gerenteDTO.getEmail());
@@ -51,12 +51,11 @@ public class GerenteService {
         return paraDTO(gerente);
     }
 
-    public GerenteDTO atualizar(Long id, GerenteDTO gerenteDTO){
+    public GerenteDTO atualizar(Long id, GerenteDTO gerenteDTO) {
         GerenteEntity gerente = gerenteRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
 
-
-        //Lembrando que cpf e email não pode ser alterado
+        // Lembrando que cpf e email não pode ser alterado
         gerente.setNome(gerenteDTO.getNome());
         gerente.setTelefone(gerenteDTO.getTelefone());
 
@@ -64,9 +63,9 @@ public class GerenteService {
         return paraDTO(gerenteAtualizado);
     }
 
-    public void remover(long id){
+    public void remover(long id) {
         GerenteEntity gerente = gerenteRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
         gerente.setAtivo(false);
         gerenteRepository.save(gerente);
     }

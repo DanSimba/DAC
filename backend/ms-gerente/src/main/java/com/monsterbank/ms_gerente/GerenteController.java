@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/gerente")
 public class GerenteController {
 
     private final GerenteService gerenteService;

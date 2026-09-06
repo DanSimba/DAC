@@ -76,7 +76,7 @@ services:
       - POSTGRES_USER=ms-gerente
       - POSTGRES_PASSWORD=psql
     ports:
-      - "5436:5436"
+      - "5436:5432"
     volumes:
       - pgdata-gerente:/var/lib/postgresql/data
     networks:
