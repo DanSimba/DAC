@@ -4,7 +4,7 @@ package com.monsterbank.ms_cliente;
 
 import com.monsterbank.ms_cliente.cliente.ClienteService;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
-import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.registrarSolicitacaoRequest;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.listarSolicitacoesReturn;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +32,7 @@ public class ClienteController {
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<Void> regitrarSolicitacao(@RequestBody registrarSolicitacaoRequest dto){
+    public ResponseEntity<Void> regitrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto){
         solicitacaoService.registrar(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();

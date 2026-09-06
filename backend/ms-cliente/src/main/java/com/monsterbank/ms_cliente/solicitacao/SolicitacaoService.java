@@ -1,7 +1,6 @@
 package com.monsterbank.ms_cliente.solicitacao;
 
 import com.monsterbank.ms_cliente.exception.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +22,14 @@ import java.util.Optional;
 @Service
 public class SolicitacaoService {
 
-    // @Autowired
-    // private SolicitacaoRepository solicitacaoRepository;
 
     private final SolicitacaoRepository solicitacaoRepository;
 
-    public SolicitacaoService (SolicitacaoRepository solicitacaoRepository) {
+    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository) {
         this.solicitacaoRepository = solicitacaoRepository;
     }
 
-    public void registrar(RegistrarSolicitacaoRequest dto){
+    public void registrar(RegistrarSolicitacaoRequest dto) {
         validarPorCPF(dto.cpf());
         validarEmailSolicitado(dto.email());
         validarEmailCadastrado(dto.email());
@@ -80,6 +77,10 @@ public class SolicitacaoService {
                 )).toList();
 
     }
+
+    //public Optional<SolicitacaoEntity> procurarSolicitacao(){
+        
+    //}
 
     public void aprovarSolicitacao(String cpf){
 

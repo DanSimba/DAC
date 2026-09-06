@@ -1,6 +1,9 @@
 package com.monsterbank.ms_cliente.cliente;
 
 
+import com.monsterbank.ms_cliente.exception.ErroCriacaClienteException;
+import com.monsterbank.ms_cliente.solicitacao.SolicitacaoEntity;
+import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,9 @@ public class ClienteService {
 
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private SolicitacaoService solicitacaoService;
 
     public List<ClienteRetorno> listarClientes(Integer page){
         PageRequest peageable = PageRequest.of(page, 50);
@@ -59,6 +65,34 @@ public class ClienteService {
                         getSalario(cliente.getCpf())
                 )).toList()).orElseGet(ArrayList::new);
 
+    }
+
+    public void aprovarCliente(String cpf){
+
+
+
+    }
+
+    private void criarCliente(SolicitacaoEntity solicitacao){
+        try{
+            ClienteEntity cliente = new ClienteEntity(
+                    solicitacao.getCpf(),
+                    solicitacao.getNome(),
+                    solicitacao.getEmail(),
+                    solicitacao.getTelefone(),
+                    solicitacao.getSalario(),
+                    solicitacao.getLogradouro(),
+                    solicitacao.getNumero(),
+                    solicitacao.getComplemento(),
+                    solicitacao.getCep(),
+                    solicitacao.getCidade(),
+                    solicitacao.getUf()
+            );
+
+            clienteRepository.save(cliente);
+        }catch(ErroCriacaClienteException e){
+            throw new RuntimeException("Erro ao criar cliente", e);
+        }
     }
 
     private String getSalario(String cpf){
