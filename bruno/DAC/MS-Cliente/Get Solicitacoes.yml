@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:8080/clientes/solicitacoes
+  url: http://localhost:8081/clientes/solicitacoes
   auth: inherit
 
 settings:

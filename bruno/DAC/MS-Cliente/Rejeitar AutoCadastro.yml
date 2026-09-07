@@ -5,7 +5,7 @@ info:
 
 http:
   method: PUT
-  url: http://localhost:8080/clientes/solicitacoes/{cpf}
+  url: http://localhost:8081/clientes/solicitacoes/{cpf}
   body:
     type: json
     data: |-
