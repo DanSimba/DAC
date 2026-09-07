@@ -37,7 +37,7 @@ services:
       - POSTGRES_USER=ms-auth
       - POSTGRES_PASSWORD=psql
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - pgdata-auth:/var/lib/postgresql/data
     networks:
@@ -50,7 +50,7 @@ services:
       - POSTGRES_USER=ms-conta
       - POSTGRES_PASSWORD=psql
     ports:
-      - "5434:5434"
+      - "5434:5432"
     volumes:
       - pgdata-conta:/var/lib/postgresql/data
     networks:
@@ -63,7 +63,7 @@ services:
       - POSTGRES_USER=ms-cliente
       - POSTGRES_PASSWORD=psql
     ports:
-      - "5435:5435"
+      - "5435:5432"
     volumes:
       - pgdata-cliente:/var/lib/postgresql/data
     networks:
