@@ -4,6 +4,7 @@ import { Account } from '../../../../domain/account/models/account.model';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { AccountService } from '../../../../application/account/services/account-service';
 
 @Component({
   selector: 'app-client-menu',
@@ -16,7 +17,9 @@ export class ClientMenu {
   private router = inject(Router);
 
   client = signal<Client>(this.clientService.getClient());
-  account = signal<Account>(this.clientService.getAccount());
+
+  accountService = inject(AccountService);
+  account = signal<Account>(this.accountService.getAccount());
 
   logout(){
     console.log('usuário saiu!!');

@@ -7,6 +7,7 @@ import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PopUp } from '../../../shared/components/pop-up/pop-up';
 import { TransferenceModel } from '../../../../domain/operations/models/transference.model';
+import { AccountService } from '../../../../application/account/services/account-service';
 
 @Component({
   selector: 'app-transference',
@@ -19,7 +20,9 @@ export class Transference {
 
   clientService = inject(ClientService);
   client = signal<Client>(this.clientService.getClient());
-  account = signal<Account>(this.clientService.getAccount());
+  
+  accountService = inject(AccountService);
+  account = signal<Account>(this.accountService.getAccount());
 
   dest = signal<number|null>(null);
   value = signal<number|null>(null);
@@ -54,10 +57,10 @@ export class Transference {
         acc_destiny: concreteDest.toString(),
 
         value: concreteValue,
-        datetime: this.clientService.getCurrentTimeFormated()
+        datetime: this.accountService.getCurrentTimeFormated()
       }
 
-      this.clientService.transferir(concreteTransference).subscribe({
+      this.accountService.transferir(concreteTransference).subscribe({
         next: (response) => {
           //JÁ SETA A CONTA ATUALIZADA COM O RETORNO LÁ NO SERVICE
 

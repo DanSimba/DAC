@@ -16,7 +16,8 @@
                 Data: 
                 <input type="date" 
                 (input)="setDate($event.target.value)"
-                class="w-fit focus:outline-none">
+                [min]="minDate()"
+                class="w-fit focus:outline-none cursor-pointer">
             </div>
         </div>
         
