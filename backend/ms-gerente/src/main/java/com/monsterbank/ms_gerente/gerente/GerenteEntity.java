@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ms-gerente")
+@Table(name = "gerente")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class GerenteEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

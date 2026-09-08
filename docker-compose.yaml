@@ -62,9 +62,93 @@ services:
 
   front-end:
     build: ./frontend
-    ports: 
-      - 4200:4200
+    ports:
+      - "4200:4200"
+    networks:
+      - monsterbank-net
+
   api-gateway:
     build: ./backend/api-gateway
     ports:
-      - 8080:8080
+      - "8080:8080"
+    networks:
+      - monsterbank-net
+
+  ms-gerente:
+    build: ./backend/ms-gerente
+    ports:
+      - "8084:8084"
+    depends_on:
+      - db-gerente
+    networks:
+      - monsterbank-net
+
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - monsterbank-net
+  
+  db-auth:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ms-auth
+      - POSTGRES_USER=ms-auth
+      - POSTGRES_PASSWORD=psql
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-auth:/var/lib/postgresql/data
+    networks:
+      - monsterbank-net
+
+  db-conta:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ms-conta
+      - POSTGRES_USER=ms-conta
+      - POSTGRES_PASSWORD=psql
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata-conta:/var/lib/postgresql/data
+    networks:
+      - monsterbank-net
+
+  db-cliente:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ms-cliente
+      - POSTGRES_USER=ms-cliente
+      - POSTGRES_PASSWORD=psql
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata-cliente:/var/lib/postgresql/data
+    networks:
+      - monsterbank-net
+
+  db-gerente:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ms-gerente
+      - POSTGRES_USER=ms-gerente
+      - POSTGRES_PASSWORD=psql
+    ports:
+      - "5436:5432"
+    volumes:
+      - pgdata-gerente:/var/lib/postgresql/data
+    networks:
+      - monsterbank-net
+
+volumes:
+  pgdata-gerente:
+  pgdata-auth:
+  pgdata-cliente:
+  pgdata-conta:
+
+networks:
+  monsterbank-net:
+    driver: bridge
