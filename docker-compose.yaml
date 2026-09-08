@@ -1,4 +1,65 @@
 services:
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  postgres-cliente:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: cliente
+      POSTGRES_USER: monster
+      POSTGRES_PASSWORD: monster
+    ports:
+      - "5433:5432"
+  
+  postgres-conta:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: conta
+      POSTGRES_USER: monster
+      POSTGRES_PASSWORD: monster
+    ports:
+      - "5434:5432"
+
+  postgres-gerente:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: gerente
+      POSTGRES_USER: monster
+      POSTGRES_PASSWORD: monster
+    ports:
+      - "5435:5432"
+
+  ms-cliente:
+    build:
+      context: ./backend/ms-cliente
+      dockerfile: ms-cliente.dockerfile
+
+    depends_on:
+      - postgres-cliente
+      - rabbitmq
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-cliente:5432/cliente
+      SPRING_DATASOURCE_USERNAME: monster
+      SPRING_DATASOURCE_PASSWORD: monster
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+    ports:
+      - "8081:8080"
+
   front-end:
     build: ./frontend
     ports: 
