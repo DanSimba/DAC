@@ -43,7 +43,7 @@ public class ClienteController {
 
     }
 
-    @PostMapping
+    @PostMapping("/solicitacao/registrar")
     public ResponseEntity<Void> regitrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto){
         solicitacaoService.registrar(dto);
 

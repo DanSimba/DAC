@@ -17,7 +17,7 @@ export class ClientHttpService {
 
   // Faz a solicitação de criação do cliente ao API Gateway
   createClientRequest(clientRequest: CreateClient): Observable<void> {
-    return this.http.post<void>(`${this.API_URL}/api/solicitacoes`, clientRequest);
+    return this.http.post<void>(`${this.API_URL}/clientes`, clientRequest);
   }
 
 
