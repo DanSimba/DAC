@@ -28,14 +28,27 @@
                     Para: {{transfInstance()?.acc_destiny}}
                 </p>
             </div>
-            <p>
-                 Valor: {{transfInstance()?.value}}R$
-            </p>
+            @if(transfInstance()?.acc_origin == account().number){
+                <p class="text-red-700">
+                    Valor: {{transfInstance()?.value}}R$
+                </p>
+            } @else {
+                <p class="text-blue-700">
+                    Valor: {{transfInstance()?.value}}R$
+                </p>
+            }
             <p>
                  Data: {{transfInstance()?.datetime}}
             </p>
-         } @else{
+         } @else if(type() === 'dep'){
+            <p class="text-blue-700">
+                 Valor: {{operInstance()?.value}}R$
+            </p>
             <p>
+                 Data: {{operInstance()?.datetime}}
+            </p>
+         }@else{
+            <p class="text-red-700">
                  Valor: {{operInstance()?.value}}R$
             </p>
             <p>

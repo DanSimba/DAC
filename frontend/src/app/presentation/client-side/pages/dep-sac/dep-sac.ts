@@ -5,6 +5,8 @@ import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PopUp } from '../../../shared/components/pop-up/pop-up';
 import { ClientService } from '../../../../application/client/services/client-service';
+import { AccountService } from '../../../../application/account/services/account-service';
+import { Account } from '../../../../domain/account/models/account.model';
 
 @Component({
   selector: 'app-dep-sac',
@@ -15,7 +17,8 @@ import { ClientService } from '../../../../application/client/services/client-se
 export class DepSac {
   location = inject(Location);
 
-  clientService = inject(ClientService);
+  accountService = inject(AccountService);
+  account = signal<Account>(this.accountService.getAccount());
 
   side = signal<'dep'|'sac'|''>('');
   value = signal<number>(0);
@@ -31,13 +34,13 @@ export class DepSac {
     if(concreteSide!='' && concreteValue>0){
         const op: OperationModel = {
           type:'operation',
-          acc_number: this.clientService.getAccount().number,
+          acc_number: this.accountService.getAccount().number,
           side:concreteSide,
           value: concreteValue,
-          datetime: this.clientService.getCurrentTimeFormated()
+          datetime: this.accountService.getCurrentTimeFormated()
         }
 
-        this.clientService.operar(op).subscribe({
+        this.accountService.operar(op).subscribe({
           //VALUE É A CONTA COM O SALDO ATUALIZADO
           next: (value) => {
             //JÁ SETA A CONTA COM O RETORNO LÁ NO SERVICE

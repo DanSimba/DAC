@@ -6,6 +6,8 @@ import { ExtCard } from '../../components/ext-card/ext-card';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
+import { ExtratoService } from '../../../../application/extrato/services/extrato-service';
+import { AccountService } from '../../../../application/account/services/account-service';
 
 @Component({
   selector: 'app-extrato',
@@ -15,26 +17,40 @@ import { Account } from '../../../../domain/account/models/account.model';
 })
 export class Extrato implements OnInit{
   location = inject(Location);
+
+  accountService = inject(AccountService);
+  account = signal<Account>(this.accountService.getAccount());
+
   clientService = inject(ClientService);
+  extratoService = inject(ExtratoService);
+
   client = signal<Client>(this.clientService.getClient());
-  account = signal<Account>(this.clientService.getAccount());
+
+  date = signal<number>(0);
+  minDate = signal<string>('');
 
   //MOCK lista com tds os extratos
-  extList = signal<ExtratoModel[]> (this.clientService.getExtList());
+  extList = computed(():ExtratoModel[]=>{
+    return this.extratoService.getExtList();
+  })
 
   //filtra o extrato pela data
   filteredList= computed(()=>{
-    return this.extList().filter((ext)=> ext.id<=this.date())
+    return this.extList().filter((ext)=> ext.id<=this.date()).reverse();
   })
 
-  date = signal<number>(20260831)
-
   ngOnInit(): void {
+    //POPULA A LISTA DE EXTRATO COM O MES
+    this.extratoService.createMonthExt(this.account().balance);
     const now = new Date();
     //ganbiarra pra tranformar Date no formato que o input aceita
     const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-    //console.log("now: ", nowString)
 
+    //MINIMO DE TEMPO
+    const minString = `${now.getFullYear()-1}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    //console.log("now: ", nowString)
+    //console.log("MIN: ", minString)
+    this.minDate.set(minString);
     this.setDate(nowString);
   }
 
@@ -51,7 +67,7 @@ export class Extrato implements OnInit{
   //FAZ LITERALMENTE O CONTRARIO DA FUNÇÃO DE CIMA 
   formatDateId(d:number):string{
     const dString = d.toString();
-    console.log('DSTRING: ', dString)
+    //console.log('DSTRING: ', dString)
     const formatedDate = `${dString.slice(6,8)}/${dString.slice(4,6)}/${dString.slice(0,4)}`
     return formatedDate;
   }
