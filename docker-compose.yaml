@@ -7,3 +7,12 @@ services:
     build: ./backend/api-gateway
     ports:
       - 8080:8080
+    env_file:
+      - ./backend/api-gateway/.env
+    depends_on:
+      - ms-cliente
+    
+  ms-cliente:
+    build: ./backend/ms-cliente
+    ports: 
+    - 8081:8081

@@ -23,7 +23,7 @@
         <input 
           type="text" 
           name="nome" 
-          [(ngModel)]="client.name" 
+          [(ngModel)]="client.nome" 
           class="w-full border border-gray-400 rounded p-2"
           placeholder="Ex: João Banana Coitadinho da Silva"
         />
@@ -61,7 +61,7 @@
         <input 
           type="text" 
           name="telefone" 
-          [(ngModel)]="client.phone"
+          [(ngModel)]="client.telefone"
           (keydown)="bloquearNaoNumeros($event)"
           (input)="formatarTelefone()"
           maxlength="15"
@@ -105,7 +105,7 @@
         <input 
           type="text" 
           name="logradouro" 
-          [(ngModel)]="address.street"
+          [(ngModel)]="address.logradouro"
           [readonly]="ruaBloqueada"
           [class.bg-gray-300]="ruaBloqueada"
           [class.cursor-not-allowed]="ruaBloqueada" 
@@ -119,7 +119,7 @@
         <input 
           type="text" 
           name="numero" 
-          [(ngModel)]="address.number" 
+          [(ngModel)]="address.numero" 
           class="w-full border border-gray-400 rounded p-2"
           placeholder="123"
         />
@@ -132,7 +132,7 @@
         <input 
           type="text" 
           name="complemento" 
-          [(ngModel)]="address.complement" 
+          [(ngModel)]="address.complemento" 
           class="w-full border border-gray-400 rounded p-2"
           placeholder="Apto 101"
         />
@@ -143,7 +143,7 @@
         <input 
           type="text"
           name="bairro"
-          [(ngModel)]="address.neighborhood"
+          [(ngModel)]="address.bairro"
           readonly
           class="w-full border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
           placeholder="Jardim das Américas"
@@ -156,7 +156,7 @@
           <input 
             type="text" 
             name="cidade" 
-            [(ngModel)]="address.city" 
+            [(ngModel)]="address.cidade" 
             readonly
             class="w-3/4 border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
             placeholder="Curitiba"
