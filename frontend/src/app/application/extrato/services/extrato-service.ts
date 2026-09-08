@@ -72,7 +72,6 @@ export class ExtratoService {
   }
 
   createDateId(d:string):number{ //d = 'aaaa-mm-dd'
-
     //pega a string e tira os traços
     const dateInt = d.split("-");
     //console.log('dateInt: ', dateInt);

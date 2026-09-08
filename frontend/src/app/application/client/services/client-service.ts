@@ -2,15 +2,9 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Client } from '../../../domain/client/models/client.model';
 import { ClientStatus } from '../../../enumeration/client-status';
 import { UserType } from '../../../enumeration/user-type';
-import { Account } from '../../../domain/account/models/account.model';
-import { ManagerStatus } from '../../../enumeration/manager-status';
-import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { ClientHttpService } from '../../../infraestructure/http/client.http.service';
-import { Observable, tap } from 'rxjs';
-import { TransferenceModel } from '../../../domain/operations/models/transference.model';
-import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
-import { CreateClient } from '../../../domain/client/models/create-client.model';
 import { ExtratoService } from '../../extrato/services/extrato-service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -59,5 +53,9 @@ export class ClientService {
 
   getIMO(): boolean{
     return this.isMenuOpen()
+  }
+
+  createClientRequest(payload: any): Observable<void>{
+    return this.clientHttpService.createClientRequest(payload);
   }
 }
