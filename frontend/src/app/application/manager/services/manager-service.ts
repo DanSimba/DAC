@@ -44,7 +44,7 @@ export class ManagerService {
     return this.managerHttpService.atualizarGerente(id, gerente).pipe(
       tap({
         next: (atual) => this.managers.update((lista)=>
-        lista.map((m)=>(m.id = id ? atual: m))),
+        lista.map((m)=>(m.id === id ? atual: m))),
         error: (err) => console.log('alguém não foi atualizado', err),
       })
     )

@@ -2,14 +2,14 @@
 
     <div class="flex flex-row w-full px-8 gap-x-6 justify-start items-center">
         <div class="flex flex-row w-[12vw] h-[6vh] justify-evenly items-center bg-rosa scale-105 text-white text-3xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_var(--color-azure)] cursor-pointer rounded-lg transition-all duration-130"
-        (click)="location.back()">
+        (click)="local.back()">
                <mat-icon>arrow_backward</mat-icon> Voltar
         </div>
 
         <h1 class="text-7xl text-white font-monster">GERENTES</h1>
 
         <div class="flex flex-row w-fit h-[6vh] px-4 justify-evenly items-center gap-x-2 bg-azure scale-105 text-white text-2xl font-display font-title hover:scale-110 hover:shadow-[4px_4px_0px_var(--color-rosa)] cursor-pointer rounded-lg transition-all duration-130"
-        (click)="abrirCriacao()">
+        (click)="abrirVazio()">
                <mat-icon>add</mat-icon> Novo Gerente
         </div>
     </div>
@@ -21,11 +21,11 @@
                 <div class="flex flex-col">
                     <span>{{manager.nome}}</span>
                     <span class="text-base font-display">CPF: {{manager.cpf}} · {{manager.email}}</span>
-                    <span class="text-base font-display">{{manager.status === ManagerStatus.ACTIVE ? 'Ativo' : 'Inativo'}}</span>
+                    <span class="text-base font-display">Tel: {{manager.telefone}}</span>
                 </div>
 
                 <div class="flex flex-row gap-x-3">
-                    <mat-icon class="cursor-pointer hover:scale-110 transition-all duration-130" (click)="abrirEdicao(manager)">edit</mat-icon>
+                    <mat-icon class="cursor-pointer hover:scale-110 transition-all duration-130" (click)="editarForm(manager)">edit</mat-icon>
                     <mat-icon class="cursor-pointer hover:scale-110 transition-all duration-130" (click)="remover(manager)">delete</mat-icon>
                 </div>
             </div>
@@ -40,7 +40,7 @@
             <form class="flex flex-col w-[30vw] p-8 gap-y-4 bg-marinho border-5 border-solid border-azure rounded-2xl text-white font-title"
             (ngSubmit)="salvar()">
 
-                <h2 class="text-4xl font-monster mb-2">{{editandoId() ? 'Editar Gerente' : 'Novo Gerente'}}</h2>
+                <h2 class="text-4xl font-monster mb-2">{{editandoID() ? 'Editar Gerente' : 'Novo Gerente'}}</h2>
 
                 <label class="text-lg font-display">Nome *</label>
                 <input type="text" name="nome" [(ngModel)]="form.nome"
@@ -54,16 +54,9 @@
                 <input type="email" name="email" [(ngModel)]="form.email"
                 class="w-full p-2 rounded-lg text-black font-display focus:outline-none" placeholder="gerente@bantads.com" />
 
-                <label class="text-lg font-display">Senha {{editandoId() ? '(deixe em branco p/ manter)' : '*'}}</label>
-                <input type="password" name="senha" [(ngModel)]="form.senha"
-                class="w-full p-2 rounded-lg text-black font-display focus:outline-none" placeholder="Senha" />
-
-                <label class="text-lg font-display">Status</label>
-                <select name="status" [(ngModel)]="form.status"
-                class="w-full p-2 rounded-lg text-black font-display focus:outline-none">
-                    <option [ngValue]="ManagerStatus.ACTIVE">Ativo</option>
-                    <option [ngValue]="ManagerStatus.INACTIVE">Inativo</option>
-                </select>
+                <label class="text-lg font-display">Telefone</label>
+                <input type="text" name="telefone" [(ngModel)]="form.telefone"
+                class="w-full p-2 rounded-lg text-black font-display focus:outline-none" placeholder="(99) 99999-9999" />
 
                 <div class="flex flex-row w-full gap-x-4 mt-4">
                     <button type="button" (click)="fecharForm()"
