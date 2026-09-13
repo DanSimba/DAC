@@ -1,6 +1,7 @@
 package com.monsterbank.ms_cliente.solicitacao;
 
 
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.Endereco;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -109,6 +110,19 @@ public class SolicitacaoEntity {
         this.status = StatusSolicitacao.PENDENTE;
         this.motivo = null;
         this.dataProcessamento = LocalDateTime.now();
+    }
+
+    public Endereco getEndereco(){
+        Endereco endereco = new Endereco(
+                this.cep,
+                this.logradouro,
+                this.numero,
+                this.complemento,
+                this.bairro,
+                this.cidade,
+                this.uf
+        );
+        return endereco;
     }
 
 
