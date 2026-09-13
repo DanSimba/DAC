@@ -26,11 +26,11 @@ services:
     networks:
       - monsterbank-net
 
-  db-conta:
+  db-account:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=ms-conta
-      - POSTGRES_USER=ms-conta
+      - POSTGRES_DB=ms-account
+      - POSTGRES_USER=ms-account
       - POSTGRES_PASSWORD=psql
     ports:
       - "5434:5432"
