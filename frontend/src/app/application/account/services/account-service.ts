@@ -15,24 +15,13 @@ import { OperationModel } from '../../../domain/operations/models/operation.mode
 })
 export class AccountService {
   private extratoService = inject(ExtratoService);
-  private clientService = inject(ClientService);
   private accountHttpService = inject(AccountHttpService)
 
-  client = signal<Client>(this.clientService.getClient());
-
   private account = signal<Account>({
-      client   : this.client(),
+      client_id: 1,
       number   : '001',
       balance  : 1000,
-      manager  : {
-            id       : 2,
-            name     : 'dievalson oracle pereira',
-            cpf      : 'dievalson oracle pereira',
-            email    : 'dievalson oracle pereira',
-            password : 'dievalson oracle pereira',
-            status   : ManagerStatus.ACTIVE,
-            type     : UserType.MANAGER
-      },
+      manager_id  : 2,
       createdAt : '10/10/2012',
   })
 

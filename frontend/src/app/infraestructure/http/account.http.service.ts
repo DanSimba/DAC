@@ -4,13 +4,14 @@ import { Observable } from 'rxjs';
 import { Account } from '../../domain/account/models/account.model';
 import { TransferenceModel } from '../../domain/operations/models/transference.model';
 import { HttpClient } from '@angular/common/http';
+import { environmentDev } from '../../../enviroments/enviroment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AccountHttpService {
   http = inject(HttpClient);
-  //private readonly API_URL = environment.apiUrl;
+  private readonly API_URL = `${environmentDev.apiUrlAccount}/account`;
 
 
   //FAZ A OPERAÇÃO CERTA E AI RETORNA A CONTA COM O VALOR ATUALIZADO

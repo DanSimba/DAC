@@ -1,10 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { OperationModel } from '../../domain/operations/models/operation.model';
-import { Account } from '../../domain/account/models/account.model';
-import { Transference } from '../../presentation/client-side/pages/transference/transference';
-import { TransferenceModel } from '../../domain/operations/models/transference.model';
+import { environmentDev } from '../../../enviroments/enviroment.development';
 import { CreateClient } from '../../domain/client/models/create-client.model';
 
 @Injectable({
@@ -13,7 +10,7 @@ import { CreateClient } from '../../domain/client/models/create-client.model';
 export class ClientHttpService {
   http = inject(HttpClient);
   //private readonly API_URL = environment.apiUrl;
-  private readonly API_URL = 'http://localhost:8080'; // URL exposta somente para teste
+  private readonly API_URL = `${environmentDev.apiUrlCliente}/clientes`; // URL exposta somente para teste
 
   // Faz a solicitação de criação do cliente ao API Gateway
   createClientRequest(clientRequest: CreateClient): Observable<void> {

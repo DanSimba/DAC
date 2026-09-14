@@ -46,7 +46,6 @@ public class ClienteController {
     @PostMapping("/solicitacao/registrar")
     public ResponseEntity<Void> regitrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto){
         solicitacaoService.registrar(dto);
-
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -60,8 +59,6 @@ public class ClienteController {
     public ResponseEntity<List<listarSolicitacoesReturn>> getSolicitacaos(@RequestParam(defaultValue = "0") int page){
         return ResponseEntity.ok(solicitacaoService.listarSolicitacoes(page));
     }
-
-
 
 
 }
