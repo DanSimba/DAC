@@ -37,7 +37,7 @@ public class GerenteController {
 
     @GetMapping
     public ResponseEntity<List<GerenteDTO>> listar(){
-        rabbitMQProducer.sendMessage("Mensagem caindo na fila do rabbit");
+        //rabbitMQProducer.sendMessage("Mensagem caindo na fila do rabbit");
         return ResponseEntity.ok(gerenteService.listar());
     };
 

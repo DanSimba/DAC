@@ -1,4 +1,4 @@
-package com.monsterbank.ms_gerente.config;
+package com.monsterbank.ms_auth.config;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +9,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue queue(){
-        return new Queue("ms.gerente.cmd");
+        return new Queue("ms.auth.cmd");
     }
 
 }
