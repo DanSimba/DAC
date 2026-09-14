@@ -44,5 +44,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
     }
 
+    @ExceptionHandler(ErroCriacaoClienteException.class)
+    public ResponseEntity<ErrorResponse> handleErroCriacaoClienteException(ErroCriacaoClienteException e){
+        ErrorResponse erro = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
+    }
+
+    @ExceptionHandler(SolicitacaoNaoPendenteException.class)
+    public ResponseEntity<ErrorResponse> handleSolicitacaoNaoPendenteException(SolicitacaoNaoPendenteException e){
+        ErrorResponse erro = new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+    }
+
+    @ExceptionHandler(ClienteNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleClienteNaoEncontradoException(ClienteNaoEncontradoException e){
+        ErrorResponse erro = new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+    }
+
+
+
+
+
 
 }

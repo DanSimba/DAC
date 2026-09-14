@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Viacep } from '../../../../application/client/services/viacep';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -18,45 +18,41 @@ import Decimal from 'decimal.js'
 })
 export class Autocadastro {
 
-  // comentado para utilização da model createClient
-  // public nome: string = '';
-  // public cpf: string = '';
-  // public email: string = '';
-  // public telefone: string = '';
   public salarioExibicao: string = '';
-  //public salarioNumerico: Decimal | null = null;
   public ruaBloqueada: boolean = false;
   
   public address : Address = {
     cep: '',
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
     uf: '',
     state: ''
   };
 
     public client: CreateClient = {
-    name: '',
-    cpf: '',
-    phone: '',
+    nome: '',
     email: '',
-    salary: new Decimal(0),
-    address: this.address
+    cpf: '',
+    telefone: '',
+    salario: new Decimal(0),
+    endereco: this.address
   };
 
   public mensagemSucesso: string = '';
   public mensagemErro: string = '';
-  public clientService: any;
 
-  constructor(private viaCepService : Viacep) {}
+  constructor(private viaCepService : Viacep,
+              private clientService : ClientService,
+              private changeDetector: ChangeDetectorRef
+  ) {}
 
   // Bloqueia caracteres não numéricos nos campos de CPF, telefone e salário.
   public bloquearNaoNumeros(event: KeyboardEvent): void {
     const tecla = event.key;
-    const permitido = /\d/.test(tecla) || tecla === 'Backspace' || tecla === 'Delete' || tecla === 'ArrowLeft' || tecla === 'ArrowRight';
+    const permitido = /\d/.test(tecla) || tecla === 'Backspace' || tecla === 'Delete' || tecla === 'ArrowLeft' || tecla === 'ArrowRight' || tecla === 'Tab' || tecla === 'Shift';
 
     if (!permitido) {
       event.preventDefault();
@@ -81,7 +77,7 @@ export class Autocadastro {
 
   // Formata o telefone com DDD e traço
   public formatarTelefone(): void {
-    let telefoneNumeros = this.client.phone.replace(/\D/g, '');
+    let telefoneNumeros = this.client.telefone.replace(/\D/g, '');
 
     if (telefoneNumeros.length > 11) {
       telefoneNumeros = telefoneNumeros.slice(0, 11);
@@ -90,7 +86,7 @@ export class Autocadastro {
     telefoneNumeros = telefoneNumeros.replace(/(\d{2})(\d)/, '($1) $2');
     telefoneNumeros = telefoneNumeros.replace(/(\d{5})(\d)/, '$1-$2');
 
-    this.client.phone = telefoneNumeros;
+    this.client.telefone = telefoneNumeros;
   }
 
   // Formata o salário para exibição e mantém o valor numérico para envio
@@ -99,43 +95,67 @@ export class Autocadastro {
 
     if (!salarioNumeros) {
       this.salarioExibicao = '';
-      //this.salarioNumerico = null;
-      this.client.salary = new Decimal(0);
+      this.client.salario = new Decimal(0);
       return;
     }
 
-    this.client.salary = new Decimal(salarioNumeros).div(100); // alterado para decimal de acordo com enunciado do trabalho
-    this.salarioExibicao = this.client.salary.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    this.client.salario = new Decimal(salarioNumeros).div(100); // alterado para decimal de acordo com enunciado do trabalho
+    this.salarioExibicao = this.client.salario.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
   public onSubmit(): void {
-    if (!this.client.name || !this.client.cpf || !this.client.email) {
+    if (!this.client.nome || !this.client.cpf || !this.client.email) {
       this.mensagemErro = 'Por favor, preencha os campos obrigatórios (*).';
       this.mensagemSucesso = '';
       return;
     }
 
-    if (this.client.salary.comparedTo(0) <= 0) {
+    if (this.client.salario.comparedTo(0) <= 0) {
       this.mensagemErro = 'O salário deve ser um valor positivo.';
       this.mensagemSucesso = '';
       return;
     }
 
     this.mensagemErro = '';
-    this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.';
+    this.mensagemSucesso = '';
+
+    const payload = {
+      ...this.client,
+      cpf: this.client.cpf.replace(/\D/g, ''),
+      salario: this.client.salario.toFixed(2)
+    };
 
     // Envia o cliente para o service
-    this.clientService.createClientRequest(this.client).subscribe({
+    this.clientService.createClientRequest(payload as any).subscribe({
       next: () => {
         this.mensagemErro = '';
         this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.'
+        this.changeDetector.detectChanges();
       },
-      error: () => {
-        this.mensagemErro = 'Não foi possível realizar a solicitação de cadastro.';
-        this.mensagemSucesso = ''
+      error: (error: HttpErrorResponse) => {
+        this.mensagemSucesso = '';
+
+        let errorObject = error.error;
+        if (typeof errorObject === 'string') {
+          try {
+            errorObject = JSON.parse(errorObject);
+          } catch (e) {}
+        }
+        
+        if (errorObject && errorObject.mensagem) {
+          this.mensagemErro = errorObject.mensagem;
+        } else if (error.status === 400) {
+          this.mensagemErro = 'Dados inválidos enviados na requisição.';
+        } else if (error.status === 409) {
+          this.mensagemErro = 'CPF ou e-mail já possui cadastro ou solicitação.';
+        } else if (error.status === 500) {
+          this.mensagemErro = 'O servidor está temporariamente indisponível.';
+        } else {
+          this.mensagemErro = 'Não foi possível realizar a solicitação.';
+        }
+        this.changeDetector.detectChanges();
       }
     });
-    
   }
 
   // Valida CEP antes da consulta na API ViaCEP
@@ -171,10 +191,10 @@ export class Autocadastro {
         } else {
           this.mensagemErro = '';
           this.address.cep = result.cep;
-          this.address.street = result.logradouro;
+          this.address.logradouro = result.logradouro;
           this.ruaBloqueada = result.logradouro !== '';
-          this.address.city = result.localidade;
-          this.address.neighborhood = result.bairro;
+          this.address.cidade = result.localidade;
+          this.address.bairro = result.bairro;
           this.address.uf = result.uf;
           this.address.state = result.estado;
         }
@@ -197,9 +217,9 @@ export class Autocadastro {
   }
 
   clearAddressFromCep(): void {
-    this.address.street = '';
-    this.address.neighborhood = '';
-    this.address.city = '';
+    this.address.logradouro = '';
+    this.address.bairro = '';
+    this.address.cidade = '';
     this.address.uf = '';
     this.address.state = '';
     this.ruaBloqueada = false;

@@ -17,18 +17,6 @@ export class ClientHttpService {
 
   // Faz a solicitação de criação do cliente ao API Gateway
   createClientRequest(clientRequest: CreateClient): Observable<void> {
-    return this.http.post<void>(`${this.API_URL}/api/solicitacoes`, clientRequest);
-  }
-
-
-  //FAZ A OPERAÇÃO CERTA E AI RETORNA A CONTA COM O VALOR ATUALIZADO
-  operar(op: OperationModel): Observable<Account>{
-    return this.http.post<Account>('URL DESSA BOSTA', op);
-  }
-
-  //RETORNA A ACCOUNT COM O SALDO ATUALIZADO
-  //SE NÃO ENCONTRAR O DESTINATÁRIO, DEVE RETORNAR ERROR 
-  transferir(t: TransferenceModel): Observable<Account>{
-    return this.http.post<Account>('URL DESSA BOSTA', t);
+    return this.http.post<void>(`${this.API_URL}/clientes`, clientRequest);
   }
 }

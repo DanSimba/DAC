@@ -4,6 +4,7 @@ import { Account } from '../../../../domain/account/models/account.model';
 import { MatIconModule } from '@angular/material/icon';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { RouterLink } from "@angular/router";
+import { AccountService } from '../../../../application/account/services/account-service';
 
 @Component({
   selector: 'app-client-home-page',
@@ -15,5 +16,6 @@ export class ClientHomePage {
   clientService = inject(ClientService)
 
   client = signal<Client>(this.clientService.getClient());
-  account = signal<Account>(this.clientService.getAccount());
+  accountService = inject(AccountService);
+  account = signal<Account>(this.accountService.getAccount());
 }

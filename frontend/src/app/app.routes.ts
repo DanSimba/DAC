@@ -1,10 +1,8 @@
 import { Routes } from '@angular/router';
 import { HomePage } from './presentation/shared/pages/home-page/home-page';
 import { ClientSidePage } from './presentation/client-side/pages/client-side-page/client-side-page';
-import { Autocadastro } from './presentation/shared/pages/autocadastro/autocadastro';
 import { ManagerSidePage } from './presentation/manager-side/pages/manager-side-page/manager-side-page';
 import { clientAuthGuard } from './domain/client/guards/client-auth-guard';
-import { Login } from './presentation/shared/pages/login/login';
 
 export const routes: Routes = [
     {//home deslogado
@@ -36,6 +34,10 @@ export const routes: Routes = [
                 path:'transferir',
                 loadComponent: () => import('../app/presentation/client-side/pages/transference/transference').then(m => m.Transference)
             },
+            {
+                path:'extrato',
+                loadComponent: () => import('../app/presentation/client-side/pages/extrato/extrato').then(m => m.Extrato)
+            },
         ]
     },
     { //telas do lado gerente
@@ -63,10 +65,10 @@ export const routes: Routes = [
     },
     { // Teste do ViaCEP
         path: 'autocadastro',
-        component: Autocadastro
+        loadComponent: () => import('./presentation/shared/pages/autocadastro/autocadastro').then(m => m.Autocadastro)
      },
-     { // tela de login
+     { // Tela de login
         path: 'login',
-        component: Login
+        loadComponent: () => import('./presentation/shared/pages/login/login').then(m => m.Login)
      }
 ];

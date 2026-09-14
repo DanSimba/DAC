@@ -5,6 +5,8 @@ import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PopUp } from '../../../shared/components/pop-up/pop-up';
 import { ClientService } from '../../../../application/client/services/client-service';
+import { AccountService } from '../../../../application/account/services/account-service';
+import { Account } from '../../../../domain/account/models/account.model';
 
 @Component({
   selector: 'app-dep-sac',
@@ -15,12 +17,13 @@ import { ClientService } from '../../../../application/client/services/client-se
 export class DepSac {
   location = inject(Location);
 
-  clientService = inject(ClientService);
+  accountService = inject(AccountService);
+  account = signal<Account>(this.accountService.getAccount());
 
-  side = signal<string>('');
+  side = signal<'dep'|'sac'|''>('');
   value = signal<number>(0);
 
-  setSide(s: string){
+  setSide(s: 'dep'|'sac'|''){
     this.side.set(s);
   }
 
@@ -30,12 +33,14 @@ export class DepSac {
 
     if(concreteSide!='' && concreteValue>0){
         const op: OperationModel = {
-          acc_number: this.clientService.getAccount().number,
+          type:'operation',
+          acc_number: this.accountService.getAccount().number,
           side:concreteSide,
-          value: concreteValue
+          value: concreteValue,
+          datetime: this.accountService.getCurrentTimeFormated()
         }
 
-        this.clientService.operar(op).subscribe({
+        this.accountService.operar(op).subscribe({
           //VALUE É A CONTA COM O SALDO ATUALIZADO
           next: (value) => {
             //JÁ SETA A CONTA COM O RETORNO LÁ NO SERVICE

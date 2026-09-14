@@ -67,7 +67,7 @@
         <div class="has-[:hover]:bg-linear-to-t from-rosa/60 to-[black/50] to-80% flex flex-row w-full h-[24vh] justify-center items-center pb-6 px-12 transition-all duration-130">
             
             <!--ENVIAR-->
-            <div class="group flex flex-row w-[16vw] hover:scale-110 h-[8vh] justify-evenly px-3 items-center bg-rosa rounded-lg text-white text-3xl font-title font-display transition-all duration-130 cursor-pointer"
+            <div class="group {{sent()?'hidden': 'flex'}} flex-row w-[16vw] h-[8vh] justify-evenly px-3 items-center {{isComplete()? 'bg-rosa cursor-pointer hover:scale-110': 'bg-gray-500 scale-90 cursor-not-allowed'}} rounded-lg text-white text-3xl font-title font-display transition-all duration-130"
             (click)="send()">
                 Transferir <mat-icon>arrow_forward</mat-icon>
             </div>

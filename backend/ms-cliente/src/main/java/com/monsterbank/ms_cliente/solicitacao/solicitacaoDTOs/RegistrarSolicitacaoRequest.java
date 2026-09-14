@@ -7,10 +7,4 @@ public record RegistrarSolicitacaoRequest(
         String telefone,
         String salario,
         Endereco endereco
-        // String logradouro,
-        // Integer numero,
-        // String complemento,
-        // String cep,
-        // String cidade,
-        // String uf
 ) {}

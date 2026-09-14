@@ -1,5 +1,7 @@
 package com.monsterbank.ms_cliente.exception;
 
 public class SolicitacaoNaoPendenteException extends RuntimeException{
-    super("A solicitação não está pendente!");
+    public SolicitacaoNaoPendenteException (){
+        super("A solicitação não está pendente!");
+    }
 }
