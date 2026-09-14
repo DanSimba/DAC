@@ -1,10 +1,7 @@
-import { Client } from "../../client/models/client.model";
-import { Manager } from "../../manager/models/manager.model";
-
 export interface Account {
-    client   : Client;
+    client_id   : number;
     number   : string;
     balance  : number;
-    manager  : Manager;
+    manager_id  : number;
     createdAt : string;
 }
