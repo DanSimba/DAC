@@ -6,5 +6,6 @@ export interface Address {
     bairro       : string;
     cidade       : string;
     uf           : string;
-    state        : string;
+    state        : string; // estado por extenso
+    
 }
