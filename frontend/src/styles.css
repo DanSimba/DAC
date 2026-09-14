@@ -13,8 +13,6 @@
   font-family: "Elms Sans", sans-serif; 
 }
 
-
-
 :root{
     --marinho: #1d1d36;
     --rosa: #e50d81;
@@ -56,5 +54,4 @@
     --font-weight-title: 700; /*títulos grandes (Montserrat em cinza)*/
     --font-weight-cont: 500; /*textos, subtítulos (nunito sans)*/
     --font-weight-bold: 800;
-
 }
