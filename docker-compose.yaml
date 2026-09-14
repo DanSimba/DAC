@@ -87,6 +87,28 @@ services:
     ports:
       - "8081:8080"
 
+  ms-account:
+    build:
+      context: ./backend/ms-account
+      dockerfile: ms-account.dockerfile
+
+    depends_on:
+      - db-account
+      - rabbitmq
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/account
+      SPRING_DATASOURCE_USERNAME: ms-account
+      SPRING_DATASOURCE_PASSWORD: psql
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+    ports:
+      - "8082:8080"
+
   front-end:
     build: ./frontend
     ports:

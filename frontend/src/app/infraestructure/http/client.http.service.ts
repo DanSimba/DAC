@@ -10,7 +10,7 @@ import { CreateClient } from '../../domain/client/models/create-client.model';
 export class ClientHttpService {
   http = inject(HttpClient);
   //private readonly API_URL = environment.apiUrl;
-  private readonly API_URL = environmentDev.apiUrl; // URL exposta somente para teste
+  private readonly API_URL = `${environmentDev.apiUrlCliente}/clientes`; // URL exposta somente para teste
 
   // Faz a solicitação de criação do cliente ao API Gateway
   createClientRequest(clientRequest: CreateClient): Observable<void> {
