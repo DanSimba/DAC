@@ -18,7 +18,7 @@ export class AccountService {
   private accountHttpService = inject(AccountHttpService)
 
   private account = signal<Account>({
-      client_id: 1,
+      client_cpf: '00011122233',
       number   : '001',
       balance  : 1000,
       manager_id  : 2,

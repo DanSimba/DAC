@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @Table(name = "clientes", uniqueConstraints = {@UniqueConstraint(name = "uk_solicitacao_email", columnNames = "email")})
 public class ClienteEntity {
 
-
     @Id
     @Column(length = 11, nullable = false)
     String cpf;

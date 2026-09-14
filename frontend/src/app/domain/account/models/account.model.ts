@@ -1,5 +1,5 @@
 export interface Account {
-    client_id   : number;
+    client_cpf   : string;
     number   : string;
     balance  : number;
     manager_id  : number;
