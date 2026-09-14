@@ -1,9 +1,12 @@
 services:
 
+  #=====INFRAESTUTURA=====#
   redis:
     image: redis:7
     ports:
       - "6379:6379"
+    networks:
+      - monsterbank-net
 
   rabbitmq:
     image: rabbitmq:3.7.8-management
@@ -13,6 +16,7 @@ services:
     networks:
       - monsterbank-net
 
+  #=====BANCO DE DADOS=====#
   db-auth:
     image: postgres:15-alpine
     environment:
@@ -62,6 +66,14 @@ services:
       - "5436:5432"
     volumes:
       - pgdata-gerente:/var/lib/postgresql/data
+    networks:
+      - monsterbank-net
+
+  #=====SERVIÇOS=====#
+  api-gateway:
+    build: ./backend/api-gateway
+    ports:
+      - "8080:8080"
     networks:
       - monsterbank-net
 
@@ -131,6 +143,17 @@ services:
       - db-gerente
     networks:
       - monsterbank-net
+
+  #=====FRONT END=====#
+
+  front-end:
+    build: ./frontend
+    ports:
+      - "4200:4200"
+    networks:
+      - monsterbank-net
+
+#=====INFRA DOCKER=====#
 
 volumes:
   pgdata-gerente:

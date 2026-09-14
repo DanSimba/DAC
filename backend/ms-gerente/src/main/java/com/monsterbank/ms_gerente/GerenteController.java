@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.monsterbank.ms_gerente.aprovacao.AprovacaoService;
 import com.monsterbank.ms_gerente.gerente.GerenteDTO;
 import com.monsterbank.ms_gerente.gerente.GerenteService;
+import com.monsterbank.ms_gerente.mensageria.publisher.RabbitMQProducer;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,15 +26,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class GerenteController {
 
     private final GerenteService gerenteService;
-    private final  AprovacaoService aprovacaoService;
+    private final AprovacaoService aprovacaoService;
+    private final RabbitMQProducer rabbitMQProducer;
 
-    GerenteController(GerenteService gerenteService, AprovacaoService aprovacaoService) {
+    GerenteController(GerenteService gerenteService, AprovacaoService aprovacaoService, RabbitMQProducer rabbitMQProducer) {
         this.gerenteService = gerenteService;
         this.aprovacaoService = aprovacaoService;
+        this.rabbitMQProducer = rabbitMQProducer;
     }
 
     @GetMapping
     public ResponseEntity<List<GerenteDTO>> listar(){
+        rabbitMQProducer.sendMessage("Mensagem caindo na fila do rabbit");
         return ResponseEntity.ok(gerenteService.listar());
     };
 

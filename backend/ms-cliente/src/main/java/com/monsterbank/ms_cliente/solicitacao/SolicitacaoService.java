@@ -1,6 +1,7 @@
 package com.monsterbank.ms_cliente.solicitacao;
 
 import com.monsterbank.ms_cliente.exception.*;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +13,10 @@ import com.monsterbank.ms_cliente.exception.SalarioInvalidoException;
 import com.monsterbank.ms_cliente.exception.CpfUtilizadoException;
 import com.monsterbank.ms_cliente.exception.EmailSolicitadoException;
 import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
-import com.monsterbank.ms_cliente.exception.SolicitacaoNaoPendenteException;
 
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SolicitacaoService {
@@ -63,7 +62,7 @@ public class SolicitacaoService {
     }
 
 
-    public void aprovar(String cpf) {
+    public SolicitacaoSagaDTO aprovar(String cpf) {
         if(!CpfUtils.validar(cpf)){
             throw new CpfInvalidoException();
         }
@@ -76,6 +75,15 @@ public class SolicitacaoService {
 
         solicitacao.aprovar();
         solicitacaoRepository.save(solicitacao);
+
+        return new SolicitacaoSagaDTO(
+                solicitacao.getNome(),
+                solicitacao.getEmail(),
+                solicitacao.getCpf(),
+                solicitacao.getTelefone(),
+                solicitacao.getSalario().toString(), // tomar cuidado com excep
+                solicitacao.getEndereco()
+        );
     }
 
     public void rejeitar(String cpf, String motivo) {
@@ -112,8 +120,7 @@ public class SolicitacaoService {
     }
 
     public SolicitacaoEntity getSolicitacaoByCpf(String cpf){
-        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
-        return solicitacao;
+        return solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
     }
 
 

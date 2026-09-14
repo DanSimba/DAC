@@ -1,7 +1,9 @@
 package com.monsterbank.ms_cliente.cliente;
 
 
+import com.monsterbank.ms_cliente.exception.ClienteNaoEncontradoException;
 import com.monsterbank.ms_cliente.exception.ErroCriacaoClienteException;
+import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoEntity;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,7 @@ public class ClienteService {
 
 
 
-    private void criarCliente(String cpf){
+    public void criarCliente(String cpf){
 
         SolicitacaoEntity solicitacao = solicitacaoService.getSolicitacaoByCpf(cpf);
 
@@ -74,6 +76,13 @@ public class ClienteService {
             throw new RuntimeException("Erro ao criar cliente", e);
         }
     }
+
+    public void removerCliente(String cpf){
+        ClienteEntity cliente = clienteRepository.findByCpf(cpf).orElseThrow(() -> new ClienteNaoEncontradoException());
+
+        clienteRepository.delete(cliente);
+    }
+
 
     private String getSalario(String cpf){
         //consulta conta
