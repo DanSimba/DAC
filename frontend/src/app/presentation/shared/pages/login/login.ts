@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -14,8 +14,6 @@ import { AuthResponse } from '../../../../domain/auth/models/auth-response.model
 })
 
 export class Login {
-  private authService = inject(AuthHttpService);
-  private router = inject(Router);
 
   public credentials: LoginRequest = {
     login: '',
@@ -25,6 +23,11 @@ export class Login {
   public mostrarSenha: boolean = false;
   public mensagemErro: string = '';
   public mensagemSucesso: string = '';
+
+  constructor(
+    private authService: AuthHttpService,
+    private router: Router
+  ) {}
 
   public alternarMostrarSenha(): void {
     this.mostrarSenha = !this.mostrarSenha;
@@ -52,8 +55,11 @@ export class Login {
         localStorage.setItem('usuario', JSON.stringify(response.usuario)); // Salva as informações do usuário autenticado
         localStorage.setItem('tipo', String(response.tipo)); // Salva o tipo de usuário
 
+        // Pega o tipo de usuario retornado para evitar problemas caso usem MANAGER ou GERENTE
+        const tipoUsuario = String(response.tipo).toUpperCase(); 
+
         // Redireciona para o painel de acordo com o tipo de usuário retornado
-        if (response.tipo === 'MANAGER') {
+        if (tipoUsuario === 'MANAGER' || tipoUsuario === 'GERENTE') {
           this.router.navigate(['/manager']);
         } else {
           this.router.navigate(['/client']);

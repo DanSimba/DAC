@@ -4,21 +4,22 @@ import { Viacep } from '../../../../application/client/services/viacep';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ViacepResponse } from '../../../../domain/address/models/viacep-response.model';
 import { Address } from '../../../../domain/address/models/address.model';
-import { CreateClient } from '../../../../domain/client/models/create-client.model';
+import { CreateClient, CreateClientPayload } from '../../../../domain/client/models/create-client.model';
 import { NgxMaskDirective } from 'ngx-mask';
 import { ClientService } from '../../../../application/client/services/client-service';
+import { RouterLink } from '@angular/router';
 
 import Decimal from 'decimal.js'
 
 @Component({
   selector: 'app-autocadastro',
-  imports: [FormsModule, NgxMaskDirective],
+  imports: [FormsModule, NgxMaskDirective, RouterLink],
   templateUrl: './autocadastro.html',
   styleUrl: './autocadastro.css',
 })
 export class Autocadastro {
 
-  public salarioExibicao: string = '';
+  public salarioExibicao: string = ''; // Essa variavel só é usada pra exibir o salario formatado bonitinho na tela
   public ruaBloqueada: boolean = false;
   
   public address : Address = {
@@ -61,7 +62,8 @@ export class Autocadastro {
 
   // Formata o CPF para xxx.xxx.xxx-xx
   public formatarCPF(): void {
-    let cpfNumeros = this.client.cpf.replace(/\D/g, '');
+    let cpfNumeros = this.client.cpf.replace(/\D/g, ''); // regex só permite números
+    // cpfNumeros é só para apoio para pegar somente os numeros
 
     if (cpfNumeros.length > 11) {
       cpfNumeros = cpfNumeros.slice(0, 11);
@@ -91,16 +93,16 @@ export class Autocadastro {
 
   // Formata o salário para exibição e mantém o valor numérico para envio
   public formatarSalario(): void {
-    const salarioNumeros = this.salarioExibicao.replace(/\D/g, '');
+    const salarioNumeros = this.salarioExibicao.replace(/\D/g, ''); // constante de apoio que pega somente os números do salário digitado
 
     if (!salarioNumeros) {
-      this.salarioExibicao = '';
-      this.client.salario = new Decimal(0);
+      this.salarioExibicao = ''; // Esse é o valor que deve ser exibido exibido formatado
+      this.client.salario = new Decimal(0); // Esse é o valor que deve ser enviado para o backend
       return;
-    }
+    } 
 
-    this.client.salario = new Decimal(salarioNumeros).div(100); // alterado para decimal de acordo com enunciado do trabalho
-    this.salarioExibicao = this.client.salario.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    this.client.salario = new Decimal(salarioNumeros).div(100); // Mantm o valor numerico para envio ao backend, divide por 100 pra considerar os centavos
+    this.salarioExibicao = this.client.salario.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); // formata o valor para exibição na tela, pra ficar daora R$ 1.000,00
   }
 
   public onSubmit(): void {
@@ -119,14 +121,18 @@ export class Autocadastro {
     this.mensagemErro = '';
     this.mensagemSucesso = '';
 
-    const payload = {
-      ...this.client,
-      cpf: this.client.cpf.replace(/\D/g, ''),
-      salario: this.client.salario.toFixed(2)
+    // monta o payload para enviar para o back, agora tem o salário para string com 2 casas decimais e cpf string só com numerps
+    const payload: CreateClientPayload = {
+      nome: this.client.nome,
+      email: this.client.email,
+      telefone: this.client.telefone,
+      endereco: this.client.endereco,
+      cpf: this.client.cpf.replace(/\D/g, ''), // só deixa os números
+      salario: this.client.salario.toFixed(2) // converte para string com 2 casas decimais
     };
 
     // Envia o cliente para o service
-    this.clientService.createClientRequest(payload as any).subscribe({
+    this.clientService.createClientRequest(payload).subscribe({
       next: () => {
         this.mensagemErro = '';
         this.mensagemSucesso = 'Solicitação de autocadastro enviada com sucesso! Aguarde a análise do gerente.'
