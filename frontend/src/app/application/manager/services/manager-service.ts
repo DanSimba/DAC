@@ -20,7 +20,19 @@ export class ManagerService {
   private managers = signal<ManagerDTO[]>([]);
   getManagers(): ManagerDTO[]{
     return this.managers();
+    // pro meu mano logado em algum momento
   }
+
+  getGerente() {
+    return this.mock();
+    // já q não puxei do back ainda
+  }
+  private mock = signal<{ id: number; nome: string; email: string }>({
+    id    : 1,
+    nome  : 'dievalson oracle pereira',
+    email : 'dievaln@bantads.com',
+  });
+
 
   carregarGerente(): Observable<ManagerDTO[]>{
     return this.managerHttpService.listarGerentes().pipe(
