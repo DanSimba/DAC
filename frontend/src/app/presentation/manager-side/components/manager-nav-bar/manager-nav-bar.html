@@ -1,6 +1,5 @@
 <nav class="relative flex flex-row w-screen h-[10vh] px-8 justify-between items-center bg-rosa border-b-3 border-b-azure font-monster z-20">
 
-    <!--DADOS DO GERENTE (no lugar da logo do print)-->
     <div class="flex flex-row items-center gap-x-3 cursor-pointer select-none hover:opacity-90 transition-all duration-130"
     (click)="managerService.toggleMenu()">
         <div class="flex w-14 h-14 bg-icon bg-cover rounded-full"></div>
@@ -13,7 +12,6 @@
         <mat-icon class="text-white">{{managerService.getIMO() ? 'expand_less' : 'expand_more'}}</mat-icon>
     </div>
 
-    <!--NAVEGAÇÃO-->
     <div class="flex flex-row gap-x-4">
         <a routerLink="/manager" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="!bg-white"
         class="flex justify-center items-center px-6 py-2 bg-azure border-2 border-black rounded-full text-black font-title text-lg hover:scale-105 transition-all duration-130">
@@ -36,7 +34,7 @@
         </a>
     </div>
 
-    <!--DROPDOWN COM OS DADOS DETALHADOS + SAIR, abre logo abaixo do bloco do gerente-->
+    <!-- dropdown -->
     <div class="absolute left-8 top-[10vh]">
         <app-manager-menu></app-manager-menu>
     </div>
