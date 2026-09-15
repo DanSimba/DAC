@@ -1,59 +1,51 @@
 package com.monsterbank.ms_account.account;
 
 import jakarta.persistence.*;
-
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "account")
 public class AccountEntity {
-    @Id 
-    @Column(nullable = false)
-    String number;
+
+    @Id
+    @Column(nullable = false, unique = true)
+    private String number;
 
     @Column(length = 11, nullable = false)
-    String client_cpf;
+    private String client_cpf;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balanco;
 
     @Column(nullable = false)
-    Integer manager_id;
-
-    @Column(length = 18, nullable = false) //string data tem 16 chars, mas vou colocar 18 só pra garantir
-    String created_at;  
+    private Long manager_id;
     
-    public accountEntity(
-        String number,
+    public AccountEntity(
         String clientCpf,
         BigDecimal balanco,
-        Integer managerId,
-        String createdAt
+        Long managerId
     ){
-        this.number = number;
+        //pode gerar um valor repetido, mas a chance é mínima
+        this.number = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
         this.client_cpf = clientCpf;
         this.balanco = balanco;
         this.manager_id = managerId;
-        this.created_at = createdAt;
     }
 
     public String getNumber() {
-        return number;
+        return this.number;
     }
 
-    public String getClient_cpf() {
-        return client_id;
+    public String getClientCpf() {
+        return this.client_id;
     }
 
     public BigDecimal getBalanco() {
-        return balanco;
+        return this.balanco;
     }
 
-    public Integer getManager_id() {
-        return manager_id;
-    }
-
-    public String getCreated_at() {
-        return created_at;
+    public Long getManagerId() {
+        return this.manager_id;
     }
 }

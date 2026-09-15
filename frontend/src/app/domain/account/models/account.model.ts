@@ -3,5 +3,4 @@ export interface Account {
     number   : string;
     balance  : number;
     manager_id  : number;
-    createdAt : string;
 }

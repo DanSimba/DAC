@@ -1,10 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Account } from '../../../domain/account/models/account.model';
 import { ExtratoService } from '../../extrato/services/extrato-service';
-import { ClientService } from '../../client/services/client-service';
-import { Client } from '../../../domain/client/models/client.model';
-import { ManagerStatus } from '../../../enumeration/manager-status';
-import { UserType } from '../../../enumeration/user-type';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { Observable, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
@@ -21,8 +17,7 @@ export class AccountService {
       client_cpf: '00011122233',
       number   : '001',
       balance  : 1000,
-      manager_id  : 2,
-      createdAt : '10/10/2012',
+      manager_id  : 2
   })
 
   getAccount():Account{

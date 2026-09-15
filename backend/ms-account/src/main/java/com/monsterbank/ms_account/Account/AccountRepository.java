@@ -14,4 +14,6 @@ import org.springframework.data.domain.Pageable;
 public interface AccountRepository extends JpaRepository<AccountEntity, String> {
 
     Optional<AccountEntity> findByNumber(String number);
+    
+    Optional<AccountEntity> findByCpf(String cpf);
 }
