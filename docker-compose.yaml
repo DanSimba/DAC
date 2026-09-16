@@ -109,7 +109,7 @@ services:
       - rabbitmq
 
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/account
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/ms-account
       SPRING_DATASOURCE_USERNAME: ms-account
       SPRING_DATASOURCE_PASSWORD: psql
 
@@ -128,12 +128,12 @@ services:
     networks:
       - monsterbank-net
 
-  api-gateway:
-    build: ./backend/api-gateway
-    ports:
-      - "8080:8080"
-    networks:
-      - monsterbank-net
+  #api-gateway:
+   # build: ./backend/api-gateway
+   # ports:
+   #   - "8080:8080"
+   # networks:
+   #   - monsterbank-net
 
   ms-gerente:
     build: ./backend/ms-gerente
@@ -146,12 +146,12 @@ services:
 
   #=====FRONT END=====#
 
-  front-end:
-    build: ./frontend
-    ports:
-      - "4200:4200"
-    networks:
-      - monsterbank-net
+  #front-end:
+  #  build: ./frontend
+  #  ports:
+  #    - "4200:4200"
+  #  networks:
+  #    - monsterbank-net
 
 #=====INFRA DOCKER=====#
 

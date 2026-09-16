@@ -3,14 +3,13 @@ package com.monsterbank.ms_account.account.accountDTOs;
 public class AccountDTO {
     String number;
     String client_cpf;
-    BigDecimal balanco;
+    double balanco;
     Long manager_id;
-    LocalDateTime created_at;  
     
     public AccountDTO(
         String number,
         String clientCpf,
-        BigDecimal balanco,
+        double balanco,
         Long managerId
     ){
         this.number = number;

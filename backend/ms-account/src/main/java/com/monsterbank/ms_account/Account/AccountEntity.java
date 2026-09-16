@@ -1,8 +1,7 @@
 package com.monsterbank.ms_account.account;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name = "account")
@@ -16,14 +15,14 @@ public class AccountEntity {
     private String client_cpf;
 
     @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal balanco;
+    private double balanco;
 
     @Column(nullable = false)
     private Long manager_id;
     
     public AccountEntity(
         String clientCpf,
-        BigDecimal balanco,
+        double balanco,
         Long managerId
     ){
         //pode gerar um valor repetido, mas a chance é mínima
@@ -38,10 +37,10 @@ public class AccountEntity {
     }
 
     public String getClientCpf() {
-        return this.client_id;
+        return this.client_cpf;
     }
 
-    public BigDecimal getBalanco() {
+    public double getBalanco() {
         return this.balanco;
     }
 
