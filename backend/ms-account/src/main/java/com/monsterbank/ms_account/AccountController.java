@@ -1,25 +1,48 @@
 package com.monsterbank.ms_account;
 
-// ms-cliente comentado pq o ms-account não deve conhecer o ms-cliente
-// comunicação deve ser feita via mensageria
-/* 
-    import com.monsterbank.ms_cliente.cliente.ClienteService;
-    import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
-    import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
-    import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.listarSolicitacoesReturn;
-    import com.monsterbank.ms_cliente.cliente.clienteDTOs.ClienteRetorno;
-    import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RecusarSolicitacaoRequest;
-*/
-
+import com.monsterbank.ms_account.Account.AccountDTOs.CreateAccountRequest;
+import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.account.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
+import java.util.Optional;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/account")
 public class AccountController {
 
+     private AccountService accountService;
+
+     private AccountController(AccountService as){
+          this.accountService = as;
+     }
+
+     @GetMapping("/test")
+     public String test() {
+          return "ms-account funcionando!";
+     }
+
+     @GetMapping("/findByCpf")
+     public ResponseEntity<Optional<AccountDTO>> findAccountByCpf(@RequestParam String cpf){
+          return ResponseEntity.ok(this.accountService.findAccountByCpf(cpf));
+     }
+
+     @GetMapping("/findByNumber")
+     public ResponseEntity<Optional<AccountDTO>> findAccountByNumber(@RequestParam String number){
+          return ResponseEntity.ok(this.accountService.findAccountByNumber(number));
+     }
+
+     @PostMapping("/create")
+     public ResponseEntity<AccountDTO> createAccount(@RequestBody CreateAccountRequest request){
+          return ResponseEntity.ok(this.accountService.createAccount(
+                         request.getCpf(),
+                         request.getManagerId()
+                    )
+               );
+     }
 }

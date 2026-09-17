@@ -7,7 +7,7 @@ export interface Client {
     cpf      : string;
     name     : string;
     email    : string;
-    password : string;
+    password : string; 
     salary   : number;
     address  : Address;
     status   : ClientStatus;

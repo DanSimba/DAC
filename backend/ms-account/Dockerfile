@@ -23,6 +23,6 @@ WORKDIR /app
 # Copia o jar gerado na etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8081
+EXPOSE 8080
 
 CMD ["java", "-jar", "app.jar"]

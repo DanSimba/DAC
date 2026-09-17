@@ -12,7 +12,6 @@ import lombok.Setter;
 @Setter
 public class ClienteEntity {
 
-
     @Id
     @Column(length = 11, nullable = false)
     String cpf;
