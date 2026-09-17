@@ -80,14 +80,14 @@ services:
   ms-cliente:
     build:
       context: ./backend/ms-cliente
-      dockerfile: ms-cliente.dockerfile
+      #dockerfile: ms-cliente.dockerfile
 
     depends_on:
       - db-cliente
       - rabbitmq
 
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db-cliente:5432/cliente
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-cliente:5432/ms-cliente
       SPRING_DATASOURCE_USERNAME: ms-cliente
       SPRING_DATASOURCE_PASSWORD: psql
 
@@ -97,7 +97,10 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
 
     ports:
-      - "8081:8080"
+      - "8081:8081"
+
+    networks:
+      - monsterbank-net
 
   ms-account:
     build:

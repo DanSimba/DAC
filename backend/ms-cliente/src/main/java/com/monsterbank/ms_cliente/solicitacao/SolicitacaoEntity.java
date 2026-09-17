@@ -7,9 +7,14 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
+
 
 @Entity
 @Table(name = "solicitacao_cliente", uniqueConstraints = {@UniqueConstraint(name = "uk_solicitacao_email", columnNames = "email")})
+@Getter
+@Setter
 public class SolicitacaoEntity {
 
     @Id
@@ -126,61 +131,61 @@ public class SolicitacaoEntity {
     }
 
 
-    public String getCpf() {
-        return cpf;
-    }
+    // public String getCpf() {
+    //     return cpf;
+    // }
 
-    public String getNome() {
-        return nome;
-    }
+    // public String getNome() {
+    //     return nome;
+    // }
 
-    public String getEmail() {
-        return email;
-    }
+    // public String getEmail() {
+    //     return email;
+    // }
 
-    public String getTelefone() {
-        return telefone;
-    }
+    // public String getTelefone() {
+    //     return telefone;
+    // }
 
-    public BigDecimal getSalario() {
-        return salario;
-    }
+    // public BigDecimal getSalario() {
+    //     return salario;
+    // }
 
-    public String getLogradouro() {
-        return logradouro;
-    }
+    // public String getLogradouro() {
+    //     return logradouro;
+    // }
 
-    public Integer getNumero() {
-        return numero;
-    }
+    // public Integer getNumero() {
+    //     return numero;
+    // }
 
-    public String getComplemento() {
-        return complemento;
-    }
+    // public String getComplemento() {
+    //     return complemento;
+    // }
 
-    public String getCep() {
-        return cep;
-    }
+    // public String getCep() {
+    //     return cep;
+    // }
 
-    public String getCidade() {
-        return cidade;
-    }
+    // public String getCidade() {
+    //     return cidade;
+    // }
 
-    public String getUf() {
-        return uf;
-    }
+    // public String getUf() {
+    //     return uf;
+    // }
 
-    public StatusSolicitacao getStatus() {
-        return status;
-    }
+    // public StatusSolicitacao getStatus() {
+    //     return status;
+    // }
 
-    public String getMotivo() {
-        return motivo;
-    }
+    // public String getMotivo() {
+    //     return motivo;
+    // }
 
-    public LocalDateTime getDataProcessamento() {
-        return dataProcessamento;
-    }
+    // public LocalDateTime getDataProcessamento() {
+    //     return dataProcessamento;
+    // }
 
 
 

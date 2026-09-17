@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthHttpService } from '../../../../infraestructure/http/auth.http.service';
 
 @Component({
   selector: 'app-client-nav-bar',
@@ -10,5 +11,11 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ClientNavBar {
   clientService = inject(ClientService)
+
+  constructor(private authService: AuthHttpService) {}
+
+  public sair(): void {
+    this.authService.logout();
+  }
   
 }

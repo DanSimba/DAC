@@ -2,11 +2,14 @@ package com.monsterbank.ms_cliente.cliente;
 
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "clientes", uniqueConstraints = {@UniqueConstraint(name = "uk_solicitacao_email", columnNames = "email")})
+@Getter
+@Setter
 public class ClienteEntity {
 
     @Id
@@ -42,6 +45,8 @@ public class ClienteEntity {
     @Column(nullable = false, length = 2)
     private String uf;
 
+    // Mantido protected por necessidade do JPA, caso necessário, alterar para public
+    protected ClienteEntity(){};
 
     public ClienteEntity(
             String cpf,
@@ -70,47 +75,47 @@ public class ClienteEntity {
 
     }
 
-    public String getCpf() {
-        return cpf;
-    }
+    // public String getCpf() {
+    //     return cpf;
+    // }
 
-    public String getEmail() {
-        return email;
-    }
+    // public String getEmail() {
+    //     return email;
+    // }
 
-    public BigDecimal getSalario() {
-        return salario;
-    }
+    // public BigDecimal getSalario() {
+    //     return salario;
+    // }
 
-    public String getNome() {
-        return nome;
-    }
+    // public String getNome() {
+    //     return nome;
+    // }
 
-    public String getTelefone() {
-        return telefone;
-    }
+    // public String getTelefone() {
+    //     return telefone;
+    // }
 
-    public Integer getNumero() {
-        return numero;
-    }
+    // public Integer getNumero() {
+    //     return numero;
+    // }
 
-    public String getCep() {
-        return cep;
-    }
+    // public String getCep() {
+    //     return cep;
+    // }
 
-    public String getLogradouro() {
-        return logradouro;
-    }
+    // public String getLogradouro() {
+    //     return logradouro;
+    // }
 
-    public String getCidade() {
-        return cidade;
-    }
+    // public String getCidade() {
+    //     return cidade;
+    // }
 
-    public String getComplemento() {
-        return complemento;
-    }
+    // public String getComplemento() {
+    //     return complemento;
+    // }
 
-    public String getUf() {
-        return uf;
-    }
+    // public String getUf() {
+    //     return uf;
+    // }
 }
