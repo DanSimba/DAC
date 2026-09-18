@@ -18,12 +18,13 @@ public class AccountController {
 
      private AccountService accountService;
 
-     private AccountController(AccountService as){
+     public  AccountController(AccountService as){
           this.accountService = as;
      }
 
      @GetMapping("/test")
      public String test() {
+          System.out.println("MSACCOUNT FUNFANDO FI");
           return "ms-account funcionando!";
      }
 

@@ -14,5 +14,5 @@ public interface AccountRepository extends JpaRepository<AccountEntity, String> 
 
     Optional<AccountEntity> findByNumber(String number);
     
-    Optional<AccountEntity> findByCpf(String cpf);
+    Optional<AccountEntity> findByClientCpf(String clientCpf);
 }
