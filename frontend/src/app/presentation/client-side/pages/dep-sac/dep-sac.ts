@@ -7,6 +7,7 @@ import { PopUp } from '../../../shared/components/pop-up/pop-up';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { AccountService } from '../../../../application/account/services/account-service';
 import { Account } from '../../../../domain/account/models/account.model';
+import { OperationSide } from '../../../../enumeration/operation-side';
 
 @Component({
   selector: 'app-dep-sac',
@@ -23,15 +24,16 @@ export class DepSac {
   side = signal<'dep'|'sac'|''>('');
   value = signal<number>(0);
 
-  setSide(s: 'dep'|'sac'|''){
+  setSide(s: 'dep'|'sac'){
     this.side.set(s);
   }
 
   send(){
-    const concreteSide = this.side();
+    const concreteSide:OperationSide|null = this.side() == 'dep'? OperationSide.DEP : this.side() == 'sac'? OperationSide.SAC : null;
+    console.log('CONCRETE SIDE:', concreteSide);
     const concreteValue = this.value();
 
-    if(concreteSide!='' && concreteValue>0){
+    if(concreteSide && concreteValue>0){
         const op: OperationModel = {
           type:'operation',
           acc_number: this.accountService.getAccount().number,
@@ -39,6 +41,8 @@ export class DepSac {
           value: concreteValue,
           datetime: this.accountService.getCurrentTimeFormated()
         }
+
+        console.log('CONCRETE OPERATION: ', op)
 
         this.accountService.operar(op).subscribe({
           //VALUE É A CONTA COM O SALDO ATUALIZADO

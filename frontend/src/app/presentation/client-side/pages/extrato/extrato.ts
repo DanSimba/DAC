@@ -40,8 +40,12 @@ export class Extrato implements OnInit{
   })
 
   ngOnInit(): void {
+
+    //PRIMEIRO FAZ UM GETEXTRATOLIST
+    
     //POPULA A LISTA DE EXTRATO COM O MES
     this.extratoService.createMonthExt(this.account());
+    
     const now = new Date();
     //ganbiarra pra tranformar Date no formato que o input aceita
     const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`

@@ -11,16 +11,16 @@ export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
 
-  createExtrato(ext: OperationModel|TransferenceModel, id: number, acc: Account){ 
+  createExtrato(ext: OperationModel|TransferenceModel, dateId: number, acc: Account){ 
       //procura por esse id no extrato (se já tem o dia, coloca ext lá)
-        const extDay = this.extList().find(day => day.id==id)
+        const extDay = this.extList().find(day => day.dateId==dateId)
         if(extDay){
             if(ext.type == 'operation'){
                 extDay.opers.push(ext);
                 extDay.saldoApos = acc.balance;
                 console.log('extrato atualizado: ', this.extList());
             } else{
-                extDay.tranfs.push(ext);
+                extDay.transfs.push(ext);
                 extDay.saldoApos = acc.balance;
                 console.log('extrato atualizado: ', this.extList());
             }
@@ -30,36 +30,38 @@ export class ExtratoService {
       //caso não ache o dia (é o primeiro extrato do dia), cria um novo
         const newExt: ExtratoModel = {
           acc_number: acc.number,
-          tranfs: [],
+          transfs: [],
           opers: [],
-          id: id,
+          id: Math.random()*1000,
+          dateId: dateId,
           saldoApos: acc.balance //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
         }
   
         if(ext.type == 'operation'){
           newExt.opers.push(ext);
         } else{
-          newExt.tranfs.push(ext);
+          newExt.transfs.push(ext);
         }
   
         this.extList.update(exts=>[newExt, ...exts]);
         console.log('extrato atualizado: ', this.extList());
   }
   
-  createEmptyDay(id: number, acc: Account){
+  createEmptyDay(dateId: number, acc: Account){
     //encontra ultimo saldo
     //deus proteja quem tiver que debuggar isso aq
-    let lastSaldo = this.extList().find((ext)=>(ext.id < id))?.saldoApos ?? acc.balance;
+    let lastSaldo = this.extList().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balance;
     const emptyDay: ExtratoModel = {
        acc_number: acc.number,
-          tranfs: [],
+          transfs: [],
           opers: [],
-          id: id,
+          id: Math.random()*1000,
+          dateId: dateId,
           saldoApos: lastSaldo //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
     } 
 
     this.extList.update(exts=>[emptyDay, ...exts]);
-    console.log('extrato atualizado com dia vazio: ', this.extList());
+    //console.log('extrato atualizado com dia vazio: ', this.extList());
   }
 
   getExtList():ExtratoModel[]{
@@ -72,16 +74,16 @@ export class ExtratoService {
 
     while(days>0){
       let idString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(days).padStart(2, '0')}`
-      let id = this.createDateId(idString);
+      let dateId = this.createDateId(idString);
 
       //miseria.ts
       //encontra a ultima oper / transf na lista antes do dia vazio
       //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
 
       //procura se o dia ja consta na extList
-      let existingDay = this.extList().find((ext)=>(ext.id == id));
+      let existingDay = this.extList().find((ext)=>(ext.dateId == dateId));
       if(!existingDay){ //SE O DIA NAO EXISTE, CRIA VAZIO
-         this.createEmptyDay(id, acc);
+         this.createEmptyDay(dateId, acc);
       }
       days--
     }

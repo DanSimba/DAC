@@ -26,10 +26,10 @@
                 @for (ext of filteredList(); track $index) {
                     <div class="flex flex-col justify-between p-4 gap-y-4 bg-black/50 border-5 border-solid border-rosa rounded-2xl">
                         <div class="flex flex-row w-full">
-                            Data: {{formatDateId(ext.id)}}
+                            Data: {{formatDateId(ext.dateId)}}
                         </div>
 
-                        @for (transf of ext.tranfs; track $index) {
+                        @for (transf of ext.transfs; track $index) {
                             <app-ext-card [transfInstance]="transf"></app-ext-card> 
                         }
 
