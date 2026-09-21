@@ -3,6 +3,7 @@ import { TransferenceModel } from "./transference.model";
 
 //REFATORAÇÃO: O EXTRATO CONDIZ AO DIA, TDS AS OPERS E TRANFS QUE ACONTECERAM NELE E SOMENTE O SALDO FINAL
 export interface ExtratoModel {
+    acc_number: string;
     tranfs: TransferenceModel[];
     opers: OperationModel[];
 

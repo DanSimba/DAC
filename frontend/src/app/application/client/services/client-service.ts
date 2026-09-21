@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 export class ClientService {
 
   private clientHttpService = inject(ClientHttpService);
-  private extratoService = inject(ExtratoService);
+  //private extratoService = inject(ExtratoService);
   //MOCKZIN
   private clientMock = signal<Client>({
         id       : 1,

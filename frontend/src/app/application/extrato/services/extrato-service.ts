@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
+import { Account } from '../../../domain/account/models/account.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,48 +11,62 @@ export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
 
-  createExtrato(ext: OperationModel|TransferenceModel|null, id: number, saldoApos:number){ //null para popular a lista com dias vazios
-
+  createExtrato(ext: OperationModel|TransferenceModel, id: number, acc: Account){ 
       //procura por esse id no extrato (se já tem o dia, coloca ext lá)
         const extDay = this.extList().find(day => day.id==id)
         if(extDay){
-          if(ext){
             if(ext.type == 'operation'){
                 extDay.opers.push(ext);
+                extDay.saldoApos = acc.balance;
                 console.log('extrato atualizado: ', this.extList());
             } else{
                 extDay.tranfs.push(ext);
+                extDay.saldoApos = acc.balance;
                 console.log('extrato atualizado: ', this.extList());
             }
             return
-          } else return //SE EXISTE ALGO NO DIA, ENTÃO NÃO PRECISA ADICIONAR DIA VAZIO NO LUGAR
         }
         
-      //caso não ache o dia (primeiro ext do dia), cria um novo
+      //caso não ache o dia (é o primeiro extrato do dia), cria um novo
         const newExt: ExtratoModel = {
+          acc_number: acc.number,
           tranfs: [],
           opers: [],
           id: id,
-          saldoApos: saldoApos //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
+          saldoApos: acc.balance //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
         }
   
-        if(ext){
-          if(ext.type == 'operation'){
-            newExt.opers.push(ext);
-          } else{
-            newExt.tranfs.push(ext);
-          }
+        if(ext.type == 'operation'){
+          newExt.opers.push(ext);
+        } else{
+          newExt.tranfs.push(ext);
         }
   
         this.extList.update(exts=>[newExt, ...exts]);
         console.log('extrato atualizado: ', this.extList());
   }
   
+  createEmptyDay(id: number, acc: Account){
+    //encontra ultimo saldo
+    //deus proteja quem tiver que debuggar isso aq
+    let lastSaldo = this.extList().find((ext)=>(ext.id < id))?.saldoApos ?? acc.balance;
+    const emptyDay: ExtratoModel = {
+       acc_number: acc.number,
+          tranfs: [],
+          opers: [],
+          id: id,
+          saldoApos: lastSaldo //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
+    } 
+
+    this.extList.update(exts=>[emptyDay, ...exts]);
+    console.log('extrato atualizado com dia vazio: ', this.extList());
+  }
+
   getExtList():ExtratoModel[]{
     return this.extList();
   }
 
-  createMonthExt(saldo: number){ //roda por tds os dias do mÊs adicionando extratos á lista
+  createMonthExt(acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
     const now = new Date();
     let days = now.getDate();
 
@@ -61,15 +76,19 @@ export class ExtratoService {
 
       //miseria.ts
       //encontra a ultima oper / transf na lista antes do dia vazio
-      let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
-      if(lastOp){
-         this.createExtrato(null, id, lastOp.saldoApos);
-      }else{
-        this.createExtrato(null, id, saldo);
+      //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
+
+      //procura se o dia ja consta na extList
+      let existingDay = this.extList().find((ext)=>(ext.id == id));
+      if(!existingDay){ //SE O DIA NAO EXISTE, CRIA VAZIO
+         this.createEmptyDay(id, acc);
       }
       days--
     }
   }
+
+
+  //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)
 
   createDateId(d:string):number{ //d = 'aaaa-mm-dd'
     //pega a string e tira os traços
