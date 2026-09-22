@@ -1,1 +1,122 @@
-<p>manager-home-page works!</p>
+<div class="mx-auto max-w-5xl p-6 bg-white shadow-lg border rounded-lg my-10">
+
+  <div class="flex justify-between items-center mb-6 border-b pb-4">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800">Solicitações de Abertura de Conta</h2>
+      <p class="text-sm text-gray-600">Novos cadastros aguardando análise.</p>
+    </div>
+  </div>
+
+  @if (mensagemSucesso) {
+    <div class="p-3 bg-green-100 border rounded border-green-400 text-green-700 mb-4">
+      {{ mensagemSucesso }}
+    </div>
+  }
+
+  @if (mensagemErro) {
+    <div class="p-3 bg-red-100 border rounded border-red-400 text-red-700 mb-4">
+      {{ mensagemErro }}
+    </div>
+  }
+
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse text-left text-sm">
+      <thead class="bg-gray-100 border-b">
+        <tr>
+          <th class="p-3 font-semibold text-gray-800">Data / Hora</th>
+          <th class="p-3 font-semibold text-gray-800">CPF</th>
+          <th class="p-3 font-semibold text-gray-800">Nome</th>
+          <th class="p-3 font-semibold text-gray-800">Salário</th>
+          <th class="p-3 font-semibold text-gray-800 text-center">Status</th>
+          <th class="p-3 font-semibold text-gray-800 text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitacoes; track item.id) {
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3 text-gray-800">{{ item.dataHora }}</td>
+            <td class="p-3 text-gray-800">{{ item.cpf }}</td>
+            <td class="p-3 font-medium text-gray-900">{{ item.nome }}</td>
+            <td class="p-3 text-gray-800">{{ item.salario }}</td>
+            
+            <td class="p-3 text-center">
+              @if (item.status === 'PENDENTE') {
+                <span class="bg-yellow-100 text-yellow-800 font-semibold px-2 py-1 rounded">
+                  PENDENTE
+                </span>
+              } @else if (item.status === 'APROVADO') {
+                <span class="bg-green-100 text-green-800 font-semibold px-2 py-1 rounded">
+                  APROVADO
+                </span>
+              } @else {
+                <span class="bg-red-100 text-red-800 font-semibold px-2 py-1 rounded">
+                  NÃO APROVADO
+                </span>
+              }
+            </td>
+
+            <td class="p-3 text-center">
+              @if (item.status === 'PENDENTE') {
+                <div class="flex justify-center gap-2">
+                  <button 
+                    type="button" 
+                    (click)="aprovar(item)"
+                    class="bg-green-600 hover:bg-green-800 text-white font-bold py-1 px-3 rounded">
+                    Aprovar
+                  </button>
+
+                  <button 
+                    type="button" 
+                    (click)="abrirModal(item)"
+                    class="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 rounded">
+                    Rejeitar
+                  </button>
+                </div>
+              } @else {
+                <span class="text-xs text-gray-400">Finalizado</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!--Pop-up de rejeição talvez eu faça em outro arquivo dps-->
+  @if (modalAberto) {
+    <div class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-lg max-w-2xl w-full p-6">
+        
+        <h3 class="text-lg font-bold text-gray-800 mb-2">Rejeitar Cadastro</h3>
+        <p class="text-sm text-gray-600 mb-4">
+          Informe o motivo da recusa para o cliente <strong>{{ solicitacaoSelecionada?.nome }}</strong>:
+        </p>
+
+        <textarea 
+          rows="3" 
+          [(ngModel)]="motivoRejeicao"
+          class="w-full border border-gray-400 rounded p-2 mb-4"
+          placeholder="Ex: Documentação incompleta...">
+        </textarea>
+
+        <div class="flex justify-end gap-2">
+          <button 
+            type="button" 
+            (click)="fecharModal()"
+            class="border border-gray-400 text-gray-800 font-medium py-1 px-3 rounded hover:bg-gray-200">
+            Cancelar
+          </button>
+
+          <button 
+            type="button" 
+            (click)="confirmarRejeicao()"
+            class="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 rounded">
+            Confirmar Rejeição
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>
