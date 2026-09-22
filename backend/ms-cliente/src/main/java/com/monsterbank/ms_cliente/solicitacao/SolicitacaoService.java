@@ -4,6 +4,7 @@ import com.monsterbank.ms_cliente.exception.*;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.listarSolicitacoesReturn;
@@ -13,7 +14,10 @@ import com.monsterbank.ms_cliente.exception.SalarioInvalidoException;
 import com.monsterbank.ms_cliente.exception.CpfUtilizadoException;
 import com.monsterbank.ms_cliente.exception.EmailSolicitadoException;
 import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
+import com.monsterbank.ms_cliente.mensageria.producer.SolicitacaoProducer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,14 +25,20 @@ import java.util.List;
 @Service
 public class SolicitacaoService {
 
+    private static final Logger log = LoggerFactory.getLogger(SolicitacaoService.class);
 
     private final SolicitacaoRepository solicitacaoRepository;
+    private final SolicitacaoProducer solicitacaoProducer;
 
-    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository) {
+    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, SolicitacaoProducer solicitacaoProducer) {
         this.solicitacaoRepository = solicitacaoRepository;
+        this.solicitacaoProducer = solicitacaoProducer;
     }
 
+    @Transactional
     public void registrar(RegistrarSolicitacaoRequest dto) {
+        log.info("Iniciando registro de solicitação para o CPF: {}", dto.cpf());
+
         validarPorCPF(dto.cpf());
         validarEmailSolicitado(dto.email());
         validarEmailCadastrado(dto.email());
@@ -37,8 +47,12 @@ public class SolicitacaoService {
         
         try {
             salario = new BigDecimal(dto.salario());
-            if(salario.compareTo(BigDecimal.ZERO) <= 0) { throw new SalarioInvalidoException(); }
+            if(salario.compareTo(BigDecimal.ZERO) <= 0) {
+                log.warn("Salario zerado ou negativo para o CPF: {}", dto.cpf());
+                throw new SalarioInvalidoException(); 
+            }
         } catch (NumberFormatException e) {
+            log.error("Erro ao converter salario para BigDecimal: {}, CPF: {}", dto.salario(), dto.cpf());
             throw new SalarioInvalidoException();
         }
 
@@ -58,6 +72,19 @@ public class SolicitacaoService {
                 );
 
         solicitacaoRepository.save(solicitacao);
+        log.info("Solicitacao salva como {} para o CPF: {}", solicitacao.getStatus(), dto.cpf());
+
+        SolicitacaoSagaDTO eventoDTO = new SolicitacaoSagaDTO(
+            solicitacao.getNome(),
+            solicitacao.getEmail(),
+            solicitacao.getCpf(),
+            solicitacao.getTelefone(),
+            solicitacao.getSalario().toString(),
+            solicitacao.getEndereco()
+        );
+
+        solicitacaoProducer.enviarParaAnalise(eventoDTO);
+        log.info("Solicitacao enviada para analise via RabbitMQ. Status: {}. CPF: {}", solicitacao.getStatus(), dto.cpf());
 
     }
 
