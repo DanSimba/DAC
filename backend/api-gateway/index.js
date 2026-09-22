@@ -40,7 +40,7 @@ app.post('/clientes', async (req, res) => {
     res.status(response.status);
 
     if (responseBodyJson) {
-      console.log(responseBodyJson);
+      console.log(res.status);
       res.json(responseBodyJson);
     } else {
       console.log(responseBodyText);

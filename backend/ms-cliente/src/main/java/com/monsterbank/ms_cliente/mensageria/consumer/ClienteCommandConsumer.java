@@ -11,29 +11,31 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import com.monsterbank.ms_cliente.mensageria.producer.OrquestradorResponseProducer;
 
 import java.time.LocalDateTime;
 
 @Component
 public class ClienteCommandConsumer {
 
-    private final RabbitTemplate rabbitTemplate;
+    //private final RabbitTemplate rabbitTemplate;
     private final SolicitacaoService solicitacaoService;
     private final ClienteService clienteService;
     private final ObjectMapper objectMapper;
-
+    private final OrquestradorResponseProducer responseProducer;
 
     public ClienteCommandConsumer(
-            RabbitTemplate rabbitTemplate,
+            //RabbitTemplate rabbitTemplate,
             SolicitacaoService solicitacaoService,
             ClienteService clienteService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            OrquestradorResponseProducer responseProducer
     ) {
-        this.rabbitTemplate = rabbitTemplate;
+        //this.rabbitTemplate = rabbitTemplate;
         this.solicitacaoService = solicitacaoService;
         this.clienteService = clienteService;
         this.objectMapper = objectMapper;
-
+        this.responseProducer = responseProducer;
     }
 
     @RabbitListener(queues = "ms.cliente.cmd")
@@ -144,7 +146,8 @@ public class ClienteCommandConsumer {
 
         );
 
-        rabbitTemplate.convertAndSend("orquestrador.reply", reply);
+        //rabbitTemplate.convertAndSend("orquestrador.reply", reply);
+        responseProducer.enviar(reply);
     }
 
     private void enviarRespostaErro(SagaCommand command, String erro){
@@ -158,8 +161,8 @@ public class ClienteCommandConsumer {
 
         );
 
-        rabbitTemplate.convertAndSend("orquestrador.reply", reply);
-
+        //rabbitTemplate.convertAndSend("orquestrador.reply", reply);
+        responseProducer.enviar(reply);
     }
 
 }
