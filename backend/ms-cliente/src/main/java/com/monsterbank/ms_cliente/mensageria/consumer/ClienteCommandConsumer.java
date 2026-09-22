@@ -2,36 +2,33 @@ package com.monsterbank.ms_cliente.mensageria.consumer;
 
 import com.monsterbank.ms_cliente.cliente.ClienteService;
 import com.monsterbank.ms_cliente.exception.*;
+import com.monsterbank.ms_cliente.mensageria.ClienteReplyQueue;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaReply;
-import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
+import com.monsterbank.ms_cliente.mensageria.producer.OrquestradorResponseProducer;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import com.monsterbank.ms_cliente.mensageria.producer.OrquestradorResponseProducer;
 
 import java.time.LocalDateTime;
 
 @Component
 public class ClienteCommandConsumer {
 
-    //private final RabbitTemplate rabbitTemplate;
     private final SolicitacaoService solicitacaoService;
     private final ClienteService clienteService;
     private final ObjectMapper objectMapper;
     private final OrquestradorResponseProducer responseProducer;
 
     public ClienteCommandConsumer(
-            //RabbitTemplate rabbitTemplate,
             SolicitacaoService solicitacaoService,
             ClienteService clienteService,
             ObjectMapper objectMapper,
             OrquestradorResponseProducer responseProducer
     ) {
-        //this.rabbitTemplate = rabbitTemplate;
         this.solicitacaoService = solicitacaoService;
         this.clienteService = clienteService;
         this.objectMapper = objectMapper;
@@ -40,6 +37,9 @@ public class ClienteCommandConsumer {
 
     @RabbitListener(queues = "ms.cliente.cmd")
     public void receber(SagaCommand command){
+        ClienteReplyQueue replyQueue = ClienteReplyQueue.fromCommandType(command.tipo())
+                .orElse(ClienteReplyQueue.COMANDO_DESCONHECIDO);
+
         try{
             switch (command.tipo()){
 
@@ -51,7 +51,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.valueToTree(solicitacao);
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
                 case "cliente.criar" ->{
@@ -62,7 +62,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
 
                 }
 
@@ -74,7 +74,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
                 case "cliente.marcar-nao-aprovada" ->{
@@ -87,7 +87,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
                 case "cliente.compensar-criacao" ->{
@@ -98,36 +98,41 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
-                default -> enviarRespostaErro(command, "COMANDO_DESCONHECIDO");
+                default -> enviarRespostaErro(command, replyQueue, "COMANDO_DESCONHECIDO");
 
             }
         } catch(CpfInvalidoException e){
-        enviarRespostaErro(
-                command,
-                "CPF_INVALIDO"
-        );
+            enviarRespostaErro(
+                    command,
+                    replyQueue,
+                    "CPF_INVALIDO"
+            );
 
         } catch (SolicitacaoNaoPendenteException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "SOLICITACAO_NAO_PENDENTE"
             );
         } catch (ErroCriacaoClienteException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "ERRO_CRIACAO_CLIENTE"
             );
         } catch (SolicitacaoNaoEncontradaException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "SOLICITACAO_NAO_ENCONTRADA"
             );
         } catch (ClienteNaoEncontradoException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "CLIENTE_NAO_ENCONTRADO"
             );
         }
@@ -135,10 +140,13 @@ public class ClienteCommandConsumer {
 
     }
 
-    private void enviarRespostaSucesso(SagaCommand command, JsonNode payload){
+    private void enviarRespostaSucesso(
+            SagaCommand command,
+            ClienteReplyQueue replyQueue,
+            JsonNode payload
+    ){
         SagaReply reply = new SagaReply(
                 command.sagaId(),
-                command.tipo(),
                 LocalDateTime.now().toString(),
                 "SUCESSO",
                 null,
@@ -146,14 +154,16 @@ public class ClienteCommandConsumer {
 
         );
 
-        //rabbitTemplate.convertAndSend("orquestrador.reply", reply);
-        responseProducer.enviar(reply);
+        responseProducer.enviar(replyQueue, reply);
     }
 
-    private void enviarRespostaErro(SagaCommand command, String erro){
+    private void enviarRespostaErro(
+            SagaCommand command,
+            ClienteReplyQueue replyQueue,
+            String erro
+    ){
         SagaReply reply = new SagaReply(
                 command.sagaId(),
-                command.tipo(),
                 LocalDateTime.now().toString(),
                 "FALHA",
                 erro,
@@ -161,8 +171,7 @@ public class ClienteCommandConsumer {
 
         );
 
-        //rabbitTemplate.convertAndSend("orquestrador.reply", reply);
-        responseProducer.enviar(reply);
+        responseProducer.enviar(replyQueue, reply);
     }
 
 }
