@@ -9,6 +9,9 @@ import com.monsterbank.ms_account.operations.enums.OperationSide;
 @Entity
 @Table(name = "transference")
 public class TransferenceEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "extrato_id")
@@ -34,4 +37,40 @@ public class TransferenceEntity {
 
     @Column(nullable = false)
     private String datetime;
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public ExtratoEntity getExtrato() {
+        return this.extrato;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getCpfOrigin() {
+        return this.cpfOrigin;
+    }
+
+    public String getNameOrigin() {
+        return this.nameOrigin;
+    }
+
+    public String getAccOrigin() {
+        return this.accOrigin;
+    }
+
+    public String getAccDestiny() {
+        return this.accDestiny;
+    }
+
+    public BigDecimal getValue() {
+        return this.value;
+    }
+
+    public String getDatetime() {
+        return this.datetime;
+    }
 }

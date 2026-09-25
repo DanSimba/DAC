@@ -28,6 +28,7 @@ export class AccountService {
     this.account.set(a);
   }
 
+  //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
     operar(op: OperationModel): Observable<Account>{
       //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
         //pega a data em forma de id

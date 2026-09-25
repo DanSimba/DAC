@@ -50,4 +50,10 @@ public class AccountEntity {
     public Long getManagerId() {
         return this.managerId;
     }
+
+    //SETTERS---------------0987667890-=-098UYGKLOIU
+
+    public void setBalanco(BigDecimal balanco) {
+        this.balanco = balanco;
+    }
 }
