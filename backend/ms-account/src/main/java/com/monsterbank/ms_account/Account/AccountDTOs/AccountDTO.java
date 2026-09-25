@@ -1,21 +1,22 @@
 package com.monsterbank.ms_account.account.accountDTOs;
+import java.math.BigDecimal;
 
 public class AccountDTO {
     String number;
-    String client_cpf;
-    double balanco;
-    Long manager_id;
+    String clientCpf;
+    BigDecimal balanco;
+    Long managerId;
     
     public AccountDTO(
         String number,
         String clientCpf,
-        double balanco,
+        BigDecimal balanco,
         Long managerId
     ){
         this.number = number;
-        this.client_cpf = clientCpf;
+        this.clientCpf = clientCpf;
         this.balanco = balanco;
-        this.manager_id = managerId;
+        this.managerId = managerId;
     }
 
 }

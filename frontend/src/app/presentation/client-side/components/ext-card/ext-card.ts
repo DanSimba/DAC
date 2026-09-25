@@ -7,6 +7,7 @@ import { ClientService } from '../../../../application/client/services/client-se
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { AccountService } from '../../../../application/account/services/account-service';
+import { OperationSide } from '../../../../enumeration/operation-side';
 
 @Component({
   selector: 'app-ext-card',
@@ -26,7 +27,7 @@ export class ExtCard {
   operInstance = input<OperationModel>();
 
   type = computed(()=>{
-    if(this.operInstance()) return this.operInstance()?.side == 'dep'? 'dep': 'sac';
+    if(this.operInstance()) return this.operInstance()?.side == OperationSide.DEP? 'dep': 'sac';
     else return 'transf'
   })
 }

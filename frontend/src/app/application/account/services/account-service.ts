@@ -28,6 +28,7 @@ export class AccountService {
     this.account.set(a);
   }
 
+  //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
     operar(op: OperationModel): Observable<Account>{
       //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
         //pega a data em forma de id
@@ -35,7 +36,7 @@ export class AccountService {
         //ganbiarra pra tranformar Date no id formato AAAAMMDD
         const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
         
-        this.extratoService.createExtrato(op, nowId, this.account().balance);
+        this.extratoService.createExtrato(op, nowId, this.account()); //QNDO ESTIVER DENTRO DO SUBSCRIBE(), PODE METER DIRETO O RESPONSE
   
       return this.accountHttpService.operar(op).pipe(
         tap({
@@ -56,7 +57,7 @@ export class AccountService {
         //ganbiarra pra tranformar Date no id formato AAAAMMDD
         const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
         
-        this.extratoService.createExtrato(t, nowId, this.account().balance);
+        this.extratoService.createExtrato(t, nowId, this.account());
   
       return this.accountHttpService.transferir(t).pipe(
         tap({

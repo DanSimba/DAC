@@ -1,7 +1,10 @@
 package com.monsterbank.ms_account.account;
 
 import jakarta.persistence.*;
+
 import java.util.concurrent.ThreadLocalRandom;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "account")
@@ -11,25 +14,25 @@ public class AccountEntity {
     @Column(nullable = false, unique = true)
     private String number;
 
-    @Column(length = 11, nullable = false)
-    private String client_cpf;
+    @Column(name = "client_cpf", length = 11, nullable = false)
+    private String clientCpf;
 
-    @Column(nullable = false, precision = 19, scale = 4)
-    private double balanco;
+    @Column(nullable = false, precision = 17, scale = 2)
+    private BigDecimal balanco;
 
-    @Column(nullable = false)
-    private Long manager_id;
+    @Column(name = "manager_id", nullable = false)
+    private Long managerId;
     
     public AccountEntity(
         String clientCpf,
-        double balanco,
+        BigDecimal balanco,
         Long managerId
     ){
         //pode gerar um valor repetido, mas a chance é mínima
         this.number = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
-        this.client_cpf = clientCpf;
+        this.clientCpf = clientCpf;
         this.balanco = balanco;
-        this.manager_id = managerId;
+        this.managerId = managerId;
     }
 
     public String getNumber() {
@@ -37,14 +40,20 @@ public class AccountEntity {
     }
 
     public String getClientCpf() {
-        return this.client_cpf;
+        return this.clientCpf;
     }
 
-    public double getBalanco() {
+    public BigDecimal getBalanco() {
         return this.balanco;
     }
 
     public Long getManagerId() {
-        return this.manager_id;
+        return this.managerId;
+    }
+
+    //SETTERS---------------0987667890-=-098UYGKLOIU
+
+    public void setBalanco(BigDecimal balanco) {
+        this.balanco = balanco;
     }
 }

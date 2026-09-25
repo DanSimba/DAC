@@ -1,9 +1,8 @@
-package com.monsterbank.ms_account.account;
+package com.monsterbank.ms_account.operations;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.monsterbank.ms_account.account.AccountEntity;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 
 import java.util.Optional;
@@ -11,9 +10,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface AccountRepository extends JpaRepository<AccountEntity, String> {
-
-    Optional<AccountEntity> findByNumber(String number);
+public interface ExtratoRepository extends JpaRepository<ExtratoEntity, String>{
     
-    Optional<AccountEntity> findByClientCpf(String clientCpf);
+    Optional<ExtratoEntity> findByDateId(Integer dateId);
+
+    List<ExtratoEntity> findByAccNumber(String accNumber);
 }

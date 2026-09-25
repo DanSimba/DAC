@@ -123,6 +123,9 @@ services:
 
     ports:
       - "8082:8080"
+      
+    networks:
+    - monsterbank-net
 
   front-end:
     build: ./frontend

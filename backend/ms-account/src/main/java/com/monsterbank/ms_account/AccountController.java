@@ -2,6 +2,7 @@ package com.monsterbank.ms_account;
 
 import com.monsterbank.ms_account.Account.AccountDTOs.CreateAccountRequest;
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.operations.*;
 import com.monsterbank.ms_account.account.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,13 @@ public class AccountController {
 
      private AccountService accountService;
 
-     private AccountController(AccountService as){
+     public  AccountController(AccountService as){
           this.accountService = as;
      }
 
      @GetMapping("/test")
      public String test() {
+          System.out.println("MSACCOUNT FUNFANDO FI");
           return "ms-account funcionando!";
      }
 
@@ -45,4 +47,10 @@ public class AccountController {
                     )
                );
      }
+
+     @PostMapping("/operate")
+     public ResponseEntity<ExtratoDTO> operate(@RequestBody OperationEntity op){
+          return ResponseEntity.ok(this.accountService.operate(op));
+     }
+
 }
