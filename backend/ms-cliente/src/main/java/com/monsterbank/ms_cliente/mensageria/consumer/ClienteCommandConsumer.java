@@ -2,18 +2,23 @@ package com.monsterbank.ms_cliente.mensageria.consumer;
 
 import com.monsterbank.ms_cliente.cliente.ClienteService;
 import com.monsterbank.ms_cliente.exception.*;
-import com.monsterbank.ms_cliente.mensageria.ClienteReplyQueue;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaReply;
+import com.monsterbank.ms_cliente.mensageria.enumeration.ClienteReplyQueue;
 import com.monsterbank.ms_cliente.mensageria.producer.OrquestradorResponseProducer;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class ClienteCommandConsumer {

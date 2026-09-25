@@ -1,4 +1,4 @@
-package com.monsterbank.ms_cliente.mensageria;
+package com.monsterbank.ms_cliente.mensageria.enumeration;
 
 import java.util.Arrays;
 import java.util.Optional;

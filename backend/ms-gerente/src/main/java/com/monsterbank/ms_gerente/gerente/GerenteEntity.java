@@ -1,5 +1,6 @@
 package com.monsterbank.ms_gerente.gerente;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,5 +28,8 @@ public class GerenteEntity {
     private String email;
     private String telefone;
     private Boolean ativo;
+
+    @Column(nullable = false, name = "quantidade_clientes")
+    private Integer quantidadeClientesVinculados = 0;
 
 }

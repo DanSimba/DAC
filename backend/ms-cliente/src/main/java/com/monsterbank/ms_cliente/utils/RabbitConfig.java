@@ -1,12 +1,13 @@
 package com.monsterbank.ms_cliente.utils;
 
-import com.monsterbank.ms_cliente.mensageria.ClienteReplyQueue;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.monsterbank.ms_cliente.mensageria.enumeration.ClienteReplyQueue;
 
 @Configuration
 public class RabbitConfig {

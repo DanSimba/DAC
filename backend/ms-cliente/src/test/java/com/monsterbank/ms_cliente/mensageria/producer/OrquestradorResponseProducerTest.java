@@ -1,7 +1,8 @@
 package com.monsterbank.ms_cliente.mensageria.producer;
 
-import com.monsterbank.ms_cliente.mensageria.ClienteReplyQueue;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaReply;
+import com.monsterbank.ms_cliente.mensageria.enumeration.ClienteReplyQueue;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import tools.jackson.databind.ObjectMapper;
