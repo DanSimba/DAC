@@ -1,6 +1,7 @@
 package com.monsterbank.ms_cliente.mensageria.producer;
 
 import com.monsterbank.ms_cliente.mensageria.dto.SagaCommand;
+import com.monsterbank.ms_cliente.mensageria.enumeration.GerenteCommandQueue;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
@@ -20,8 +21,6 @@ public class SolicitacaoProducer {
 
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
-
-    private static final String FILA_GERENTE_CMD = "ms.gerente.cmd";
     
     public SolicitacaoProducer(RabbitTemplate rabbitTemplate, ObjectMapper objectMapper) { 
         this.rabbitTemplate = rabbitTemplate;
@@ -29,19 +28,24 @@ public class SolicitacaoProducer {
     }
     
     public void enviarParaAnalise(SolicitacaoSagaDTO SolicitacaoDto) {
-        log.info("Iniciando envio da solicitacao para o ms-gerente. Fila {}", FILA_GERENTE_CMD);
+        String COMMAND_TYPE = GerenteCommandQueue.AVALIAR_SOLICITACAO.commandType();
+        String QUEUE_NAME = GerenteCommandQueue.AVALIAR_SOLICITACAO.queueName();
+        
+        log.info("Iniciando envio da solicitacao para o ms-gerente. Fila: {} - commandType: {}", QUEUE_NAME, COMMAND_TYPE);
 
         JsonNode payload = objectMapper.valueToTree(SolicitacaoDto);
         String timestampString = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString();
 
         SagaCommand command = new SagaCommand(
             UUID.randomUUID().toString(),
-            "gerente.avaliar-solicitacao",
+            COMMAND_TYPE,
             timestampString,
             payload
         );
         
-        rabbitTemplate.convertAndSend(FILA_GERENTE_CMD, command);
+        rabbitTemplate.convertAndSend(QUEUE_NAME, command);
         log.info("Enviando command: {}", command);
+        log.info("Enviando para fila: {}", QUEUE_NAME);
+        log.info("Enviando commandType: {}", COMMAND_TYPE);
     }
 }

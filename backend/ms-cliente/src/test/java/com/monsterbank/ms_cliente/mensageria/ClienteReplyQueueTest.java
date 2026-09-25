@@ -2,6 +2,8 @@ package com.monsterbank.ms_cliente.mensageria;
 
 import org.junit.jupiter.api.Test;
 
+import com.monsterbank.ms_cliente.mensageria.enumeration.ClienteReplyQueue;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ClienteReplyQueueTest {
