@@ -29,5 +29,23 @@ public class EmailService {
         }
     };
 
+    public void sendPassword(String dest, String password){
+        String assunto = "Senha da conta";
+        String mensagem = "A senha da sua conta é: "+password;
+        sendEmailText(dest, assunto, mensagem);
+    }
+
+    public void sendManagerChange(String dest, String managerName){
+        String assunto = "Novo gerente";
+        String mensagem = "O gerente da sua conta é: "+managerName;
+        sendEmailText(dest, assunto, mensagem);
+    }
+
+    public void sendManagerExclude(String dest, String managerName){
+        String assunto = "Gerente removido";
+        String mensagem = "O gerente da sua conta "+managerName+" foi removido";
+        sendEmailText(dest, assunto, mensagem);
+    }
+
 }
 
