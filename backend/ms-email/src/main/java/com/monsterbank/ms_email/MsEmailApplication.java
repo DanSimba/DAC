@@ -1,13 +1,13 @@
-package com.monsterbank.api_gateway;
+package com.monsterbank.ms_email;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ApiGatewayApplication {
+public class MsEmailApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ApiGatewayApplication.class, args);
+		SpringApplication.run(MsEmailApplication.class, args);
 	}
 
 }
