@@ -36,7 +36,7 @@ public class SolicitacaoService {
     }
 
     @Transactional
-    public void registrar(RegistrarSolicitacaoRequest dto) {
+    public SolicitacaoEntity registrar(RegistrarSolicitacaoRequest dto) {
         log.info("Iniciando registro de solicitação para o CPF: {}", dto.cpf());
 
         validarPorCPF(dto.cpf());
@@ -71,10 +71,10 @@ public class SolicitacaoService {
                 dto.endereco().uf()
                 );
 
-        solicitacaoRepository.save(solicitacao);
+        solicitacao = solicitacaoRepository.save(solicitacao);
         log.info("Solicitacao salva como {} para o CPF: {}", solicitacao.getStatus(), dto.cpf());
 
-        SolicitacaoSagaDTO eventoDTO = new SolicitacaoSagaDTO(
+        RegistrarSolicitacaoRequest eventoDTO = new RegistrarSolicitacaoRequest(
             solicitacao.getNome(),
             solicitacao.getEmail(),
             solicitacao.getCpf(),
@@ -86,6 +86,7 @@ public class SolicitacaoService {
         solicitacaoProducer.enviarParaAnalise(eventoDTO);
         log.info("Solicitacao enviada para analise via RabbitMQ. Status: {}. CPF: {}", solicitacao.getStatus(), dto.cpf());
 
+        return solicitacao;
     }
 
 

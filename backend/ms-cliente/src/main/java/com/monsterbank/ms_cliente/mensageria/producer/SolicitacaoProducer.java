@@ -2,6 +2,7 @@ package com.monsterbank.ms_cliente.mensageria.producer;
 
 import com.monsterbank.ms_cliente.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_cliente.mensageria.enumeration.GerenteCommandQueue;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
@@ -27,13 +28,13 @@ public class SolicitacaoProducer {
         this.objectMapper = objectMapper; 
     }
     
-    public void enviarParaAnalise(SolicitacaoSagaDTO SolicitacaoDto) {
+    public void enviarParaAnalise(RegistrarSolicitacaoRequest solicitacaoDto) {
         String COMMAND_TYPE = GerenteCommandQueue.AVALIAR_SOLICITACAO.commandType();
         String QUEUE_NAME = GerenteCommandQueue.AVALIAR_SOLICITACAO.queueName();
         
         log.info("Iniciando envio da solicitacao para o ms-gerente. Fila: {} - commandType: {}", QUEUE_NAME, COMMAND_TYPE);
 
-        JsonNode payload = objectMapper.valueToTree(SolicitacaoDto);
+        JsonNode payload = objectMapper.valueToTree(solicitacaoDto);
         String timestampString = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString();
 
         SagaCommand command = new SagaCommand(
