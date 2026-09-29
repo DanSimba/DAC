@@ -23,6 +23,6 @@ export class AccountHttpService {
   //RETORNA A ACCOUNT COM O SALDO ATUALIZADO
   //SE NÃO ENCONTRAR O DESTINATÁRIO, DEVE RETORNAR ERROR 
   transferir(t: TransferenceModel): Observable<ExtratoModel>{
-    return this.http.post<ExtratoModel>(`${this.API_URL}/transference`, t);
+    return this.http.post<ExtratoModel>(`${this.API_URL}/transfer`, t);
   }
 }
