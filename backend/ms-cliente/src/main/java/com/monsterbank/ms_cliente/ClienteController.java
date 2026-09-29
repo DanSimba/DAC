@@ -43,6 +43,7 @@ public class ClienteController {
 
     }
 
+    @Deprecated 
     @PostMapping("/solicitacao/registrar")
     public ResponseEntity<Void> regitrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto){
         solicitacaoService.registrar(dto);

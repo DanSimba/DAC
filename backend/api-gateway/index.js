@@ -16,11 +16,11 @@ app.get('/', (req, res) => {
 });
 
 // Encaminha o cliente recebido do front para o ms-cliente
-app.post('/clientes', async (req, res) => {
+app.post('/solicitacoes', async (req, res) => {
   console.log("Cheguei no Gateway.");
   try {
     const response = await fetch(
-      `${process.env.MS_CLIENTE_URL}/clientes/solicitacao/registrar`,
+      `${process.env.MS_CLIENTE_URL}/solicitacoes`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
