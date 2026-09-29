@@ -8,7 +8,7 @@ import { ManagerDTO } from '../../domain/manager/models/managerDTO';
 })
 export class ManagerHttpService {
   http = inject(HttpClient);
-  private readonly api_URl = 'http://localhost/8080'; //a qualquer momento vira a oficial
+  private readonly api_URl = 'http://localhost:8080'; //a qualquer momento vira a oficial
 
   listarGerentes(): Observable<ManagerDTO[]>{
     return this.http.get<ManagerDTO[]>(`${this.api_URl}/gerentes`);

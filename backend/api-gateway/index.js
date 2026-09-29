@@ -11,6 +11,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
+//pra tratar responses sem corpo e encaminhar status code: 
+async function encaminhaResponse(response, res) {
+  const texto = await response.text();
+  if(!texto){
+    return res.status(response.status).end();
+  }
+  try{
+    return res.status(response.status).json(JSON.parse(texto));
+  }catch{
+    return res.status(response.status).send(texto);
+  }
+}
+
+
 app.get('/', (req, res) => {
   res.send('Olá Mundo!');
 });
@@ -54,6 +68,78 @@ app.post('/clientes', async (req, res) => {
     });
   }
 })
+
+// para o CRUD de gerentes 
+app.get('/gerentes', async(req, res) => {
+  try{
+    const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente`);
+    await encaminhaResponse(response, res);
+  }catch (error){
+    console.error('Erro a listar gerentes-> ', error);
+    res.status(502).json({
+      message: 'Erro ao comunicar com ms gerente'
+    });
+  }
+});
+
+app.post('/gerentes/:id', async(req, res) => {
+  try{
+    const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req.body)
+      }
+    );
+    await encaminhaResponse(response, res);
+  }catch(error){
+    console.error('Erro ao criar gerentes->  ', error);
+    res.status(502).json({
+      message: 'Erro ao comunicar com ms gerente'
+    });
+  }
+
+});
+
+app.put('/gerentes/:id', async(req, res) => {
+  try{
+    const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req.body)
+      }
+    );
+    await encaminhaResponse(response, res);
+  }catch(error){
+    console.error('Erro ao mudar gerentes->  ', error);
+    res.status(502).json({
+      message: 'Erro ao comunicar com ms gerente'
+    });
+  }
+
+});
+
+app.delete('/gerentes/:id', async(req,res) =>{
+   try{
+    const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
+      {
+        method: 'DELETE'
+      }
+    );
+    await encaminhaResponse(response, res);
+  } catch(error){
+    console.error('Erro ao deletar gerente->  ', error);
+    res.status(502).json({
+      message: 'Erro ao comunicar com ms gerente'
+    })
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
