@@ -77,7 +77,6 @@ public class AccountService {
     }
 
     public ExtratoDTO operate(OperationEntity op){
-        try{
             //MUDAR BALANCO
             AccountEntity acc = this.accountRepository
             .findByNumber(op.getAccNumber())
@@ -120,17 +119,10 @@ public class AccountService {
 
             ExtratoDTO extDto = new ExtratoDTO(ext);
             return extDto;
-            
-        } catch (SaldoInsuficienteException e) {
-            throw new RuntimeException("Saldo insuficiente para esta operação!!! (pobe)", e);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro realizar operação", e);
-        }
     }
     
 
     public ExtratoDTO transfer(TransferenceEntity t){
-        try{
             //ENCONTRAR AMBAS AS CONTAS
                 AccountEntity originAcc = this.accountRepository
                 .findByNumber(t.getAccOrigin())
@@ -183,11 +175,5 @@ public class AccountService {
 
             ExtratoDTO extDto = new ExtratoDTO(extOrigin);
             return extDto;
-
-        } catch (SaldoInsuficienteException e) {
-            throw new RuntimeException("Saldo insuficiente para esta operação!!! (pobe)", e);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro realizar transferência", e);
-        }
     }
 }
