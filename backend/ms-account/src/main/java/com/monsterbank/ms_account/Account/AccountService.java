@@ -71,8 +71,8 @@ public class AccountService {
             AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId());
             return accDto;
             
-        } catch (ErroCriacaoAccountException e) {
-            throw new RuntimeException("Erro ao criar conta", e);
+        } catch (Exception e) {
+            throw new ErroCriacaoAccountException();
         }
     }
 
