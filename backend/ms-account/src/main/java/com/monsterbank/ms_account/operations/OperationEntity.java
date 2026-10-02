@@ -61,4 +61,8 @@ public class OperationEntity {
     public String getDatetime() {
         return this.datetime;
     }
+
+    public void setExtrato(ExtratoEntity extrato) {
+        this.extrato = extrato;
+    }
 }

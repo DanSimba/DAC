@@ -53,4 +53,8 @@ public class AccountController {
           return ResponseEntity.ok(this.accountService.operate(op));
      }
 
+     @PostMapping("/transfer")
+     public ResponseEntity<ExtratoDTO> transfer(@RequestBody TransferenceEntity t){
+          return ResponseEntity.ok(this.accountService.transfer(t));
+     }
 }

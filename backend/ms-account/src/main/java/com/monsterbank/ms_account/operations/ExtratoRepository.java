@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface ExtratoRepository extends JpaRepository<ExtratoEntity, String>{
     
-    Optional<ExtratoEntity> findByDateId(Integer dateId);
+    Optional<ExtratoEntity> findByDateIdAndAccNumber(Integer dateId, String accNumber);
 
     List<ExtratoEntity> findByAccNumber(String accNumber);
 }

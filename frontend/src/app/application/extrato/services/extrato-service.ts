@@ -11,6 +11,15 @@ export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
 
+  //SOLUÇÃO ALTERNATIVA: PASSAR A LISTA INTEIRA DNV
+  setExtList(el: ExtratoModel[]){
+    this.extList.set(el);
+  }
+
+  addToExtList(ext: ExtratoModel){
+        this.extList.update(current=>[ext, ...current]);
+  }
+
   createExtrato(ext: OperationModel|TransferenceModel, dateId: number, acc: Account){ 
       //procura por esse id no extrato (se já tem o dia, coloca ext lá)
         const extDay = this.extList().find(day => day.dateId==dateId)

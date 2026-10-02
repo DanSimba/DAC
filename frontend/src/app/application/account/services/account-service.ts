@@ -5,6 +5,7 @@ import { TransferenceModel } from '../../../domain/operations/models/transferenc
 import { Observable, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
+import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 
 @Injectable({
   providedIn: 'root',
@@ -29,19 +30,28 @@ export class AccountService {
   }
 
   //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
-    operar(op: OperationModel): Observable<Account>{
-      //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
-        //pega a data em forma de id
-        const now = new Date();
-        //ganbiarra pra tranformar Date no id formato AAAAMMDD
-        const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
-        
-        this.extratoService.createExtrato(op, nowId, this.account()); //QNDO ESTIVER DENTRO DO SUBSCRIBE(), PODE METER DIRETO O RESPONSE
-  
+    operar(op: OperationModel): Observable<ExtratoModel>{
+
+      //OPÇAO PROVISORIA
+          //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
+            //pega a data em forma de id
+            const now = new Date();
+            //ganbiarra pra tranformar Date no id formato AAAAMMDD
+            const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+            
+            this.extratoService.createExtrato(op, nowId, this.account()); //QNDO ESTIVER DENTRO DO SUBSCRIBE(), PODE METER DIRETO O RESPONSE
+      
       return this.accountHttpService.operar(op).pipe(
         tap({
           next: (response)=>{
-            this.account.set(response);
+
+            this.extratoService.addToExtList(response);
+
+            this.account.update(current => ({
+              ...current,  
+              balance: response.saldoApos         
+            }))
+
           },
           error: (err)=>{
             console.log('err: ', err);
@@ -50,19 +60,27 @@ export class AccountService {
       )
     }
   
-    transferir(t: TransferenceModel): Observable<Account>{
-      //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
-        //pega a data em forma de id
-        const now = new Date();
-        //ganbiarra pra tranformar Date no id formato AAAAMMDD
-        const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
-        
-        this.extratoService.createExtrato(t, nowId, this.account());
+    transferir(t: TransferenceModel): Observable<ExtratoModel>{
+      
+        //OPÇAO PROVISORIA
+          //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
+            //pega a data em forma de id
+            const now = new Date();
+            //ganbiarra pra tranformar Date no id formato AAAAMMDD
+            const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+            
+            this.extratoService.createExtrato(t, nowId, this.account());
   
       return this.accountHttpService.transferir(t).pipe(
         tap({
           next: (response)=>{
-            this.account.set(response)
+            
+            this.extratoService.addToExtList(response);
+
+            this.account.update(current => ({
+              ...current,  
+              balance: response.saldoApos         
+            }))
           },
           error: (err)=>{
             console.log('err: ', err);

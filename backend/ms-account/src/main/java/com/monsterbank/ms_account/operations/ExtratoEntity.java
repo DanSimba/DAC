@@ -18,10 +18,10 @@ public class ExtratoEntity {
     @Column(nullable = false)
     private Integer dateId;
 
-    @OneToMany(mappedBy = "extrato")
+    @OneToMany(mappedBy = "extrato", cascade = CascadeType.ALL) //o cascade salva as instancias de opers e transfs junto ao salvar o extrato 
     private List<OperationEntity> opers;
 
-    @OneToMany(mappedBy = "extrato")
+    @OneToMany(mappedBy = "extrato", cascade = CascadeType.ALL)
     private List<TransfereceEntity> transfs;
 
     @Column(nullable = false)
@@ -69,10 +69,12 @@ public class ExtratoEntity {
     } 
 
     public void addOperation(OperationEntity op){
+        op.setExtrato(this);
         this.opers.add(op);
     }
 
     public void addTransference(TransferenceEntity t){
+        t.setExtrato(this);
         this.transfs.add(t);
     }
 }
