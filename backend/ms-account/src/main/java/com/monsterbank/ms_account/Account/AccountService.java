@@ -4,7 +4,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
+import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
+
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
@@ -91,6 +94,8 @@ public class AccountService {
                 //PERGUNTAR PRO RAZER: A VERIFICAÇÃO SE TEM SALDO O SUFICIENTE PODE FICAR SÓ NO FRONT? OU EU VOU TER Q FZR ESSA MERDA DNV AQUI?
                 //
                 novoBalanco = acc.getBalanco().subtract(op.getValue());
+                //compareTo retorna -1 se for menor***
+                if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
                 acc.setBalanco(novoBalanco);
             }
 
@@ -116,6 +121,8 @@ public class AccountService {
             ExtratoDTO extDto = new ExtratoDTO(ext);
             return extDto;
             
+        } catch (SaldoInsuficienteException e) {
+            throw new RuntimeException("Saldo insuficiente para esta operação!!! (pobe)", e);
         } catch (Exception e) {
             throw new RuntimeException("Erro realizar operação", e);
         }
@@ -134,8 +141,10 @@ public class AccountService {
                 .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada!!!"));
 
             //REMOVE E ADICIONA VALORES
-                novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());
-                originAcc.setBalanco(novoBalancoOrigin);
+                //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION
+                    novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());
+                    if(novoBalancoOrigin.compareTo(BigDecimal.ZERO)<0) throw new SaldoInsuficienteException();
+                    originAcc.setBalanco(novoBalancoOrigin);
 
                 novoBalancoDestiny = destinyAcc.getBalanco().add(t.getValue());
                 destinyAcc.setBalanco(novoBalancoDestiny);
@@ -175,6 +184,8 @@ public class AccountService {
             ExtratoDTO extDto = new ExtratoDTO(extOrigin);
             return extDto;
 
+        } catch (SaldoInsuficienteException e) {
+            throw new RuntimeException("Saldo insuficiente para esta operação!!! (pobe)", e);
         } catch (Exception e) {
             throw new RuntimeException("Erro realizar transferência", e);
         }
