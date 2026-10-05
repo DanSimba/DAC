@@ -102,6 +102,21 @@ services:
     networks:
       - monsterbank-net
 
+  ms-orquestrador:
+    build: ./backend/ms-orquestrador
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    networks:
+      - monsterbank-net
+
   ms-account:
     build:
       context: ./backend/ms-account
