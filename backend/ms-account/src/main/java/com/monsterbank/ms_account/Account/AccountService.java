@@ -15,15 +15,16 @@ import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.monsterbank.ms_account.operations.operationDTOs.ExtratoDTO;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Optional;
+
 import java.math.BigDecimal;
 import java.nio.file.OpenOption;
-import java.sql.Date;
 
-import java.util.Optional;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import java.util.List;
 
 @Service
 public class AccountService {
@@ -175,5 +176,13 @@ public class AccountService {
 
             ExtratoDTO extDto = new ExtratoDTO(extOrigin);
             return extDto;
+    }
+
+    public ExtratoDTO listExtratos(String number){
+        List<ExtratoEntity> exts = this.extratoRepository.findByAccNumber(number);
+
+        return exts.stream().map( //pega a lista e tranforma um por um em DTO
+            ext -> new ExtratoDTO(ext) 
+        ).collect(Collectors.toList());
     }
 }

@@ -14,6 +14,17 @@ export class AccountHttpService {
   http = inject(HttpClient);
   private readonly API_URL = `${environmentDev.apiUrlAccount}/account`;
 
+  findAccountByCpf(cpf:string): Observable<Account>{
+    return this.http.get<Account>(`${this.API_URL}/findByCpf/${cpf}`);
+  }
+
+  findAccountByNumber(number:string): Observable<Account>{
+    return this.http.get<Account>(`${this.API_URL}/findByNumber/${number}`);
+  }
+
+  listExtratos(number:string): Observable<ExtratoModel[]>{
+    return this.http.get<ExtratoModel[]>(`${this.API_URL}/listExtratos/${number}`);
+  }
 
   //FAZ A OPERAÇÃO CERTA E AI RETORNA A CONTA COM O VALOR ATUALIZADO
   operar(op: OperationModel): Observable<ExtratoModel>{

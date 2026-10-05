@@ -2,10 +2,11 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Account } from '../../../domain/account/models/account.model';
 import { ExtratoService } from '../../extrato/services/extrato-service';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
+import { response } from 'express';
 
 @Injectable({
   providedIn: 'root',
@@ -29,10 +30,28 @@ export class AccountService {
     this.account.set(a);
   }
 
-  //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
-    operar(op: OperationModel): Observable<ExtratoModel>{
+  findAccountByCpf(cpf: string){
+    this.accountHttpService.findAccountByCpf(cpf).subscribe({
+      next:(response)=>{
+        this.account.set(response);
+        //console.log("conta: ", response);
+      }
+    })
+  }
 
-      //OPÇAO PROVISORIA
+  findAccountByNumber(number: string){
+    this.accountHttpService.findAccountByNumber(number).subscribe({
+      next:(response)=>{
+        this.account.set(response);
+        //console.log("conta: ", response);
+      }
+    })
+  }
+
+  //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
+    operar(op: OperationModel): Observable<Account>{
+
+      /*OPÇAO PROVISORIA QUE CRIA O EXTRATO DIRETO NO FRONT E MANDA LA PRA LISTA
           //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
             //pega a data em forma de id
             const now = new Date();
@@ -40,29 +59,25 @@ export class AccountService {
             const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
             
             this.extratoService.createExtrato(op, nowId, this.account()); //QNDO ESTIVER DENTRO DO SUBSCRIBE(), PODE METER DIRETO O RESPONSE
-      
+      */
       return this.accountHttpService.operar(op).pipe(
-        tap({
-          next: (response)=>{
+        map((response) => {
+        
+          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
 
-            this.extratoService.addToExtList(response);
+          this.account.update(current => ({
+            ...current,  
+            balance: response.saldoApos //ATUALIZA BALANCO
+          }));
 
-            this.account.update(current => ({
-              ...current,  
-              balance: response.saldoApos         
-            }))
-
-          },
-          error: (err)=>{
-            console.log('err: ', err);
-          }
+          return this.account(); 
         })
       )
     }
   
-    transferir(t: TransferenceModel): Observable<ExtratoModel>{
+    transferir(t: TransferenceModel): Observable<Account>{
       
-        //OPÇAO PROVISORIA
+        /*OPÇAO PROVISORIA QUE CRIA O EXTRATO DIRETO NO FRONT E MANDA LA PRA LISTA
           //LÓGICA DE ADICIONAR EXTRATO, DEVE IR PARA DENTRO DO SUBSCRIBE DEPOIS
             //pega a data em forma de id
             const now = new Date();
@@ -70,21 +85,18 @@ export class AccountService {
             const nowId = +`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
             
             this.extratoService.createExtrato(t, nowId, this.account());
-  
+        */
       return this.accountHttpService.transferir(t).pipe(
-        tap({
-          next: (response)=>{
-            
-            this.extratoService.addToExtList(response);
+        map((response) => {
+        
+          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
 
-            this.account.update(current => ({
-              ...current,  
-              balance: response.saldoApos         
-            }))
-          },
-          error: (err)=>{
-            console.log('err: ', err);
-          }
+          this.account.update(current => ({
+            ...current,  
+            balance: response.saldoApos //ATUALIZA BALANCO
+          }));
+
+          return this.account(); 
         })
       )
     }

@@ -3,6 +3,8 @@ import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { Account } from '../../../domain/account/models/account.model';
+import { Observable, tap } from 'rxjs';
+import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +12,7 @@ import { Account } from '../../../domain/account/models/account.model';
 export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
+  private accountHttpService = inject(AccountHttpService);
 
   //SOLUÇÃO ALTERNATIVA: PASSAR A LISTA INTEIRA DNV
   setExtList(el: ExtratoModel[]){
@@ -98,6 +101,14 @@ export class ExtratoService {
     }
   }
 
+  listExtratos(number:string){ //já caotura e coloca tudo na extList
+    this.accountHttpService.listExtratos(number).subscribe({
+      next:(response)=>{
+        this.extList.set(response);
+        //console.log("lista de exts: ", response);
+      }
+    })
+  }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)
 
