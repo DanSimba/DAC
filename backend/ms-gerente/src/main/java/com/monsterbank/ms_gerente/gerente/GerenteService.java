@@ -19,12 +19,6 @@ public class GerenteService {
     private static final Logger log = LoggerFactory.getLogger(GerenteService.class);
 
     private final GerenteRepository gerenteRepository;
-    // private final solicitacaoRepository solicitacaoRepository;
-
-    // GerenteService(GerenteRepository gerenteRepository, solicitacaoRepository solicitacaoRepository) {
-    //     this.gerenteRepository = gerenteRepository;
-    //     this.solicitacaoRepository = solicitacaoRepository;
-    // }
 
     GerenteService(GerenteRepository gerenteRepository) {
         this.gerenteRepository = gerenteRepository;
@@ -85,32 +79,4 @@ public class GerenteService {
         gerente.setAtivo(false);
         gerenteRepository.save(gerente);
     }
-
-
-    // @Transactional
-    // public void registraAvaliacaoPendente(String cpf, String nome, String salario) {
-    //     log.info("Iniciando registro de solicitação pendente para um gerente");
-
-    //     GerenteEntity gerente = gerenteRepository.findFirstByOrderByQuantidadeClientesVinculadosAsc().orElseThrow(() -> new RuntimeException("Nenhum gerente disponível no sistema."));
-    //     log.info("ID gerente: {}", gerente.getId());
-    //     log.info("Nome: {}", gerente.getNome());
-    //     log.info("Quantidade de clientes antes de vincular: {}", gerente.getQuantidadeClientesVinculados());
-
-    //     solicitacaoEntity solicitacao = new solicitacaoEntity();
-    //     solicitacao.setCpfCliente(cpf);
-    //     solicitacao.setNomeCliente(nome);
-    //     solicitacao.setSalarioCliente(salario);
-    //     solicitacao.setStatus(StatusSolicitacao.PENDENTE);
-    //     solicitacao.setGerenteResponsavel(gerente);
-
-    //     solicitacaoRepository.save(solicitacao);
-    //     log.info("Solicitação salva.");
-    //     log.info("CPF do cliente: {}", solicitacao.getCpfCliente());
-    //     log.info("Nome do cliente: {}", solicitacao.getNomeCliente());
-    //     log.info("Status da solicitação: {}", solicitacao.getStatus());
-
-    //     gerente.setQuantidadeClientesVinculados(gerente.getQuantidadeClientesVinculados() + 1);
-    //     gerenteRepository.save(gerente);
-    //     log.info("Quantidade de clientes depois de vincular: {}", gerente.getQuantidadeClientesVinculados());
-    // }
 }
