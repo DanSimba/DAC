@@ -42,8 +42,8 @@ export class Extrato implements OnInit{
   ngOnInit(): void {
 
     //PRIMEIRO FAZ UM GETEXTRATOLIST
-    
-    //POPULA A LISTA DE EXTRATO COM O MES
+    this.extratoService.listExtratos(this.account().number);
+    //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
     this.extratoService.createMonthExt(this.account());
     
     const now = new Date();
