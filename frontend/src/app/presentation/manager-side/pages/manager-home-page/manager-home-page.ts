@@ -118,7 +118,7 @@ export class ManagerHomePage {
     }
   ];
 
-  // Controle do pop-up
+  //Controle do pop-up
   public modalAberto: boolean = false;
   public modoModal: 'REJEITAR' | 'VER_MOTIVO' = 'REJEITAR';
   public solicitacaoSelecionada: SolicitacaoCadastro | null = null;

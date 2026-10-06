@@ -1,1 +1,68 @@
-<p>clients works!</p>
+<div class="flex flex-col justify-start items-center gap-y-6 pt-14 min-h-screen">
+
+  <h1 class="text-5xl text-white font-monster">CONSULTA DE CLIENTES</h1>
+
+  <div class="w-[85vw] flex flex-col">
+    <input 
+      type="text" 
+      [(ngModel)]="termoBusca"
+      (ngModelChange)="resetarPagina()"
+      placeholder="Pesquisar por Nome ou CPF..."
+      class="w-full bg-black/50 border border-white/20 rounded-lg p-4 text-white placeholder-white/50 focus:outline-none focus:border-pink-500">
+  </div>
+
+  <div class="flex flex-col w-[85vw] rounded-lg overflow-hidden bg-black/50 border border-white/10">
+    
+    <div>
+      <table class="w-full text-left text-white font-display text-sm">
+        <thead class="bg-white/10 font-title text-base">
+          <tr>
+            <th class="p-4 font-bold">CPF</th>
+            <th class="p-4 font-bold">NOME</th>
+            <th class="p-4 font-bold">CIDADE</th>
+            <th class="p-4 font-bold text-center">ESTADO</th>
+            <th class="p-4 font-bold text-right">SALDO DA CONTA</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/10">
+          
+          @for (cliente of getClientesPaginados; track cliente.cpf) {
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4">{{ cliente.cpf }}</td>
+              <td class="p-4 font-bold">{{ cliente.nome }}</td>
+              <td class="p-4">{{ cliente.cidade }}</td>
+              <td class="p-4 text-center">{{ cliente.estado }}</td>
+              <td class="p-4 text-right">{{ cliente.saldo }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="p-8 text-center text-white/50">
+                Nenhum cliente encontrado para a busca "{{ termoBusca }}".
+              </td>
+            </tr>
+          }
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação  -->
+    <div class="flex justify-between items-center p-4 bg-black/40 text-white font-display">
+      <button 
+        (click)="mudarPagina(paginaAtual - 1)" 
+        [disabled]="paginaAtual === 1"
+        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed">
+        Anterior
+      </button>
+      <span>Página {{ paginaAtual }} de {{ getTotalPaginas }}</span>
+      <button 
+        (click)="mudarPagina(paginaAtual + 1)" 
+        [disabled]="paginaAtual >= getTotalPaginas"
+        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed font-bold">
+        Próximo
+      </button>
+    </div>
+
+  </div>
+
+</div>

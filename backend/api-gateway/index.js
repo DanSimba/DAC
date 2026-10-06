@@ -121,7 +121,20 @@ app.get('/gerentes', async(req, res) => {
   }
 });
 
-app.post('/gerentes/:id', async(req, res) => {
+//esqueci a merda do get por id
+app.get('/gerentes/:id', async(req, res) =>{
+  try{
+    const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`);
+    await encaminhaResponse(response, res);
+  }catch(error){
+    console.error('Erro ao buscar gerente x->  ', error);
+    res.status(502).json({
+      message: 'Erro ao comunicar com o ms gerente'
+    });
+  }
+})
+
+app.post('/gerentes', async(req, res) => {
   try{
     const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
       {
