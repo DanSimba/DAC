@@ -74,6 +74,12 @@ services:
     build: ./backend/api-gateway
     ports:
       - "8080:8080"
+    environment:
+      MS_GERENTE_URL: http://ms-gerente:8084
+      MS_CLIENTE_URL: http://ms-cliente:8081
+    depends_on:
+      - ms-gerente
+      - ms-cliente
     networks:
       - monsterbank-net
 
