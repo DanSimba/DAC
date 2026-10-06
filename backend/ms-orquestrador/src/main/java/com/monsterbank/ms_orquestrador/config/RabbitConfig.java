@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
+    public static final String SAGA_COMMAND_QUEUE = "saga.cmd";
     public static final String CLIENTE_COMMAND_QUEUE = "ms.cliente.cmd";
     public static final String CLIENTE_APROVAR_SOLICITACAO_REPLY_QUEUE = "ms.cliente.aprovar-solicitacao.reply";
     public static final String CLIENTE_CRIAR_REPLY_QUEUE = "ms.cliente.criar.reply";
@@ -17,6 +18,11 @@ public class RabbitConfig {
     public static final String CLIENTE_MARCAR_NAO_APROVADA_REPLY_QUEUE = "ms.cliente.marcar-nao-aprovada.reply";
     public static final String CLIENTE_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.cliente.compensar-criacao.reply";
     public static final String CLIENTE_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.cliente.comando-desconhecido.reply";
+
+    @Bean
+    public Queue sagaCmdQueue(){
+        return new Queue(SAGA_COMMAND_QUEUE, true);
+    }
 
     @Bean
     public Queue clienteCmdQueue(){
