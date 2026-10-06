@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.monsterbank.ms_gerente.gerente.solicitacaoAvaliacao.SolicitacaoAvaliacaoEntity;
-import com.monsterbank.ms_gerente.gerente.solicitacaoAvaliacao.SolicitacaoAvaliacaoRepository;
-import com.monsterbank.ms_gerente.gerente.solicitacaoAvaliacao.enumeration.StatusSolicitacao;
+// import com.monsterbank.ms_gerente.gerente.solicitacao.solicitacaoEntity;
+// import com.monsterbank.ms_gerente.gerente.solicitacao.solicitacaoRepository;
+import com.monsterbank.ms_gerente.gerente.solicitacao.enumeration.StatusSolicitacao;
 
 import jakarta.transaction.Transactional;
 
@@ -19,11 +19,9 @@ public class GerenteService {
     private static final Logger log = LoggerFactory.getLogger(GerenteService.class);
 
     private final GerenteRepository gerenteRepository;
-    private final SolicitacaoAvaliacaoRepository solicitacaoRepository;
 
-    GerenteService(GerenteRepository gerenteRepository, SolicitacaoAvaliacaoRepository solicitacaoRepository) {
+    GerenteService(GerenteRepository gerenteRepository) {
         this.gerenteRepository = gerenteRepository;
-        this.solicitacaoRepository = solicitacaoRepository;
     }
 
     public GerenteDTO paraDTO(GerenteEntity gerente) {
@@ -80,32 +78,5 @@ public class GerenteService {
                 .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
         gerente.setAtivo(false);
         gerenteRepository.save(gerente);
-    }
-
-    @Transactional
-    public void registraAvaliacaoPendente(String cpf, String nome, String salario) {
-        log.info("Iniciando registro de solicitação pendente para um gerente");
-
-        GerenteEntity gerente = gerenteRepository.findFirstByOrderByQuantidadeClientesVinculadosAsc().orElseThrow(() -> new RuntimeException("Nenhum gerente disponível no sistema."));
-        log.info("ID gerente: {}", gerente.getId());
-        log.info("Nome: {}", gerente.getNome());
-        log.info("Quantidade de clientes antes de vincular: {}", gerente.getQuantidadeClientesVinculados());
-
-        SolicitacaoAvaliacaoEntity solicitacao = new SolicitacaoAvaliacaoEntity();
-        solicitacao.setCpfCliente(cpf);
-        solicitacao.setNomeCliente(nome);
-        solicitacao.setSalarioCliente(salario);
-        solicitacao.setStatus(StatusSolicitacao.PENDENTE);
-        solicitacao.setGerenteResponsavel(gerente);
-
-        solicitacaoRepository.save(solicitacao);
-        log.info("Solicitação salva.");
-        log.info("CPF do cliente: {}", solicitacao.getCpfCliente());
-        log.info("Nome do cliente: {}", solicitacao.getNomeCliente());
-        log.info("Status da solicitação: {}", solicitacao.getStatus());
-
-        gerente.setQuantidadeClientesVinculados(gerente.getQuantidadeClientesVinculados() + 1);
-        gerenteRepository.save(gerente);
-        log.info("Quantidade de clientes depois de vincular: {}", gerente.getQuantidadeClientesVinculados());
     }
 }
