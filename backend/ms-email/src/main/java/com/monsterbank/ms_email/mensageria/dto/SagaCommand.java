@@ -1,4 +1,4 @@
-package com.monsterbank.ms_orquestrador.messaging.dto;
+package com.monsterbank.ms_email.mensageria.dto;
 
 import tools.jackson.databind.JsonNode;
 
@@ -8,4 +8,5 @@ public record SagaCommand(
         String timestamp,
         JsonNode payload
 ) {
+
 }

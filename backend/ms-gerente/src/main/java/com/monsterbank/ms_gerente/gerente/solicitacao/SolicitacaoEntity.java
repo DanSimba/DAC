@@ -1,7 +1,7 @@
-package com.monsterbank.ms_gerente.gerente.solicitacaoAvaliacao;
+package com.monsterbank.ms_gerente.gerente.solicitacao;
 
 import com.monsterbank.ms_gerente.gerente.GerenteEntity;
-import com.monsterbank.ms_gerente.gerente.solicitacaoAvaliacao.enumeration.StatusSolicitacao;
+import com.monsterbank.ms_gerente.gerente.solicitacao.enumeration.StatusSolicitacao;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +20,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SolicitacaoAvaliacaoEntity {
+public class SolicitacaoEntity {
     
     @Id
     private String cpfCliente;

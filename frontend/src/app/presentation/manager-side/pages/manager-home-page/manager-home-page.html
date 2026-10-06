@@ -1,118 +1,161 @@
-<div class="mx-auto max-w-5xl p-6 bg-white shadow-lg border rounded-lg my-10">
+<div class="flex flex-col py-6 justify-start items-center gap-y-6">
 
-  <div class="flex justify-between items-center mb-6 border-b pb-4">
+  <h1 class="text-5xl text-white font-monster mt-4">SOLICITAÇÕES DE CADASTRO</h1>
+
+  <!-- Filtros -->
+  <div class="flex flex-row gap-4 w-[85vw] font-display text-sm">
+    <button 
+      (click)="mudarFiltro('PENDENTE')"
+      [class.bg-white]="filtroAtual === 'PENDENTE'" [class.text-black]="filtroAtual === 'PENDENTE'"
+      [class.bg-white_10]="filtroAtual !== 'PENDENTE'" [class.text-white]="filtroAtual !== 'PENDENTE'"
+      class="px-6 py-2 rounded-t-lg font-bold transition-colors bg-white/20 hover:bg-white hover:text-black">
+      Pendentes
+    </button>
+    <button 
+      (click)="mudarFiltro('APROVADO')"
+      [class.bg-white]="filtroAtual === 'APROVADO'" [class.text-black]="filtroAtual === 'APROVADO'"
+      [class.bg-white_10]="filtroAtual !== 'APROVADO'" [class.text-white]="filtroAtual !== 'APROVADO'"
+      class="px-6 py-2 rounded-t-lg font-bold transition-colors bg-white/20 hover:bg-white hover:text-black">
+      Aprovados
+    </button>
+    <button 
+      (click)="mudarFiltro('REJEITADO')"
+      [class.bg-white]="filtroAtual === 'REJEITADO'" [class.text-black]="filtroAtual === 'REJEITADO'"
+      [class.bg-white_10]="filtroAtual !== 'REJEITADO'" [class.text-white]="filtroAtual !== 'REJEITADO'"
+      class="px-6 py-2 rounded-t-lg font-bold transition-colors bg-white/20 hover:bg-white hover:text-black">
+      Não Aprovados
+    </button>
+  </div>
+
+  <!-- Container Principal -->
+  <div class="flex flex-col w-[85vw] rounded-b-xl rounded-tr-xl overflow-hidden bg-black/50 border border-white/10 -mt-6">
+    
     <div>
-      <h2 class="text-2xl font-bold text-gray-800">Solicitações de Abertura de Conta</h2>
-      <p class="text-sm text-gray-600">Novos cadastros aguardando análise.</p>
-    </div>
-  </div>
-
-  @if (mensagemSucesso) {
-    <div class="p-3 bg-green-100 border rounded border-green-400 text-green-700 mb-4">
-      {{ mensagemSucesso }}
-    </div>
-  }
-
-  @if (mensagemErro) {
-    <div class="p-3 bg-red-100 border rounded border-red-400 text-red-700 mb-4">
-      {{ mensagemErro }}
-    </div>
-  }
-
-  <div class="overflow-x-auto">
-    <table class="w-full border-collapse text-left text-sm">
-      <thead class="bg-gray-100 border-b">
-        <tr>
-          <th class="p-3 font-semibold text-gray-800">Data / Hora</th>
-          <th class="p-3 font-semibold text-gray-800">CPF</th>
-          <th class="p-3 font-semibold text-gray-800">Nome</th>
-          <th class="p-3 font-semibold text-gray-800">Salário</th>
-          <th class="p-3 font-semibold text-gray-800 text-center">Status</th>
-          <th class="p-3 font-semibold text-gray-800 text-center">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of solicitacoes; track item.id) {
-          <tr class="border-b hover:bg-gray-50">
-            <td class="p-3 text-gray-800">{{ item.dataHora }}</td>
-            <td class="p-3 text-gray-800">{{ item.cpf }}</td>
-            <td class="p-3 font-medium text-gray-900">{{ item.nome }}</td>
-            <td class="p-3 text-gray-800">{{ item.salario }}</td>
-            
-            <td class="p-3 text-center">
-              @if (item.status === 'PENDENTE') {
-                <span class="bg-yellow-100 text-yellow-800 font-semibold px-2 py-1 rounded">
-                  PENDENTE
-                </span>
-              } @else if (item.status === 'APROVADO') {
-                <span class="bg-green-100 text-green-800 font-semibold px-2 py-1 rounded">
-                  APROVADO
-                </span>
-              } @else {
-                <span class="bg-red-100 text-red-800 font-semibold px-2 py-1 rounded">
-                  NÃO APROVADO
-                </span>
-              }
-            </td>
-
-            <td class="p-3 text-center">
-              @if (item.status === 'PENDENTE') {
-                <div class="flex justify-center gap-2">
-                  <button 
-                    type="button" 
-                    (click)="aprovar(item)"
-                    class="bg-green-600 hover:bg-green-800 text-white font-bold py-1 px-3 rounded">
-                    Aprovar
-                  </button>
-
-                  <button 
-                    type="button" 
-                    (click)="abrirModal(item)"
-                    class="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 rounded">
-                    Rejeitar
-                  </button>
-                </div>
-              } @else {
-                <span class="text-xs text-gray-400">Finalizado</span>
-              }
-            </td>
+      <table class="w-full text-left text-white font-display text-sm">
+        <thead class="bg-white/10 font-title text-base">
+          <tr>
+            <th class="p-4 font-bold">DATA / HORA</th>
+            <th class="p-4 font-bold">CPF</th>
+            <th class="p-4 font-bold">NOME</th>
+            <th class="p-4 font-bold text-right">SALÁRIO</th>
+            <th class="p-4 font-bold text-center">STATUS</th>
+            <th class="p-4 font-bold text-center">AÇÕES</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody class="divide-y divide-white/10">
+          @for (item of getSolicitacoesPaginadas; track item.cpf) {
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4">{{ item.dataHora }}</td>
+              <td class="p-4">{{ item.cpf }}</td>
+              <td class="p-4">{{ item.nome }}</td>
+              <td class="p-4 text-right">{{ item.salario }}</td>
+              
+              <td class="p-4 text-center">
+                @if (item.status === 'PENDENTE') {
+                  <span class="bg-yellow-500/20 text-yellow-300 border border-yellow-500/50 px-2 py-1 rounded font-bold">PENDENTE</span>
+                } @else if (item.status === 'APROVADO') {
+                  <span class="bg-green-500/20 text-green-300 border border-green-500/50 px-2 py-1 rounded font-bold">APROVADO</span>
+                } @else {
+                  <span class="bg-red-500/20 text-red-300 border border-red-500/50 px-2 py-1 rounded font-bold">REJEITADO</span>
+                }
+              </td>
+
+              <td class="p-4 text-center">
+                @if (item.status === 'PENDENTE') {
+                  <div class="flex justify-center gap-2">
+                    <button type="button" (click)="aprovar(item)" class="bg-green-600 hover:bg-green-500 text-white py-1 px-3 rounded font-bold">
+                      Aprovar
+                    </button>
+                    <button type="button" (click)="abrirModalRejeitar(item)" class="bg-red-600 hover:bg-red-500 text-white py-1 px-3 rounded font-bold">
+                      Rejeitar
+                    </button>
+                  </div>
+                } @else if (item.status === 'REJEITADO') {
+                  <button type="button" (click)="abrirModalVerMotivo(item)" class="border border-white/50 hover:bg-white/10 text-white py-1 px-3 rounded text-xs">
+                    Ver Motivo
+                  </button>
+                } @else {
+                  <span class="text-white/40">Conta Criada</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="p-8 text-center text-white/50 italic">
+                Nenhuma solicitação encontrada para esta categoria.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação -->
+    <div class="flex justify-between items-center p-4 bg-black/40 text-white font-display">
+      <button 
+        (click)="mudarPagina(paginaAtual - 1)" 
+        [disabled]="paginaAtual === 1"
+        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed">
+        Anterior
+      </button>
+      <span>Página {{ paginaAtual }} de {{ getTotalPaginas }}</span>
+      <button 
+        (click)="mudarPagina(paginaAtual + 1)" 
+        [disabled]="paginaAtual >= getTotalPaginas"
+        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed font-bold">
+        Próximo
+      </button>
+    </div>
+
   </div>
 
-  <!--Pop-up de rejeição talvez eu faça em outro arquivo dps-->
+  <!-- Pop-up Modal Rejeitar/Ver Motivo -->
   @if (modalAberto) {
-    <div class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div class="bg-white rounded-lg max-w-2xl w-full p-6">
+    <div class="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4">
+      <div class="bg-gray-900 border border-white/20 rounded-xl max-w-lg w-full p-6 text-white">
         
-        <h3 class="text-lg font-bold text-gray-800 mb-2">Rejeitar Cadastro</h3>
-        <p class="text-sm text-gray-600 mb-4">
-          Informe o motivo da recusa para o cliente <strong>{{ solicitacaoSelecionada?.nome }}</strong>:
+        <h3 class="text-xl font-bold mb-2 font-title">
+          {{ modoModal === 'REJEITAR' ? 'Rejeitar Cadastro' : 'Motivo da Rejeição' }}
+        </h3>
+        
+        <p class="text-sm text-white/70 mb-4">
+          Cliente: <strong class="text-white">{{ solicitacaoSelecionada?.nome }}</strong>
+          <br>
+          CPF: <span class="text-white">{{ solicitacaoSelecionada?.cpf }}</span>
         </p>
 
+        @if (motivoRejeicaoErro && modoModal === 'REJEITAR') {
+          <div class="p-2 mb-3 bg-red-500/20 border border-red-500/50 text-red-300 text-sm rounded">
+            {{ motivoRejeicaoErro }}
+          </div>
+        }
+
         <textarea 
-          rows="3" 
+          rows="4" 
           [(ngModel)]="motivoRejeicao"
-          class="w-full border border-gray-400 rounded p-2 mb-4"
-          placeholder="Ex: Documentação incompleta...">
+          [readonly]="modoModal === 'VER_MOTIVO'"
+          [class.bg-white_5]="modoModal === 'VER_MOTIVO'"
+          [class.text-white_50]="modoModal === 'VER_MOTIVO'"
+          class="w-full bg-black/50 border border-white/20 rounded p-3 text-sm mb-4 outline-none focus:border-red-500/50 transition-colors"
+          placeholder="Ex: Renda incompatível ou documento ilegível...">
         </textarea>
 
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-end gap-3">
           <button 
             type="button" 
             (click)="fecharModal()"
-            class="border border-gray-400 text-gray-800 font-medium py-1 px-3 rounded hover:bg-gray-200">
-            Cancelar
+            class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded transition-colors">
+            {{ modoModal === 'REJEITAR' ? 'Cancelar' : 'Fechar' }}
           </button>
 
-          <button 
-            type="button" 
-            (click)="confirmarRejeicao()"
-            class="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 rounded">
-            Confirmar Rejeição
-          </button>
+          @if (modoModal === 'REJEITAR') {
+            <button 
+              type="button" 
+              (click)="confirmarRejeicao()"
+              class="px-4 py-2 bg-red-600 hover:bg-red-500 font-bold rounded transition-colors">
+              Confirmar Rejeição
+            </button>
+          }
         </div>
 
       </div>

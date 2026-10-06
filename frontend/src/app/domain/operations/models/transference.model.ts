@@ -5,8 +5,10 @@ export interface TransferenceModel {
     type: 'transference';
     cpf_origin: string;
     name_origin: string;
+
+    //cpf_destiny:string;
+    //name_destiny: string;
     acc_origin: string;
-    
     acc_destiny: string;
 
     value: number;

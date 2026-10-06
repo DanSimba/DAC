@@ -4,22 +4,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
+import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
+
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
+import com.monsterbank.ms_account.operations.TransferenceEntity;
 import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.monsterbank.ms_account.operations.operationDTOs.ExtratoDTO;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Optional;
+
 import java.math.BigDecimal;
 import java.nio.file.OpenOption;
-import java.sql.Date;
 
-import java.util.Optional;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import java.util.List;
 
 @Service
 public class AccountService {
@@ -67,15 +72,17 @@ public class AccountService {
             AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId());
             return accDto;
             
-        } catch (ErroCriacaoAccountException e) {
-            throw new RuntimeException("Erro ao criar conta", e);
+        } catch (Exception e) {
+            throw new ErroCriacaoAccountException();
         }
     }
 
     public ExtratoDTO operate(OperationEntity op){
-        try{
             //MUDAR BALANCO
-            AccountEntity acc = this.accountRepository.findByNumber(op.getAccNumber());
+            AccountEntity acc = this.accountRepository
+            .findByNumber(op.getAccNumber())
+            .orElseThrow(() -> new RuntimeException("Conta não encontrada!!!"));
+
             BigDecimal novoBalanco = BigDecimal.ZERO;
             if(op.getSide() == OperationSide.DEP){
 
@@ -87,6 +94,8 @@ public class AccountService {
                 //PERGUNTAR PRO RAZER: A VERIFICAÇÃO SE TEM SALDO O SUFICIENTE PODE FICAR SÓ NO FRONT? OU EU VOU TER Q FZR ESSA MERDA DNV AQUI?
                 //
                 novoBalanco = acc.getBalanco().subtract(op.getValue());
+                //compareTo retorna -1 se for menor***
+                if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
                 acc.setBalanco(novoBalanco);
             }
 
@@ -99,7 +108,7 @@ public class AccountService {
                 Integer nowId =  Integer.parseInt(formatter.format(now));
             
             //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
-            ExtratoEntity ext =  this.extratoRepository.findByDateId(nowId)
+            ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
                 .orElseGet(() -> new ExtratoEntity(
                     nowId,
                     acc.getNumber(),
@@ -111,10 +120,69 @@ public class AccountService {
 
             ExtratoDTO extDto = new ExtratoDTO(ext);
             return extDto;
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Erro realizar operação", e);
-        }
     }
     
+
+    public ExtratoDTO transfer(TransferenceEntity t){
+            //ENCONTRAR AMBAS AS CONTAS
+                AccountEntity originAcc = this.accountRepository
+                .findByNumber(t.getAccOrigin())
+                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada!!!"));
+
+                AccountEntity destinyAcc = this.accountRepository
+                .findByNumber(t.getAccDestiny())
+                .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada!!!"));
+
+            //REMOVE E ADICIONA VALORES
+                //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION
+                    novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());
+                    if(novoBalancoOrigin.compareTo(BigDecimal.ZERO)<0) throw new SaldoInsuficienteException();
+                    originAcc.setBalanco(novoBalancoOrigin);
+
+                novoBalancoDestiny = destinyAcc.getBalanco().add(t.getValue());
+                destinyAcc.setBalanco(novoBalancoDestiny);
+            
+            this.accountRepository.save(destinyAcc);
+            this.accountRepository.save(originAcc);
+            
+            //CRIA EXTRATO
+            //cria id com base na data atual
+                Date now = new Date();
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                Integer nowId =  Integer.parseInt(formatter.format(now));
+            
+            //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
+                ExtratoEntity extOrigin =  this.extratoRepository.findByDateIdAndAccNumber(nowId, originAcc.getNumber())
+                    .orElseGet(() -> new ExtratoEntity(
+                        nowId,
+                        originAcc.getNumber(),
+                        novoBalancoOrigin
+                    ));
+
+                extOrigin.addTransference(t);
+            this.extratoRepository.save(extOrigin);
+
+            //CRIA NOVO EXTRATO DO DESTINATARIO
+            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc, destinyAcc, t.getValue(), now);
+            ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
+                    .orElseGet(() -> new ExtratoEntity(
+                        nowId,
+                        destinyAcc.getNumber(),
+                        novoBalancoDestiny
+                    ));
+
+            extDestiny.addTransference(destinyTransf);
+            this.extratoRepository.save(extDestiny);
+
+            ExtratoDTO extDto = new ExtratoDTO(extOrigin);
+            return extDto;
+    }
+
+    public ExtratoDTO listExtratos(String number){
+        List<ExtratoEntity> exts = this.extratoRepository.findByAccNumber(number);
+
+        return exts.stream().map( //pega a lista e tranforma um por um em DTO
+            ext -> new ExtratoDTO(ext) 
+        ).collect(Collectors.toList());
+    }
 }
