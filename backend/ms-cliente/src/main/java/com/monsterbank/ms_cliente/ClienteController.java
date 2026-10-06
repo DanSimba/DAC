@@ -43,19 +43,6 @@ public class ClienteController {
 
     }
 
-    @Deprecated 
-    @PostMapping("/solicitacao/registrar")
-    public ResponseEntity<Void> regitrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto){
-        solicitacaoService.registrar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @PutMapping("/solicitacoes/{cpf}")
-    public ResponseEntity<?> recusarSolicitacao(@PathVariable String cpf, @RequestBody RecusarSolicitacaoRequest dto){
-        solicitacaoService.rejeitar(cpf, dto.motivo());
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/solicitacoes")
     public ResponseEntity<List<listarSolicitacoesReturn>> getSolicitacaos(@RequestParam(defaultValue = "0") int page){
         return ResponseEntity.ok(solicitacaoService.listarSolicitacoes(page));

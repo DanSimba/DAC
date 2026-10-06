@@ -6,14 +6,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RecusarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.listarSolicitacoesReturn;
 import com.monsterbank.ms_cliente.utils.CpfUtils;
-
-import com.monsterbank.ms_cliente.exception.SalarioInvalidoException;
-import com.monsterbank.ms_cliente.exception.CpfUtilizadoException;
-import com.monsterbank.ms_cliente.exception.EmailSolicitadoException;
-import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
 import com.monsterbank.ms_cliente.mensageria.producer.SolicitacaoProducer;
 
 import org.slf4j.Logger;
@@ -114,20 +110,30 @@ public class SolicitacaoService {
         );
     }
 
-    public void rejeitar(String cpf, String motivo) {
-
-        if(!CpfUtils.validar(cpf)){
+    @Transactional
+    public SolicitacaoEntity rejeitar(String cpf, RecusarSolicitacaoRequest dto) {
+        log.info("Iniciando rejeicao da solicitacao para o CPF {}", cpf);
+        if(!CpfUtils.validar(cpf)) {
+            log.error("CPF {} invalido", cpf);
             throw new CpfInvalidoException();
         }
 
         SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+        log.info("Status da solicitacao: {}", solicitacao.getStatus());
 
         if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
+            log.error("Solicitacao nao pendente: {}", solicitacao.getStatus());
             throw new SolicitacaoNaoPendenteException();
         }
 
-        solicitacao.rejeitar(motivo);
+        solicitacao.rejeitar(dto.motivo());
+        log.info("Rejeitando solicitacao pelo motivo: {}", dto.motivo());
         solicitacaoRepository.save(solicitacao);
+
+        log.info("Enviando e-mail de rejeicao para {}", solicitacao.getEmail());
+        solicitacaoProducer.enviarEmailRejeicao(solicitacao.getEmail(), dto.motivo());
+
+        return solicitacao;
     }
 
 

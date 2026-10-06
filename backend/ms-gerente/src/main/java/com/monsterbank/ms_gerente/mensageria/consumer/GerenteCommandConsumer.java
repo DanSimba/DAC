@@ -24,7 +24,7 @@ public class GerenteCommandConsumer {
 
     @RabbitListener(queues = "ms.gerente.cmd")
     public void receber(SagaCommand command) {
-            GerenteReplyQueue replyQueue = GerenteReplyQueue.fromCommandType(command.tipo()).orElse(GerenteReplyQueue.COMANDO_DESCONHECIDO);
+        GerenteReplyQueue replyQueue = GerenteReplyQueue.fromCommandType(command.tipo()).orElse(GerenteReplyQueue.COMANDO_DESCONHECIDO);
         
         log.info("Recebimento da command {}", command);
 
