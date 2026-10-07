@@ -5,6 +5,8 @@ import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
+
+import com.monsterbank.ms_account.operations.operationDTOs.ExtratoDTO;
 import com.monsterbank.ms_account.account.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import java.util.Optional;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/account")
 public class AccountController {
@@ -31,6 +34,11 @@ public class AccountController {
           return "ms-account funcionando!";
      }
 
+     @GetMapping("/getMockAcc")
+     public ResponseEntity<AccountDTO> getMockAcc(){
+          return ResponseEntity.ok(this.accountService.getMockAcc());
+     }
+
      @GetMapping("/findByCpf/{cpf}")
      public ResponseEntity<Optional<AccountDTO>> findAccountByCpf(@PathVariable("cpf") String cpf){
           return ResponseEntity.ok(this.accountService.findAccountByCpf(cpf));
@@ -42,7 +50,7 @@ public class AccountController {
      }
 
      @GetMapping("/listExtratos/{number}")
-     public ResponseEntity<Optional<ExtratoDTO[]>> listExtratos(@PathVariable("number") String number){
+     public ResponseEntity <List<ExtratoDTO>> listExtratos(@PathVariable("number") String number){
           return ResponseEntity.ok(this.accountService.listExtratos(number));
      }
 

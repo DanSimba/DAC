@@ -7,11 +7,14 @@ import java.util.List;
 
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 
+import com.monsterbank.ms_account.operations.OperationEntity;
+import com.monsterbank.ms_account.operations.TransferenceEntity;
+
 public class ExtratoDTO {
 
     private Integer dateId;
     private List<OperationEntity> opers;
-    private List<TransfereceEntity> transfs;
+    private List<TransferenceEntity> transfs;
     private String accNumber;
     private BigDecimal saldoApos;
 

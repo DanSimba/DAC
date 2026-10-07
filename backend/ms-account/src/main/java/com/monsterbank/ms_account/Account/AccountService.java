@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.math.BigDecimal;
 import java.nio.file.OpenOption;
 
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -35,6 +34,17 @@ public class AccountService {
     public AccountService(AccountRepository accountRepository, ExtratoRepository extratoRepository) {
         this.accountRepository = accountRepository;
         this.extratoRepository = extratoRepository;
+    }
+
+    public AccountDTO getMockAcc(){
+        BigDecimal bal = new BigDecimal("1100.45");
+        AccountDTO acc = new AccountDTO(
+                "999",
+                "11122233399",
+                bal,
+                100L
+            );
+        return acc;
     }
 
     public Optional<AccountDTO> findAccountByCpf(String cpf){
@@ -108,11 +118,12 @@ public class AccountService {
                 Integer nowId =  Integer.parseInt(formatter.format(now));
             
             //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
+            final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
             ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
                 .orElseGet(() -> new ExtratoEntity(
                     nowId,
                     acc.getNumber(),
-                    novoBalanco
+                    balancoFinal
                 ));
 
             ext.addOperation(op);
@@ -135,11 +146,11 @@ public class AccountService {
 
             //REMOVE E ADICIONA VALORES
                 //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION
-                    novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());
+                    BigDecimal novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());
                     if(novoBalancoOrigin.compareTo(BigDecimal.ZERO)<0) throw new SaldoInsuficienteException();
                     originAcc.setBalanco(novoBalancoOrigin);
 
-                novoBalancoDestiny = destinyAcc.getBalanco().add(t.getValue());
+                BigDecimal novoBalancoDestiny = destinyAcc.getBalanco().add(t.getValue());
                 destinyAcc.setBalanco(novoBalancoDestiny);
             
             this.accountRepository.save(destinyAcc);
@@ -152,23 +163,25 @@ public class AccountService {
                 Integer nowId =  Integer.parseInt(formatter.format(now));
             
             //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
+            final BigDecimal balancoFinalOrigin = novoBalancoOrigin;
                 ExtratoEntity extOrigin =  this.extratoRepository.findByDateIdAndAccNumber(nowId, originAcc.getNumber())
                     .orElseGet(() -> new ExtratoEntity(
                         nowId,
                         originAcc.getNumber(),
-                        novoBalancoOrigin
+                        balancoFinalOrigin
                     ));
 
                 extOrigin.addTransference(t);
             this.extratoRepository.save(extOrigin);
 
             //CRIA NOVO EXTRATO DO DESTINATARIO
-            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc, destinyAcc, t.getValue(), now);
+            final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
+            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc.getNumber(), destinyAcc.getNumber(), t.getValue(), now);
             ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
                     .orElseGet(() -> new ExtratoEntity(
                         nowId,
                         destinyAcc.getNumber(),
-                        novoBalancoDestiny
+                        balancoFinalDestiny
                     ));
 
             extDestiny.addTransference(destinyTransf);
@@ -178,7 +191,7 @@ public class AccountService {
             return extDto;
     }
 
-    public ExtratoDTO listExtratos(String number){
+    public List<ExtratoDTO> listExtratos(String number){
         List<ExtratoEntity> exts = this.extratoRepository.findByAccNumber(number);
 
         return exts.stream().map( //pega a lista e tranforma um por um em DTO

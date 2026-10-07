@@ -30,6 +30,15 @@ export class AccountService {
     this.account.set(a);
   }
 
+  getMockAcc(){
+    this.accountHttpService.getMockAcc().subscribe({
+      next:(response)=>{
+        this.account.set(response);
+        console.log("conta: ", response);
+      }
+    })
+  }
+
   findAccountByCpf(cpf: string){
     this.accountHttpService.findAccountByCpf(cpf).subscribe({
       next:(response)=>{

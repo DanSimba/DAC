@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
                 SaldoInsuficienteException e) {
 
                 ErrorResponse error = new ErrorResponse(
-                        HttpStatus.BAD_REQUEST.value(), //400
+                        403, //403: forbidden, nao tem dinheiro bro
                         "SALDO_INSUFICIENTE",
                         e.getMessage()
                 );
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
                 SaldoInsuficienteException e) {
 
                 ErrorResponse error = new ErrorResponse(
-                        HttpStatus.BAD_REQUEST.value(), //400
+                        500, //erro interno
                         "ERRO_AO_CRIAR_CONTA",
                         e.getMessage()
                 );
