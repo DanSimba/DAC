@@ -29,11 +29,11 @@ export class ExtratoService {
         if(extDay){
             if(ext.type == 'operation'){
                 extDay.opers.push(ext);
-                extDay.saldoApos = acc.balance;
+                extDay.saldoApos = acc.balanco;
                 console.log('extrato atualizado: ', this.extList());
             } else{
                 extDay.transfs.push(ext);
-                extDay.saldoApos = acc.balance;
+                extDay.saldoApos = acc.balanco;
                 console.log('extrato atualizado: ', this.extList());
             }
             return
@@ -46,7 +46,7 @@ export class ExtratoService {
           opers: [],
           id: Math.random()*1000,
           dateId: dateId,
-          saldoApos: acc.balance //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
+          saldoApos: acc.balanco //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
         }
   
         if(ext.type == 'operation'){
@@ -62,7 +62,7 @@ export class ExtratoService {
   createEmptyDay(dateId: number, acc: Account){
     //encontra ultimo saldo
     //deus proteja quem tiver que debuggar isso aq
-    let lastSaldo = this.extList().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balance;
+    let lastSaldo = this.extList().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
     const emptyDay: ExtratoModel = {
        acc_number: acc.number,
           transfs: [],

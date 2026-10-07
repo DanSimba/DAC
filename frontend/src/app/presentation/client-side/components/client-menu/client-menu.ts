@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { ClientService } from '../../../../application/client/services/client-service';
@@ -19,11 +19,13 @@ export class ClientMenu implements OnInit{
   client = signal<Client>(this.clientService.getClient());
 
   private accountService = inject(AccountService);
-  account = signal<Account>(this.accountService.getAccount());
+
+  account = computed(():Account =>{
+    return this.accountService.getAccount();
+  })
 
   ngOnInit(): void {
     this.accountService.getMockAcc(); //a resposta ja ta subcrita lá no service, ai a account daqui só puxa o resultado pronto de la
-    this.account.set(this.accountService.getAccount());
     //console.log("CONTA PUXADA: ", this.account())
   }
 

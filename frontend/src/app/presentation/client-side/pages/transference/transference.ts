@@ -42,7 +42,7 @@ export class Transference {
       return
      } 
 
-    if(concreteValue>this.account().balance){
+    if(concreteValue>this.account().balanco){
       this.showPopUp('Saldo insuficiente!!!', 'fail')
       return
     }
