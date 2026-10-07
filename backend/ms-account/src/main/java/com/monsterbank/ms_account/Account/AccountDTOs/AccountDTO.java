@@ -19,4 +19,20 @@ public class AccountDTO {
         this.managerId = managerId;
     }
 
+    public String getNumber() {
+        return number;
+    }
+
+    public String getClientCpf() {
+        return clientCpf;
+    }
+
+    public BigDecimal getBalanco() {
+        return balanco;
+    }
+
+    public Long getManagerId() {
+        return managerId;
+    }
+
 }

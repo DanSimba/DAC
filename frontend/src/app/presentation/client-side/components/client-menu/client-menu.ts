@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { ClientService } from '../../../../application/client/services/client-service';
@@ -12,14 +12,22 @@ import { AccountService } from '../../../../application/account/services/account
   templateUrl: './client-menu.html',
   styleUrl: './client-menu.css',
 })
-export class ClientMenu {
-  clientService = inject(ClientService)
+export class ClientMenu implements OnInit{
+  clientService = inject(ClientService);
   private router = inject(Router);
 
   client = signal<Client>(this.clientService.getClient());
 
-  accountService = inject(AccountService);
-  account = signal<Account>(this.accountService.getAccount());
+  private accountService = inject(AccountService);
+
+  account = computed(():Account =>{
+    return this.accountService.getAccount();
+  })
+
+  ngOnInit(): void {
+    this.accountService.getMockAcc(); //a resposta ja ta subcrita lá no service, ai a account daqui só puxa o resultado pronto de la
+    //console.log("CONTA PUXADA: ", this.account())
+  }
 
   logout(){
     console.log('usuário saiu!!');

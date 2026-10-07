@@ -39,7 +39,7 @@ public class OperationEntity {
     }
 
     public String getAccNumber() {
-        return this.acc_number;
+        return this.accNumber;
     }
 
     public Long getId() {

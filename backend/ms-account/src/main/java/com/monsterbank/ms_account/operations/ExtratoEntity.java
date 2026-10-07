@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.monsterbank.ms_account.operations.OperationEntity;
+import com.monsterbank.ms_account.operations.TransferenceEntity;
 
 @Entity
 @Table(name = "extrato")
@@ -22,7 +24,7 @@ public class ExtratoEntity {
     private List<OperationEntity> opers;
 
     @OneToMany(mappedBy = "extrato", cascade = CascadeType.ALL)
-    private List<TransfereceEntity> transfs;
+    private List<TransferenceEntity> transfs;
 
     @Column(nullable = false)
     private String accNumber;
@@ -56,7 +58,7 @@ public class ExtratoEntity {
         return this.opers;
     }
 
-    public List<TransfereceEntity> getTransfs() {
+    public List<TransferenceEntity> getTransfs() {
         return this.transfs;
     }
 

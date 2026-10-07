@@ -18,16 +18,26 @@ export class AccountService {
   private account = signal<Account>({
       client_cpf: '00011122233',
       number   : '001',
-      balance  : 1000,
+      balanco  : 1000,
       manager_id  : 2
   })
 
   getAccount():Account{
+    console.log("CONTA no service: ", this.account());
     return this.account();
   }
 
   setAccount(a:Account){
     this.account.set(a);
+  }
+
+  getMockAcc(){
+    this.accountHttpService.getMockAcc().subscribe({
+      next:(response)=>{
+        this.account.set(response);
+        console.log("conta: ", response);
+      }
+    })
   }
 
   findAccountByCpf(cpf: string){
@@ -67,7 +77,7 @@ export class AccountService {
 
           this.account.update(current => ({
             ...current,  
-            balance: response.saldoApos //ATUALIZA BALANCO
+            balanco: response.saldoApos //ATUALIZA BALANCO
           }));
 
           return this.account(); 
@@ -93,7 +103,7 @@ export class AccountService {
 
           this.account.update(current => ({
             ...current,  
-            balance: response.saldoApos //ATUALIZA BALANCO
+            balanco: response.saldoApos //ATUALIZA BALANCO
           }));
 
           return this.account(); 

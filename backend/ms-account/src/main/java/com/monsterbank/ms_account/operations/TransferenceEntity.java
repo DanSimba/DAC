@@ -2,7 +2,6 @@ package com.monsterbank.ms_account.operations;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 

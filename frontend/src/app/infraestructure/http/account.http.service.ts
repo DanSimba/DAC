@@ -14,6 +14,10 @@ export class AccountHttpService {
   http = inject(HttpClient);
   private readonly API_URL = `${environmentDev.apiUrlAccount}/account`;
 
+  getMockAcc(): Observable<Account>{
+    return this.http.get<Account>(`${this.API_URL}/getMockAcc`);
+  }
+
   findAccountByCpf(cpf:string): Observable<Account>{
     return this.http.get<Account>(`${this.API_URL}/findByCpf/${cpf}`);
   }
