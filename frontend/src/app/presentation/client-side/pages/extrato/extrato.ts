@@ -45,6 +45,8 @@ export class Extrato implements OnInit{
     this.extratoService.listExtratos(this.account().number);
     //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
     this.extratoService.createMonthExt(this.account());
+
+    console.log("LISTA QUE TA NO COMP: ", this.extList())
     
     const now = new Date();
     //ganbiarra pra tranformar Date no formato que o input aceita

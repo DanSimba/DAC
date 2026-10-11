@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 import com.monsterbank.ms_account.operations.enums.OperationSide;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "operation")
@@ -16,6 +16,7 @@ public class OperationEntity {
 
     @ManyToOne
     @JoinColumn(name = "extrato_id")
+    @JsonIgnore //ISSO PROIBE O JACKSON DE BUSCAR O EXTRATO ORIGINAL, QUE BUSCA A OPER, QUE BUSCA O EXTRATO DNV E GERA UM LOOP
     private ExtratoEntity extrato;
 
     @Column(name = "type", nullable = false)

@@ -41,7 +41,7 @@ export class ExtratoService {
         
       //caso não ache o dia (é o primeiro extrato do dia), cria um novo
         const newExt: ExtratoModel = {
-          acc_number: acc.number,
+          accNumber: acc.number,
           transfs: [],
           opers: [],
           id: Math.random()*1000,
@@ -64,7 +64,7 @@ export class ExtratoService {
     //deus proteja quem tiver que debuggar isso aq
     let lastSaldo = this.extList().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
     const emptyDay: ExtratoModel = {
-       acc_number: acc.number,
+       accNumber: acc.number,
           transfs: [],
           opers: [],
           id: Math.random()*1000,
@@ -105,7 +105,7 @@ export class ExtratoService {
     this.accountHttpService.listExtratos(number).subscribe({
       next:(response)=>{
         this.extList.set(response);
-        //console.log("lista de exts: ", response);
+        console.log("lista de exts: ", response);
       }
     })
   }

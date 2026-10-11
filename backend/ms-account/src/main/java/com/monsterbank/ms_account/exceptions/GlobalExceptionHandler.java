@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         }
 
         //TRATAMENTO GENERICO
-        @ExceptionHandler(Exception.class)
+        /*@ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleGeneric(
                 Exception e) {
                         
@@ -54,5 +54,11 @@ public class GlobalExceptionHandler {
                         "ERRO_INTERNO",
                         "Erro genérico!!! :("
                         ));
+        }*/
+
+        @ExceptionHandler(Exception.class)
+        public Exception handleGeneric( //enquanto eu estiver debuggando eu vou fzr isso aq msm
+                Exception e) {
+                        return e;
         }
 }

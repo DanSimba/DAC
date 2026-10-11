@@ -2,6 +2,7 @@ package com.monsterbank.ms_account.account;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 
@@ -24,6 +25,8 @@ import java.nio.file.OpenOption;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.hibernate.Hibernate;
 
 @Service
 public class AccountService {
@@ -198,11 +201,18 @@ public class AccountService {
             return extDto;
     }
 
+    @Transactional(readOnly = true)
     public List<ExtratoDTO> listExtratos(String number){
-        List<ExtratoEntity> exts = this.extratoRepository.findByAccNumber(number);
+        List<ExtratoEntity> exts =
+        extratoRepository.findByAccNumber(number);
 
-        return exts.stream().map( //pega a lista e tranforma um por um em DTO
-            ext -> new ExtratoDTO(ext) 
-        ).collect(Collectors.toList());
+        for (ExtratoEntity ext : exts) {
+            Hibernate.initialize(ext.getOpers());
+            Hibernate.initialize(ext.getTransfs());
+        }
+
+        return exts.stream()
+            .map(ExtratoDTO::new) //mapeia cada item pra DTO
+            .collect(Collectors.toList());
     }
 }
