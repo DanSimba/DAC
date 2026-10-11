@@ -16,7 +16,6 @@ public class OperationEntity {
 
     @ManyToOne
     @JoinColumn(name = "extrato_id")
-    @Column(name = "id")
     private ExtratoEntity extrato;
 
     @Column(name = "type", nullable = false)
@@ -34,6 +33,8 @@ public class OperationEntity {
 
     @Column(name = "datetime", nullable = false)
     private String datetime; //DD/MM/AAAA hh:mm
+
+    public OperationEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
 
     public OperationSide getSide() {
         return this.side;

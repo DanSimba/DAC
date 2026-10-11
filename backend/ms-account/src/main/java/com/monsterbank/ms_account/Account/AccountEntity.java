@@ -35,6 +35,8 @@ public class AccountEntity {
         this.managerId = managerId;
     }
 
+    public AccountEntity(){} //CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
+
     public String getNumber() {
         return this.number;
     }

@@ -33,6 +33,8 @@ public class ExtratoEntity {
     @Column(name = "saldo_apos", nullable = false, precision = 17, scale = 2)
     private BigDecimal saldoApos;
 
+    public ExtratoEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
+
      public ExtratoEntity(
         Integer dateId,
         String accNumber,

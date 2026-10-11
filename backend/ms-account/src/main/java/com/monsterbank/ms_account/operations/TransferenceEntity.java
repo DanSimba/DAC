@@ -41,6 +41,8 @@ public class TransferenceEntity {
     @Column(name = "datetime", nullable = false)
     private String datetime; //DIFERENTE DE DATEID
 
+    public TransferenceEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
+
     public TransferenceEntity(
         String accOrigin,
         String accDestiny,

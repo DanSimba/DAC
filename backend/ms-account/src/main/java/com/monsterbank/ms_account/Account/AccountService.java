@@ -36,15 +36,22 @@ public class AccountService {
         this.extratoRepository = extratoRepository;
     }
 
-    public AccountDTO getMockAcc(){
-        BigDecimal bal = new BigDecimal("1100.45");
-        AccountDTO acc = new AccountDTO(
-                "999",
-                "11122233399",
-                bal,
-                100L
-            );
-        return acc;
+    public Optional<AccountDTO> getMockAcc(){
+        //BigDecimal bal = new BigDecimal("1100.45");
+        //AccountDTO acc = new AccountDTO(
+        //        "999",
+        //        "11122233399",
+        //        bal,
+        //        100L
+        //    );
+        return this.accountRepository.findByNumber("001").map(
+            acc -> new AccountDTO(
+                acc.getNumber(),
+                acc.getClientCpf(),
+                acc.getBalanco(),
+                acc.getManagerId()
+            )
+        );
     }
 
     public Optional<AccountDTO> findAccountByCpf(String cpf){

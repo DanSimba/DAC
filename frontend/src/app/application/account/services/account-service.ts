@@ -35,7 +35,7 @@ export class AccountService {
     this.accountHttpService.getMockAcc().subscribe({
       next:(response)=>{
         this.account.set(response);
-        console.log("conta: ", response);
+        console.log("conta getmockAcc: ", response);
       }
     })
   }
