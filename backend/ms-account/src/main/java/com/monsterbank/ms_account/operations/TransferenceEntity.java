@@ -13,31 +13,32 @@ import com.monsterbank.ms_account.operations.enums.OperationSide;
 public class TransferenceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "extrato_id")
     private ExtratoEntity extrato;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String type = "transference";
 
-    @Column(nullable = false)
+    @Column(name = "cpf_origin", nullable = false)
     private String cpfOrigin;
 
-    @Column(nullable = false)
+    @Column(name = "name_origin", nullable = false)
     private String nameOrigin;
 
-    @Column(nullable = false) //AMBOS OS ACCS SÃO O NUMERO DA CONTA
+    @Column(name = "acc_origin", nullable = false) //AMBOS OS ACCS SÃO O NUMERO DA CONTA
     private String accOrigin;
 
-    @Column(nullable = false)
+    @Column(name = "acc_destiny", nullable = false)
     private String accDestiny;
 
-    @Column(nullable = false, precision = 17, scale = 2)
+    @Column(name = "value", nullable = false, precision = 17, scale = 2)
     private BigDecimal value;
 
-    @Column(nullable = false)
+    @Column(name = "datetime", nullable = false)
     private String datetime; //DIFERENTE DE DATEID
 
     public TransferenceEntity(

@@ -11,13 +11,13 @@ import java.math.BigDecimal;
 public class AccountEntity {
 
     @Id
-    @Column(nullable = false, unique = true)
+    @Column(name = "number", nullable = false, unique = true)
     private String number;
 
     @Column(name = "client_cpf", length = 11, nullable = false)
     private String clientCpf;
 
-    @Column(nullable = false, precision = 17, scale = 2)
+    @Column(name = "balanco", nullable = false, precision = 17, scale = 2)
     private BigDecimal balanco;
 
     @Column(name = "manager_id", nullable = false)

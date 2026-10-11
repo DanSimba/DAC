@@ -16,23 +16,24 @@ public class OperationEntity {
 
     @ManyToOne
     @JoinColumn(name = "extrato_id")
+    @Column(name = "id")
     private ExtratoEntity extrato;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String type = "operation";
 
-    @Column(nullable = false)
+    @Column(name = "acc_number",nullable = false)
     private String accNumber;
 
     @Enumerated(EnumType.STRING) //GUARDA COMO STRING PQ NGM MERECE NÉ
-    @Column(nullable = false)
+    @Column(name = "side", nullable = false)
     private OperationSide side;
 
-    @Column(nullable = false, precision = 17, scale = 2)
+    @Column(name = "value", nullable = false, precision = 17, scale = 2)
     private BigDecimal value;
 
-    @Column(nullable = false)
-    private String datetime;
+    @Column(name = "datetime", nullable = false)
+    private String datetime; //DD/MM/AAAA hh:mm
 
     public OperationSide getSide() {
         return this.side;
