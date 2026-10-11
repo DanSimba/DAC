@@ -44,9 +44,9 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleGeneric(
                 Exception e) {
-                
-                System.out.println("Exception!!!! ", e.getLocalizedMessage());
-                
+                        
+                 e.printStackTrace();
+
                 return ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(new ErrorResponse(
