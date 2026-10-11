@@ -17,6 +17,7 @@ export class ExtratoService {
   //SOLUÇÃO ALTERNATIVA: PASSAR A LISTA INTEIRA DNV
   setExtList(el: ExtratoModel[]){
     this.extList.set(el);
+    console.log("EXTLIST ESTÁ ASSIM: ", this.extList())
   }
 
   addToExtList(ext: ExtratoModel){
@@ -44,7 +45,6 @@ export class ExtratoService {
           accNumber: acc.number,
           transfs: [],
           opers: [],
-          id: Math.random()*1000,
           dateId: dateId,
           saldoApos: acc.balanco //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
         }
@@ -62,21 +62,33 @@ export class ExtratoService {
   createEmptyDay(dateId: number, acc: Account){
     //encontra ultimo saldo
     //deus proteja quem tiver que debuggar isso aq
-    let lastSaldo = this.extList().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
+    let lastSaldo = [...this.extList()].reverse().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
     const emptyDay: ExtratoModel = {
        accNumber: acc.number,
           transfs: [],
           opers: [],
-          id: Math.random()*1000,
           dateId: dateId,
           saldoApos: lastSaldo //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
     } 
 
-    this.extList.update(exts=>[emptyDay, ...exts]);
-    //console.log('extrato atualizado com dia vazio: ', this.extList());
+    this.extList.update(exts => {
+      const novaLista = [...exts];
+      const index = novaLista.findIndex(item => item.dateId > emptyDay.dateId);
+      
+      if (index === -1) {
+        novaLista.push(emptyDay);
+      } else {
+        //Se achar, insere exatamente naquela posição
+        novaLista.splice(index, 0, emptyDay);
+      }
+      
+      return novaLista;
+    });
+    console.log('extrato atualizado com dia vazio: ', this.extList());
   }
 
   getExtList():ExtratoModel[]{
+    //console.log("EXT(LIST SENDO PEGA: ", this.extList());
     return this.extList();
   }
 
@@ -99,15 +111,6 @@ export class ExtratoService {
       }
       days--
     }
-  }
-
-  listExtratos(number:string){ //já caotura e coloca tudo na extList
-    this.accountHttpService.listExtratos(number).subscribe({
-      next:(response)=>{
-        this.extList.set(response);
-        console.log("lista de exts: ", response);
-      }
-    })
   }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)

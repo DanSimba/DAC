@@ -33,18 +33,16 @@ export class Extrato implements OnInit{
   extList = computed(():ExtratoModel[]=>{
     return this.extratoService.getExtList();
   })
-
   //filtra o extrato pela data
   filteredList= computed(()=>{
-    return this.extList().filter((ext)=> ext.id<=this.date()).reverse();
+    return this.extList().filter((ext)=> ext.dateId<=this.date()).reverse();
   })
 
   ngOnInit(): void {
 
     //PRIMEIRO FAZ UM GETEXTRATOLIST
-    this.extratoService.listExtratos(this.account().number);
-    //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
-    this.extratoService.createMonthExt(this.account());
+    this.accountService.listExtratos();
+    //this.extList.set(this.extratoService.getExtList());
 
     console.log("LISTA QUE TA NO COMP: ", this.extList())
     

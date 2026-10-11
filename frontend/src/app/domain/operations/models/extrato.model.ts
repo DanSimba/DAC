@@ -6,8 +6,7 @@ export interface ExtratoModel {
     accNumber: string;
     transfs: TransferenceModel[];
     opers: OperationModel[];
-
-    id: number; 
+ 
     dateId:number; //O ID SERÁ A DATA NO FORMATO AAAAMMDD
     saldoApos: number; //saldo no fim do dia
 }

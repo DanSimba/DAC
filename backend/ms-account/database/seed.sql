@@ -1,8 +1,12 @@
 --POPULAÇÃO DO BANCO DB-ACCOUNT @#$%¨&*())(*&¨%$%¨&*(*&¨%$))
 
+
+--ARRANCA DADOS E COLOCA DE NOVO
+TRUNCATE TABLE account, extrato, operation, transference; 
+
 --ACCOUNTS $%¨&*(*&¨%$&%)
 INSERT INTO account (number, balanco, client_cpf, manager_id)
-VALUES ('001', 1200.50, '11122233344', 999888777666);
+VALUES ('001', 800.00, '11122233344', 999888777666);
 
 INSERT INTO account (number, balanco, client_cpf, manager_id)
 VALUES ('002', 10856.80, '22233344455', 999888777666);
@@ -36,11 +40,11 @@ WHERE e.acc_number = '001'
 INSERT INTO operation (acc_number, datetime, side, type, value, extrato_id)
 SELECT --ja encontra extrato respectivo
     '001',
-    '2026/09/21 18:31:00',
+    '2026/10/08 18:31:00',
     'DEP',
     'operation',
     100.00,
     e.id
 FROM extrato e
 WHERE e.acc_number = '001'
-  AND e.date_id = 20260921;
+  AND e.date_id = 20261008

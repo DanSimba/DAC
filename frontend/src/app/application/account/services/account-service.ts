@@ -23,7 +23,7 @@ export class AccountService {
   })
 
   getAccount():Account{
-    console.log("CONTA no service: ", this.account());
+    //console.log("CONTA no service: ", this.account());
     return this.account();
   }
 
@@ -35,7 +35,7 @@ export class AccountService {
     this.accountHttpService.getMockAcc().subscribe({
       next:(response)=>{
         this.account.set(response);
-        console.log("conta getmockAcc: ", response);
+        //console.log("conta getmockAcc: ", response);
       }
     })
   }
@@ -110,6 +110,22 @@ export class AccountService {
         })
       )
     }
+
+  listExtratos(){ //já caotura, atualiza o balanco e coloca tudo na extList
+    this.accountHttpService.listExtratos(this.account().number).subscribe({
+      next:(response)=>{
+        this.extratoService.setExtList(response);
+        this.account.update(current => ({
+            ...current,  
+            balanco: response[response.length-1].saldoApos //ATUALIZA BALANCO
+          }));
+          
+        //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
+        this.extratoService.createMonthExt(this.account());
+        console.log("lista de exts: ", response);
+      }
+    })
+  }
   
     //RESOLVI FZR UMA FUNÇÃO PRA PEGAR A DATA E HORA DO JEITO QUE O RAZER GOSTA AUTOMATICAMENTE
     getCurrentTimeFormated(): string{
