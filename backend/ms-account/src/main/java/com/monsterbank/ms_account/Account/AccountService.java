@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
-
+import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
 
@@ -157,11 +157,11 @@ public class AccountService {
             //ENCONTRAR AMBAS AS CONTAS
                 AccountEntity originAcc = this.accountRepository
                 .findByNumber(t.getAccOrigin())
-                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada!!!"));
+                .orElseThrow(() -> new  ErroContaNaoEncontradaException());
 
                 AccountEntity destinyAcc = this.accountRepository
                 .findByNumber(t.getAccDestiny())
-                .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada!!!"));
+                .orElseThrow(() -> new ErroContaNaoEncontradaException());
 
             //REMOVE E ADICIONA VALORES
                 //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION

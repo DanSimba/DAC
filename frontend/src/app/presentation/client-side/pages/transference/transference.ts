@@ -70,13 +70,12 @@ export class Transference{
 
           //ANIMAÇÃO MTO FODA E LIMMPA INPUTS
 
-          //console.log("RESPONSE: ", response);
+          console.log("RESPONSE: ", response);
           this.sent.set(true);
 
-          this.dest.set('');
-          this.value.set(null);
-
           setTimeout(() => {
+            this.dest.set('');
+            this.value.set(null);
             this.sent.set(false);
           }, 3000);
         }, 

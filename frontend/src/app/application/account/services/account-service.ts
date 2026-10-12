@@ -79,7 +79,6 @@ export class AccountService {
     }
   
     transferir(t: TransferenceModel): Observable<Account>{
-    
       return this.accountHttpService.transferir(t).pipe(
         map((response) => {
           console.log("EXTRATO VINDO DO BACK: ", response)
