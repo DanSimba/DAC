@@ -22,13 +22,13 @@
          @if(type() === 'transf'){
             <div class="flex flex-row w-70 justify-between">
                 <p>
-                 De: {{transfInstance()?.acc_origin}}
+                 De: {{transfInstance()?.accOrigin}}
                 </p>
                 <p>
-                    Para: {{transfInstance()?.acc_destiny}}
+                    Para: {{transfInstance()?.accDestiny}}
                 </p>
             </div>
-            @if(transfInstance()?.acc_origin == account().number){
+            @if(transfInstance()?.accOrigin == account().number){
                 <p class="text-red-700">
                     Valor: {{transfInstance()?.value}}R$
                 </p>

@@ -40,4 +40,24 @@ public class ExtratoDTO {
         this.accNumber = ee.getAccNumber();
         this.saldoApos = ee.getSaldoApos();
     }
+
+    public Integer getDateId() {
+        return dateId;
+    }
+
+    public List<OperationEntity> getOpers() {
+        return opers;
+    }
+
+    public List<TransferenceEntity> getTransfs() {
+        return transfs;
+    }
+
+    public String getAccNumber() {
+        return accNumber;
+    }
+
+    public BigDecimal getSaldoApos() {
+        return saldoApos;
+    }
 }

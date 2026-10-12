@@ -3,8 +3,6 @@ import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { Account } from '../../../domain/account/models/account.model';
-import { Observable, tap } from 'rxjs';
-import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,15 +10,15 @@ import { AccountHttpService } from '../../../infraestructure/http/account.http.s
 export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
-  private accountHttpService = inject(AccountHttpService);
 
   //SOLUÇÃO ALTERNATIVA: PASSAR A LISTA INTEIRA DNV
   setExtList(el: ExtratoModel[]){
     this.extList.set(el);
+    //console.log("EXTLIST ESTÁ ASSIM: ", this.extList())
   }
 
   addToExtList(ext: ExtratoModel){
-        this.extList.update(current=>[ext, ...current]);
+        this.extList.update(current=>[...current, ext]);
   }
 
   createExtrato(ext: OperationModel|TransferenceModel, dateId: number, acc: Account){ 
@@ -41,10 +39,9 @@ export class ExtratoService {
         
       //caso não ache o dia (é o primeiro extrato do dia), cria um novo
         const newExt: ExtratoModel = {
-          acc_number: acc.number,
+          accNumber: acc.number,
           transfs: [],
           opers: [],
-          id: Math.random()*1000,
           dateId: dateId,
           saldoApos: acc.balanco //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
         }
@@ -62,21 +59,33 @@ export class ExtratoService {
   createEmptyDay(dateId: number, acc: Account){
     //encontra ultimo saldo
     //deus proteja quem tiver que debuggar isso aq
-    let lastSaldo = this.extList().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
+    let lastSaldo = [...this.extList()].reverse().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
     const emptyDay: ExtratoModel = {
-       acc_number: acc.number,
+       accNumber: acc.number,
           transfs: [],
           opers: [],
-          id: Math.random()*1000,
           dateId: dateId,
           saldoApos: lastSaldo //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
     } 
 
-    this.extList.update(exts=>[emptyDay, ...exts]);
+    this.extList.update(exts => {
+      const novaLista = [...exts];
+      const index = novaLista.findIndex(item => item.dateId > emptyDay.dateId);
+      
+      if (index === -1) {
+        novaLista.push(emptyDay);
+      } else {
+        //Se achar, insere exatamente naquela posição
+        novaLista.splice(index, 0, emptyDay);
+      }
+      
+      return novaLista;
+    });
     //console.log('extrato atualizado com dia vazio: ', this.extList());
   }
 
   getExtList():ExtratoModel[]{
+    //console.log("EXT(LIST SENDO PEGA: ", this.extList());
     return this.extList();
   }
 
@@ -99,15 +108,6 @@ export class ExtratoService {
       }
       days--
     }
-  }
-
-  listExtratos(number:string){ //já caotura e coloca tudo na extList
-    this.accountHttpService.listExtratos(number).subscribe({
-      next:(response)=>{
-        this.extList.set(response);
-        //console.log("lista de exts: ", response);
-      }
-    })
   }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)

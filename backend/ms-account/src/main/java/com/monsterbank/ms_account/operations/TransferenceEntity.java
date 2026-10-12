@@ -2,49 +2,53 @@ package com.monsterbank.ms_account.operations;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-import com.monsterbank.ms_account.operations.enums.OperationSide;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "transference")
 public class TransferenceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "extrato_id")
+    @JsonIgnore //ISSO PROIBE O JACKSON DE BUSCAR O EXTRATO ORIGINAL, QUE BUSCA A OPER, QUE BUSCA O EXTRATO DNV E GERA UM LOOP
     private ExtratoEntity extrato;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String type = "transference";
 
-    @Column(nullable = false)
+    @Column(name = "cpf_origin", nullable = false)
     private String cpfOrigin;
 
-    @Column(nullable = false)
+    @Column(name = "name_origin", nullable = false)
     private String nameOrigin;
 
-    @Column(nullable = false) //AMBOS OS ACCS SÃO O NUMERO DA CONTA
+    @Column(name = "acc_origin", nullable = false) //AMBOS OS ACCS SÃO O NUMERO DA CONTA
     private String accOrigin;
 
-    @Column(nullable = false)
+    @Column(name = "acc_destiny", nullable = false)
     private String accDestiny;
 
-    @Column(nullable = false, precision = 17, scale = 2)
+    @Column(name = "value", nullable = false, precision = 17, scale = 2)
     private BigDecimal value;
 
-    @Column(nullable = false)
+    @Column(name = "datetime", nullable = false)
     private String datetime; //DIFERENTE DE DATEID
+
+    public TransferenceEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
 
     public TransferenceEntity(
         String accOrigin,
         String accDestiny,
         BigDecimal v,
-        Date now //como eu vou usar isso na função de tranfer que ja cria uma data de agr, ent eu posso reaproveitar
+        LocalDateTime now //como eu vou usar isso na função de tranfer que ja cria uma data de agr, ent eu posso reaproveitar
     ){
         //DEPOIS CONECTAR COM O MS CLIENTE PARA CONSEGUIR ESSES CAMPOS
         //POR ENQUANTO VAMOS TRABALHAR SÓ COM CONTA
@@ -55,7 +59,7 @@ public class TransferenceEntity {
         this.accDestiny = accDestiny;
         this.value = v;
 
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         this.datetime = formatter.format(now);
     }
 

@@ -15,9 +15,10 @@ public class ExtratoEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id") //não é obrigatorio mas eu faço questao de explicitar cada sílaba de código desta porra pq eu n confio nem na minha cabeça mto menos no hibernate 
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "date_id", nullable = false)
     private Integer dateId;
 
     @OneToMany(mappedBy = "extrato", cascade = CascadeType.ALL) //o cascade salva as instancias de opers e transfs junto ao salvar o extrato 
@@ -26,11 +27,13 @@ public class ExtratoEntity {
     @OneToMany(mappedBy = "extrato", cascade = CascadeType.ALL)
     private List<TransferenceEntity> transfs;
 
-    @Column(nullable = false)
+    @Column(name = "acc_number", nullable = false)
     private String accNumber;
 
-    @Column(nullable = false, precision = 17, scale = 2)
+    @Column(name = "saldo_apos", nullable = false, precision = 17, scale = 2)
     private BigDecimal saldoApos;
+
+    public ExtratoEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
 
      public ExtratoEntity(
         Integer dateId,
@@ -78,5 +81,9 @@ public class ExtratoEntity {
     public void addTransference(TransferenceEntity t){
         t.setExtrato(this);
         this.transfs.add(t);
+    }
+
+    public void setSaldoApos(BigDecimal saldoApos) {
+        this.saldoApos = saldoApos;
     }
 }

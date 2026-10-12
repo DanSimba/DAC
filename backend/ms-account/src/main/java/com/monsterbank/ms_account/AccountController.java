@@ -35,7 +35,7 @@ public class AccountController {
      }
 
      @GetMapping("/getMockAcc")
-     public ResponseEntity<AccountDTO> getMockAcc(){
+     public ResponseEntity<Optional<AccountDTO>> getMockAcc(){
           return ResponseEntity.ok(this.accountService.getMockAcc());
      }
 
