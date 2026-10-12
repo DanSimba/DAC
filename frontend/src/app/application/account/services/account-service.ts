@@ -16,10 +16,10 @@ export class AccountService {
   private accountHttpService = inject(AccountHttpService)
 
   private account = signal<Account>({
-      client_cpf: '00011122233',
-      number   : '001',
-      balanco  : 1000,
-      manager_id  : 2
+      client_cpf: '',
+      number   : '',
+      balanco  : 0,
+      manager_id  : 0
   })
 
   getAccount():Account{
@@ -99,10 +99,12 @@ export class AccountService {
     this.accountHttpService.listExtratos(this.account().number).subscribe({
       next:(response)=>{
         this.extratoService.setExtList(response);
-        this.account.update(current => ({
+        if(response.length>0){
+          this.account.update(current => ({
             ...current,  
             balanco: response[response.length-1].saldoApos //ATUALIZA BALANCO
           }));
+        }
           
         //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
         this.extratoService.createMonthExt(this.account());
@@ -116,7 +118,7 @@ export class AccountService {
       const date = new Date();
       //console.log('DATA NÃO FORMATADA: ', date);
   
-      const formatedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`
+      const formatedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
       //console.log('DATETIME AGR: ', formatedDate);
   
       return formatedDate;
