@@ -18,15 +18,15 @@ services:
 
   #=====BANCO DE DADOS=====#
   db-auth:
-    image: postgres:15-alpine
+    image: mongo:7
     environment:
-      - POSTGRES_DB=ms-auth
-      - POSTGRES_USER=ms-auth
-      - POSTGRES_PASSWORD=psql
+      - MONGO_INITDB_DATABASE=ms-auth
+      - MONGO_INITDB_ROOT_USERNAME=ms-auth
+      - MONGO_INITDB_ROOT_PASSWORD=psql
     ports:
-      - "5433:5432"
+      - "27017:27017"
     volumes:
-      - pgdata-auth:/var/lib/postgresql/data
+      - mgdata-auth:/data/db
     networks:
       - monsterbank-net
 
@@ -83,6 +83,30 @@ services:
     networks:
       - monsterbank-net
 
+
+  ms-auth:
+    build:
+      context: ./backend/ms-auth
+
+    depends_on:
+      - db-auth
+      - rabbitmq
+
+    environment:
+      SPRING_MONGODB_URI: mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+    ports:
+      - "8081:8081"
+
+    networks:
+      - monsterbank-net
+
+
   ms-cliente:
     build:
       context: ./backend/ms-cliente
@@ -103,7 +127,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
 
     ports:
-      - "8081:8081"
+      - "8083:8083"
 
     networks:
       - monsterbank-net
@@ -184,7 +208,7 @@ services:
 
 volumes:
   pgdata-gerente:
-  pgdata-auth:
+  mgdata-auth:
   pgdata-cliente:
   pgdata-conta:
 
