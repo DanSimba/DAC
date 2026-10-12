@@ -48,6 +48,7 @@ export class DepSac {
           //VALUE É A CONTA COM O SALDO ATUALIZADO
           next: (value) => {
             //JÁ SETA A CONTA COM O RETORNO LÁ NO SERVICE
+            console.log("operação efetuda com sucesso: ", value)
             this.showPopUp('Operação efetuada com sucesso!!!', 'success');
           },
           error: (err)=> {

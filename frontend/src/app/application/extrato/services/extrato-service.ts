@@ -3,8 +3,6 @@ import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { Account } from '../../../domain/account/models/account.model';
-import { Observable, tap } from 'rxjs';
-import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,16 +10,15 @@ import { AccountHttpService } from '../../../infraestructure/http/account.http.s
 export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
-  private accountHttpService = inject(AccountHttpService);
 
   //SOLUÇÃO ALTERNATIVA: PASSAR A LISTA INTEIRA DNV
   setExtList(el: ExtratoModel[]){
     this.extList.set(el);
-    console.log("EXTLIST ESTÁ ASSIM: ", this.extList())
+    //console.log("EXTLIST ESTÁ ASSIM: ", this.extList())
   }
 
   addToExtList(ext: ExtratoModel){
-        this.extList.update(current=>[ext, ...current]);
+        this.extList.update(current=>[...current, ext]);
   }
 
   createExtrato(ext: OperationModel|TransferenceModel, dateId: number, acc: Account){ 
@@ -84,7 +81,7 @@ export class ExtratoService {
       
       return novaLista;
     });
-    console.log('extrato atualizado com dia vazio: ', this.extList());
+    //console.log('extrato atualizado com dia vazio: ', this.extList());
   }
 
   getExtList():ExtratoModel[]{

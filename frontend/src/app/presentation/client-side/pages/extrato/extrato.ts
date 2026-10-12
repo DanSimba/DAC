@@ -44,7 +44,7 @@ export class Extrato implements OnInit{
     this.accountService.listExtratos();
     //this.extList.set(this.extratoService.getExtList());
 
-    console.log("LISTA QUE TA NO COMP: ", this.extList())
+    //console.log("LISTA QUE TA NO COMP: ", this.extList())
     
     const now = new Date();
     //ganbiarra pra tranformar Date no formato que o input aceita

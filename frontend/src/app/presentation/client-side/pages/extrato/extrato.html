@@ -29,11 +29,11 @@
                             Data: {{formatDateId(ext.dateId)}}
                         </div>
 
-                        @for (transf of ext.transfs; track $index) {
+                        @for (transf of ext.transfs.reverse(); track $index) {
                             <app-ext-card [transfInstance]="transf"></app-ext-card> 
                         }
 
-                        @for (oper of ext.opers; track $index) {
+                        @for (oper of ext.opers.reverse(); track $index) {
                             <app-ext-card [operInstance]="oper"></app-ext-card> 
                         }
                         <!-- @if(ext.instance.type == 'transference'){

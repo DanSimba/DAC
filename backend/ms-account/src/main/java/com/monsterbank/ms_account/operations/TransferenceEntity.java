@@ -2,8 +2,10 @@ package com.monsterbank.ms_account.operations;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -46,7 +48,7 @@ public class TransferenceEntity {
         String accOrigin,
         String accDestiny,
         BigDecimal v,
-        Date now //como eu vou usar isso na função de tranfer que ja cria uma data de agr, ent eu posso reaproveitar
+        LocalDateTime now //como eu vou usar isso na função de tranfer que ja cria uma data de agr, ent eu posso reaproveitar
     ){
         //DEPOIS CONECTAR COM O MS CLIENTE PARA CONSEGUIR ESSES CAMPOS
         //POR ENQUANTO VAMOS TRABALHAR SÓ COM CONTA
@@ -57,7 +59,7 @@ public class TransferenceEntity {
         this.accDestiny = accDestiny;
         this.value = v;
 
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         this.datetime = formatter.format(now);
     }
 

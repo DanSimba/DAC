@@ -23,8 +23,11 @@ import java.util.Optional;
 import java.math.BigDecimal;
 import java.nio.file.OpenOption;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.hibernate.Hibernate;
 
@@ -97,6 +100,8 @@ public class AccountService {
         }
     }
 
+    
+    @Transactional
     public ExtratoDTO operate(OperationEntity op){
             //MUDAR BALANCO
             AccountEntity acc = this.accountRepository
@@ -109,10 +114,6 @@ public class AccountService {
                novoBalanco = acc.getBalanco().add(op.getValue());
                acc.setBalanco(novoBalanco);
             } else{
-
-                //**************
-                //PERGUNTAR PRO RAZER: A VERIFICAÇÃO SE TEM SALDO O SUFICIENTE PODE FICAR SÓ NO FRONT? OU EU VOU TER Q FZR ESSA MERDA DNV AQUI?
-                //
                 novoBalanco = acc.getBalanco().subtract(op.getValue());
                 //compareTo retorna -1 se for menor***
                 if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
@@ -122,28 +123,36 @@ public class AccountService {
             this.accountRepository.save(acc);
             
             //CRIA EXTRATO
-            //cria id com base na data atual
-                Date now = new Date();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-                Integer nowId =  Integer.parseInt(formatter.format(now));
+                LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+
+                Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
+                    hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
+                );
             
             //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
-            final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
-            ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
-                .orElseGet(() -> new ExtratoEntity(
-                    nowId,
-                    acc.getNumber(),
-                    balancoFinal
-                ));
+                final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
+                ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
+                    .orElseGet(() -> new ExtratoEntity(
+                        nowId,
+                        acc.getNumber(),
+                        balancoFinal
+                    ));
 
-            ext.addOperation(op);
-            this.extratoRepository.save(ext);
+                ext.addOperation(op);
+                ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+                this.extratoRepository.save(ext);
+
+            //garante que a lista seja buscada 
+            Hibernate.initialize(ext.getOpers());
+            Hibernate.initialize(ext.getTransfs());
 
             ExtratoDTO extDto = new ExtratoDTO(ext);
             return extDto;
     }
     
 
+    
+    @Transactional
     public ExtratoDTO transfer(TransferenceEntity t){
             //ENCONTRAR AMBAS AS CONTAS
                 AccountEntity originAcc = this.accountRepository
@@ -168,9 +177,14 @@ public class AccountService {
             
             //CRIA EXTRATO
             //cria id com base na data atual
-                Date now = new Date();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-                Integer nowId =  Integer.parseInt(formatter.format(now));
+                LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+                
+                //CRIO UM LOCALDATE TIME SÓ NESSE CASO PRA USAR NO CONSTRUTOR DA TRANSF DESTINO
+                LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Sao_Paulo")); 
+
+                Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
+                    hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
+                );
             
             //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
             final BigDecimal balancoFinalOrigin = novoBalancoOrigin;
@@ -182,11 +196,16 @@ public class AccountService {
                     ));
 
                 extOrigin.addTransference(t);
-            this.extratoRepository.save(extOrigin);
+                extOrigin.setSaldoApos(balancoFinalOrigin); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+                this.extratoRepository.save(extOrigin);
+
+            //garante que a lista seja buscada 
+            Hibernate.initialize(extOrigin.getTransfs());
+            Hibernate.initialize(extOrigin.getOpers());
 
             //CRIA NOVO EXTRATO DO DESTINATARIO
             final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
-            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc.getNumber(), destinyAcc.getNumber(), t.getValue(), now);
+            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc.getNumber(), destinyAcc.getNumber(), t.getValue(), now );
             ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
                     .orElseGet(() -> new ExtratoEntity(
                         nowId,
@@ -195,7 +214,12 @@ public class AccountService {
                     ));
 
             extDestiny.addTransference(destinyTransf);
+            extDestiny.setSaldoApos(balancoFinalDestiny); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
             this.extratoRepository.save(extDestiny);
+            
+            //garante que a lista seja buscada 
+            Hibernate.initialize(extDestiny.getTransfs());
+            Hibernate.initialize(extDestiny.getOpers());
 
             ExtratoDTO extDto = new ExtratoDTO(extOrigin);
             return extDto;

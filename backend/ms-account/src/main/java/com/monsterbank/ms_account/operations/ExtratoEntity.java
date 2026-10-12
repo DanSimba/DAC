@@ -82,4 +82,8 @@ public class ExtratoEntity {
         t.setExtrato(this);
         this.transfs.add(t);
     }
+
+    public void setSaldoApos(BigDecimal saldoApos) {
+        this.saldoApos = saldoApos;
+    }
 }
