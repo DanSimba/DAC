@@ -44,25 +44,6 @@ public class TransferenceEntity {
 
     public TransferenceEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
 
-    public TransferenceEntity(
-        String accOrigin,
-        String accDestiny,
-        BigDecimal v,
-        LocalDateTime now //como eu vou usar isso na função de tranfer que ja cria uma data de agr, ent eu posso reaproveitar
-    ){
-        //DEPOIS CONECTAR COM O MS CLIENTE PARA CONSEGUIR ESSES CAMPOS
-        //POR ENQUANTO VAMOS TRABALHAR SÓ COM CONTA
-        this.cpfOrigin = "";
-        this.nameOrigin= "";
-
-        this.accOrigin = accOrigin;
-        this.accDestiny = accDestiny;
-        this.value = v;
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        this.datetime = formatter.format(now);
-    }
-
     public Long getId() {
         return this.id;
     }
@@ -101,5 +82,33 @@ public class TransferenceEntity {
 
     public void setExtrato(ExtratoEntity extrato) {
         this.extrato = extrato;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setCpfOrigin(String cpfOrigin) {
+        this.cpfOrigin = cpfOrigin;
+    }
+
+    public void setNameOrigin(String nameOrigin) {
+        this.nameOrigin = nameOrigin;
+    }
+
+    public void setAccOrigin(String accOrigin) {
+        this.accOrigin = accOrigin;
+    }
+
+    public void setAccDestiny(String accDestiny) {
+        this.accDestiny = accDestiny;
+    }
+
+    public void setValue(BigDecimal value) {
+        this.value = value;
+    }
+
+    public void setDatetime(String datetime) {
+        this.datetime = datetime;
     }
 }

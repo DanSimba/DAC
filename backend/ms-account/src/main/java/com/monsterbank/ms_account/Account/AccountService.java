@@ -180,7 +180,7 @@ public class AccountService {
                 LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
                 
                 //CRIO UM LOCALDATE TIME SÓ NESSE CASO PRA USAR NO CONSTRUTOR DA TRANSF DESTINO
-                LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Sao_Paulo")); 
+                //LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Sao_Paulo")); 
 
                 Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
                     hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
@@ -205,17 +205,19 @@ public class AccountService {
 
             //CRIA NOVO EXTRATO DO DESTINATARIO
             final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
-            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc.getNumber(), destinyAcc.getNumber(), t.getValue(), now );
-            ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
-                    .orElseGet(() -> new ExtratoEntity(
-                        nowId,
-                        destinyAcc.getNumber(),
-                        balancoFinalDestiny
-                    ));
+            //CRIA UM CLONE DA TRANSFERENCIA MAS MUDA O EXTRATO
+                TransferenceEntity destinyTransf = t;
+                ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
+                        .orElseGet(() -> new ExtratoEntity(
+                            nowId,
+                            destinyAcc.getNumber(),
+                            balancoFinalDestiny
+                        ));
+                destinyTransf.setExtrato(extDestiny);
 
-            extDestiny.addTransference(destinyTransf);
-            extDestiny.setSaldoApos(balancoFinalDestiny); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
-            this.extratoRepository.save(extDestiny);
+                extDestiny.addTransference(destinyTransf);
+                extDestiny.setSaldoApos(balancoFinalDestiny); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+                this.extratoRepository.save(extDestiny);
             
             //garante que a lista seja buscada 
             Hibernate.initialize(extDestiny.getTransfs());

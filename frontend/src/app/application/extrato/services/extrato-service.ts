@@ -59,7 +59,7 @@ export class ExtratoService {
   createEmptyDay(dateId: number, acc: Account){
     //encontra ultimo saldo
     //deus proteja quem tiver que debuggar isso aq
-    let lastSaldo = [...this.extList()].reverse().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? acc.balanco;
+    let lastSaldo = [...this.extList()].reverse().find((ext)=>(ext.dateId < dateId))?.saldoApos ?? 0;
     const emptyDay: ExtratoModel = {
        accNumber: acc.number,
           transfs: [],

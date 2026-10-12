@@ -43,20 +43,7 @@
     </div>
 
     <div class="flex flex-col w-full justify-center items-center gap-y-6 px-8">
-        <!-- <div class="flex flex-row w-[36vw] h-[20vh] justify-evenly rounded-2xl bg-black/50 {{side()=='sac'?' border-5 border-solid border-rosa': side()=='dep'?' border-5 border-solid border-azure':'border-5 border-solid border-gray-500'}}">
-
-            <div class="flex flex-col w-full h-full justify-center items-center text-white font-display {{side()=='sac'?'bg-linear-to-r from-rosa/60 to-[black/50] to-40% text-4xl text-white':'text-3xl text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
-            (click)="setSide('sac')">
-                Sacar 
-            </div>
-
-           
-            <div class="flex flex-col w-full h-full justify-center items-center font-display {{side()=='dep'?'bg-linear-to-l from-azure/60 to-[black/50] to-40% text-4xl text-white':'text-3xl  text-white/50'}} hover:text-4xl hover:text-white transition-all duration-150 cursor-pointer"
-            (click)="setSide('dep')">
-                Depositar 
-            </div>
-        </div> -->
-
+        
         <div class="absolute bottom-60 flex flex-col w-[36vw] h-[36vh] justify-evenly items-center rounded-2xl bg-black/50 {{side()=='sac'?' border-5 border-solid border-rosa scale-105': side()=='dep'?' border-5 border-solid border-azure scale-105':'border-5 border-solid border-gray-500'}} transition-all duration-130">
             <div class="flex flex-row w-full gap-x-6 items-center justify-center text-3xl text-white font-display font-cont {{side()==''?'text-3xl text-white/50':'text-4xl text-white'}}">
                 Valor:
