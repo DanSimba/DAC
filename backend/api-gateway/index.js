@@ -50,45 +50,7 @@ app.post('/solicitacoes', async (req, res) => {
     }
 });
 
-
-  // console.log("Cheguei no Gateway.");
-  // try {
-  //   const response = await fetch(
-  //     `${process.env.MS_CLIENTE_URL}/solicitacoes`,
-  //     {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify(req.body)
-  //     }
-  //   );
-
-  //   const responseBodyText = await response.text();
-
-  //   let responseBodyJson = null;
-  //   try {
-  //     responseBodyJson = JSON.parse(responseBodyText);
-  //   } catch (e) {
-  //     // Se falhar o parse, significa que não é um JSON válido (mantém como texto)
-  //   }
-
-  //   res.status(response.status);
-
-  //   if (responseBodyJson) {
-  //     console.log(res.status);
-  //     res.json(responseBodyJson);
-  //   } else {
-  //     console.log(responseBodyText);
-  //     res.send(responseBodyText);
-  //   }
-  // } catch (error) {
-  //   console.error(error);
-
-  //   res.status(500).json({
-  //     message: 'Erro ao comunicar com o ms-client.'
-  //   });
-  // }
-// })
-
+// Rejeitar solicitações
 app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
   try {
     const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
