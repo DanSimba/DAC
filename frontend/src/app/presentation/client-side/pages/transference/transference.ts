@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ClientService } from '../../../../application/client/services/client-service';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
@@ -15,16 +15,18 @@ import { AccountService } from '../../../../application/account/services/account
   templateUrl: './transference.html',
   styleUrl: './transference.css',
 })
-export class Transference {
+export class Transference{
   location = inject(Location);
 
   clientService = inject(ClientService);
   client = signal<Client>(this.clientService.getClient());
   
   accountService = inject(AccountService);
-  account = signal<Account>(this.accountService.getAccount());
+  account = computed((): Account=>{
+    return this.accountService.getAccount();
+  })
 
-  dest = signal<number|null>(null);
+  dest = signal<string>('');
   value = signal<number|null>(null);
 
   isComplete = computed(()=>{
@@ -60,20 +62,20 @@ export class Transference {
         datetime: this.accountService.getCurrentTimeFormated()
       }
 
+      console.log("CONCRETETRANSF: ", concreteTransference);
+
       this.accountService.transferir(concreteTransference).subscribe({
         next: (response) => {
-          //JÁ SETA A CONTA ATUALIZADA COM O RETORNO LÁ NO SERVICE
-
-          //ATUALIZA O SALDO NA TELA
-          this.account.set(response);
+          //JÁ SETA A CONTA ATUALIZADA COM O RETORNO LÁ NO SERVICE, POR ISSO N PRECISA RETORNAR ND AQ
 
           //ANIMAÇÃO MTO FODA E LIMMPA INPUTS
+
+          console.log("RESPONSE: ", response);
           this.sent.set(true);
 
-          this.dest.set(null);
-          this.value.set(null);
-
           setTimeout(() => {
+            this.dest.set('');
+            this.value.set(null);
             this.sent.set(false);
           }, 3000);
         }, 

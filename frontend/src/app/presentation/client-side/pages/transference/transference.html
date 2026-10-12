@@ -37,30 +37,33 @@
         </span>
 
         <div class="flex flex-col w-full h-full justify-evenly p-6 gap-y-4">
-            <div class="flex flex-row w-full gap-x-4 items-center text-white text-2xl font-title font-display">
-                <h1>
-                    Número da conta do destinatário:
+            <div class="flex flex-col w-full gap-y-4 items-center text-white text-2xl font-title font-display">
+                <h1 class="w-fit text-white text-4xl font-title font-display">
+                    Número da conta do destinatário
                 </h1>
                 
-                    <input type="number" placeholder="XXX"
+                    <input type="text" placeholder="XXX"
                     [value]="dest()" 
                     #destin
-                    (input)="destin.value = destin.value.slice(0, 3); dest.set($event.target.valueAsNumber)"
+                    (input)="destin.value = destin.value.slice(0, 3); dest.set(destin.value)"
                     class="{{sent()?'hidden': 'flex'}} w-[20vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
                     >
             </div>
 
-            <div class="flex flex-row w-full gap-x-4 items-center text-white text-2xl font-title font-display">
-                <h1>
-                    Valor transferido:
+            <div class="flex flex-col w-full gap-y-4 items-center text-white text-2xl font-title font-display">
+                <h1 class="text-white text-4xl font-title font-display">
+                    Valor a transferir
                 </h1>
                 
+                <div class="flex flex-row items-center gap-x-4 text-3xl">
                     <input type="number" placeholder="XX.XX" maxlength="11"
                     [value]="value()" 
                     (input)="value.set($event.target.valueAsNumber)"
                     class="{{sent()?'hidden': 'flex'}} w-[20vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
                     >
                     R$
+                </div>
+                    
             </div>
         </div>
 

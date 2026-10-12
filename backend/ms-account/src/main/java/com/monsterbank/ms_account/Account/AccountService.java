@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
-
+import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
 
@@ -157,11 +157,11 @@ public class AccountService {
             //ENCONTRAR AMBAS AS CONTAS
                 AccountEntity originAcc = this.accountRepository
                 .findByNumber(t.getAccOrigin())
-                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada!!!"));
+                .orElseThrow(() -> new  ErroContaNaoEncontradaException());
 
                 AccountEntity destinyAcc = this.accountRepository
                 .findByNumber(t.getAccDestiny())
-                .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada!!!"));
+                .orElseThrow(() -> new ErroContaNaoEncontradaException());
 
             //REMOVE E ADICIONA VALORES
                 //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION
@@ -180,7 +180,7 @@ public class AccountService {
                 LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
                 
                 //CRIO UM LOCALDATE TIME SÓ NESSE CASO PRA USAR NO CONSTRUTOR DA TRANSF DESTINO
-                LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Sao_Paulo")); 
+                //LocalDateTime now = LocalDateTime.now(ZoneId.of("America/Sao_Paulo")); 
 
                 Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
                     hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
@@ -205,17 +205,19 @@ public class AccountService {
 
             //CRIA NOVO EXTRATO DO DESTINATARIO
             final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
-            TransferenceEntity destinyTransf = new TransferenceEntity(originAcc.getNumber(), destinyAcc.getNumber(), t.getValue(), now );
-            ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
-                    .orElseGet(() -> new ExtratoEntity(
-                        nowId,
-                        destinyAcc.getNumber(),
-                        balancoFinalDestiny
-                    ));
+            //CRIA UM CLONE DA TRANSFERENCIA MAS MUDA O EXTRATO
+                TransferenceEntity destinyTransf = t;
+                ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
+                        .orElseGet(() -> new ExtratoEntity(
+                            nowId,
+                            destinyAcc.getNumber(),
+                            balancoFinalDestiny
+                        ));
+                destinyTransf.setExtrato(extDestiny);
 
-            extDestiny.addTransference(destinyTransf);
-            extDestiny.setSaldoApos(balancoFinalDestiny); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
-            this.extratoRepository.save(extDestiny);
+                extDestiny.addTransference(destinyTransf);
+                extDestiny.setSaldoApos(balancoFinalDestiny); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+                this.extratoRepository.save(extDestiny);
             
             //garante que a lista seja buscada 
             Hibernate.initialize(extDestiny.getTransfs());

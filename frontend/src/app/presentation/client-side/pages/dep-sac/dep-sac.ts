@@ -46,10 +46,11 @@ export class DepSac {
 
         this.accountService.operar(op).subscribe({
           //VALUE É A CONTA COM O SALDO ATUALIZADO
-          next: (value) => {
+          next: (response) => {
             //JÁ SETA A CONTA COM O RETORNO LÁ NO SERVICE
-            console.log("operação efetuda com sucesso: ", value)
+            console.log("operação efetuda com sucesso: ", response)
             this.showPopUp('Operação efetuada com sucesso!!!', 'success');
+            this.value.set(0);
           },
           error: (err)=> {
             this.showPopUp('Erro ao efetuar operação!!!', 'fail');

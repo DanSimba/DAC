@@ -79,10 +79,9 @@ export class AccountService {
     }
   
     transferir(t: TransferenceModel): Observable<Account>{
-    
       return this.accountHttpService.transferir(t).pipe(
         map((response) => {
-        
+          console.log("EXTRATO VINDO DO BACK: ", response)
           this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
 
           this.account.update(current => ({
