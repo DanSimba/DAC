@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClienteConsulta } from '../../../../domain/manager/models/consulta-cliente.model';
+import { ManagerHttpService } from '../../../../infraestructure/http/manager.http.service';
 
 @Component({
   selector: 'app-clients',
@@ -8,8 +9,9 @@ import { ClienteConsulta } from '../../../../domain/manager/models/consulta-clie
   templateUrl: './clients.html',
   styleUrl: './clients.css',
 })
-export class Clients {
+export class Clients implements OnInit {
 
+  /*
   public clientes: ClienteConsulta[] = [
     {
       cpf: '111.111.111-11',
@@ -117,11 +119,31 @@ export class Clients {
       saldo: 'R$ 12.000,00'
     }
   ];
+  */
+
+  private managerService = inject(ManagerHttpService);
+
+  public clientes: ClienteConsulta[] = [];
+
 
   public termoBusca: string = '';
-
   public paginaAtual: number = 1;
   public itensPorPagina: number = 5;
+
+  ngOnInit(): void {
+    this.carregarClientes();
+  }
+
+  public carregarClientes(): void {
+    this.managerService.listarClientes().subscribe({
+      next: (clientes) => {
+        this.clientes = clientes;
+      },
+      error: (erro) => {
+        console.error('Erro ao listar clientes:', erro);
+      }
+    });
+  }
 
   public get getClientesFiltradosEOrdenados(): ClienteConsulta[] {
     const termo = this.termoBusca.toLowerCase().trim();

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SolicitacaoCadastro } from '../../../../domain/manager/models/solicitacao-cadastro.model';
+import { ManagerHttpService } from '../../../../infraestructure/http/manager.http.service';
 
 @Component({
   selector: 'app-manager-home-page',
@@ -8,8 +9,9 @@ import { SolicitacaoCadastro } from '../../../../domain/manager/models/solicitac
   templateUrl: './manager-home-page.html',
   styleUrl: './manager-home-page.css',
 })
-export class ManagerHomePage {
+export class ManagerHomePage implements OnInit {
 
+  /*
   // Mockzim pra testar a tela rlx
   public solicitacoes: SolicitacaoCadastro[] = [
     {
@@ -115,8 +117,38 @@ export class ManagerHomePage {
       nome: 'Serasa',
       salario: 'R$ 1.500,00',
       status: 'APROVADO',
+    },
+    {
+      dataHora: '30/09/2026 03:40',
+      cpf: '163.082.193-19',
+      nome: 'Barata Cascuda',
+      salario: 'R$ 1.500,00',
+      status: 'APROVADO',
+    },
+    {
+      dataHora: '28/09/2026 15:40',
+      cpf: '923.032.163-29',
+      nome: 'Barrata Voadora',
+      salario: 'R$ 2.800,00',
+      status: 'APROVADO',
+    },
+    {
+      dataHora: '29/09/2026 12:00',
+      cpf: '125.036.124-13',
+      nome: 'Barata',
+      salario: 'R$ 1.300,00',
+      status: 'APROVADO',
     }
   ];
+  */
+
+  private managerService = inject(ManagerHttpService);
+
+  public solicitacoes: SolicitacaoCadastro[] = [];
+
+  public mensagemSucesso: string = '';
+  public mensagemErro: string = '';
+
 
   //Controle do pop-up
   public modalAberto: boolean = false;
@@ -130,19 +162,80 @@ export class ManagerHomePage {
   public paginaAtual: number = 1;
   public itensPorPagina: number = 5;
 
-  //função pra transformar string 'dd/MM/yyyy HH:mm' pro sort ordenar
-  public converterData(data: string): Date {
-    const [date, time] = data.split(' ');
-    const [day, month, year] = date.split('/');
-    const [hour, minute] = time.split(':');
-    return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+  ngOnInit(): void {
+    this.carregarSolicitacoes();
   }
+
+  public carregarSolicitacoes(): void {
+    this.managerService.listarSolicitacoes().subscribe({
+      next: (solicitacoes) =>
+        { this.solicitacoes = solicitacoes;
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar solicitações:', erro);
+        this.mensagemErro = 'Falha ao carregar solicitações. Tente novamente.';
+      }
+    });
+  }
+
+  public aprovar(solicitacao: SolicitacaoCadastro): void {
+    this.mensagemSucesso = '';
+    this.mensagemErro = '';
+
+    this.managerService.aprovarSolicitacao(solicitacao.cpf).subscribe({
+      next: () => {
+        this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
+        this.carregarSolicitacoes(); 
+        this.ajustarPaginaAposRemocao();
+      },
+      error: (erro) => {
+        this.mensagemErro = 'Ocorreu um erro ao aprovar o cliente.';
+      }
+    });
+  }
+
+  public confirmarRejeicao(): void {
+    if (!this.motivoRejeicao.trim()) {
+      this.motivoRejeicaoErro = 'Digite o motivo da rejeição.';
+      return;
+    }
+
+    if (this.solicitacaoSelecionada) {
+    const payload = { motivo: this.motivoRejeicao }; 
+
+      this.managerService.rejeitarSolicitacao(this.solicitacaoSelecionada.cpf, payload).subscribe({
+        next: () => {
+          this.mensagemSucesso = `A solicitação de ${this.solicitacaoSelecionada?.nome} foi rejeitada.`;
+          this.fecharModal();
+          this.carregarSolicitacoes();
+          this.ajustarPaginaAposRemocao();
+        },
+        error: (erro) => {
+          this.motivoRejeicaoErro = 'Ocorreu um erro ao rejeitar o cliente.';
+        }
+      });
+    }
+  }
+
+   //função pra transformar string 'dd/MM/yyyy HH:mm' pro sort ordenar
+  public converterData(data: string): Date {
+    if (!data) return new Date();
+    const partes = data.split(' ');
+    if (partes.length !== 2) return new Date();
+
+    const [day, month, year] = partes[0].split('/');
+    const [hour, minute] = partes[1].split(':');
+    return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+  }  
 
   // ordena da solicitaão mais antigo para o mais recente em todos os filtros
   public get getSolicitacoesOrdenadas(): SolicitacaoCadastro[] {
     const filtradas = this.solicitacoes.filter(s => s.status === this.filtroAtual);
     
     return filtradas.sort((a, b) => {
+      if (!a.dataHora) return 1;
+      if (!b.dataHora) return -1; 
+
       return this.converterData(a.dataHora).getTime() - this.converterData(b.dataHora).getTime();
     });
   }
@@ -170,12 +263,6 @@ export class ManagerHomePage {
     }
   }
 
-  public aprovar(solicitacao: SolicitacaoCadastro): void {
-    solicitacao.status = 'APROVADO';
-    solicitacao.dataHoraDecisao = new Date().toLocaleString('pt-BR');
-    this.ajustarPaginaAposRemocao();
-  }
-
   public abrirModalRejeitar(solicitacao: SolicitacaoCadastro): void {
     this.solicitacaoSelecionada = solicitacao;
     this.motivoRejeicao = '';
@@ -198,21 +285,6 @@ export class ManagerHomePage {
     this.solicitacaoSelecionada = null;
     this.motivoRejeicao = '';
     this.motivoRejeicaoErro = '';
-  }
-
-  public confirmarRejeicao(): void {
-    if (!this.motivoRejeicao.trim()) {
-      this.motivoRejeicaoErro = 'Digite o motivo da rejeição.';
-      return;
-    }
-
-    if (this.solicitacaoSelecionada) {
-      this.solicitacaoSelecionada.status = 'REJEITADO';
-      this.solicitacaoSelecionada.motivoRejeicao = this.motivoRejeicao;
-      this.solicitacaoSelecionada.dataHoraDecisao = new Date().toLocaleString('pt-BR');
-      this.ajustarPaginaAposRemocao();
-    }
-    this.fecharModal();
   }
 
   //ajusta a pagina depois de rejeitar ou aprovar uma solicitacao pra evitar que exiba uma página vazia

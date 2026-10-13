@@ -2,6 +2,18 @@
 
   <h1 class="text-5xl text-white font-monster mt-4">SOLICITAÇÕES DE CADASTRO</h1>
 
+  @if (mensagemSucesso) {
+    <div class="w-[85vw] p-4 bg-green-900/30 border border-green-500/50 text-green-400 font-display rounded text-center font-bold">
+      {{ mensagemSucesso }}
+    </div>
+  }
+
+  @if (mensagemErro) {
+    <div class="w-[85vw] p-4 bg-red-900/30 border border-red-500/50 text-red-400 font-display rounded text-center font-bold">
+      {{ mensagemErro }}
+    </div>
+  }
+
   <!-- Filtros -->
   <div class="flex flex-row gap-4 w-[85vw] font-display text-sm">
     <button 
