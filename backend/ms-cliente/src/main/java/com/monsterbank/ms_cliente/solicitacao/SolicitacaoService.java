@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RecusarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
-import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.listarSolicitacoesReturn;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.ListarSolicitacoesReturn;
 import com.monsterbank.ms_cliente.utils.CpfUtils;
 import com.monsterbank.ms_cliente.mensageria.producer.SolicitacaoProducer;
 
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SolicitacaoService {
@@ -137,20 +138,39 @@ public class SolicitacaoService {
     }
 
 
-    public List<listarSolicitacoesReturn> listarSolicitacoes(int page){
-        PageRequest peageable = PageRequest.of(page, 50);
-        List<SolicitacaoEntity> lista = solicitacaoRepository.findAll(peageable).getContent();
+    public List<ListarSolicitacoesReturn> listarSolicitacoes(StatusSolicitacao status, int page){
+        log.info("Iniciando busca das solicitações");
+        PageRequest pageable = PageRequest.of(page, 50);
+        List<SolicitacaoEntity> lista;
+
+        if (status != null) {
+            log.info("Busca de solicitação com filtro de status {}", status);
+            lista = solicitacaoRepository.findByStatus(status, pageable).getContent();
+        } else {
+            log.info("Busca de solicitação sem filtro de status.");
+            lista = solicitacaoRepository.findAll(pageable).getContent();
+        }
 
         return lista.stream()
-                .map(solicitacao -> new listarSolicitacoesReturn(
-                        solicitacao.getCpf(),
-                        solicitacao.getNome(),
-                        solicitacao.getSalario().toString(),
-                        solicitacao.getStatus().toString(),
-                        solicitacao.getMotivo() != null ? solicitacao.getMotivo() : null,
-                        solicitacao.getDataProcessamento() != null? solicitacao.getDataProcessamento().toString() : null
-                )).toList();
+            .map(solicitacao -> {
+                Map<String, String> links = null;
+                if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
+                    links = Map.of(
+                        "aprovacao", "/solicitacoes/" + solicitacao.getCpf() + "/aprovacao",
+                        "rejeicao", "/solicitacoes/" + solicitacao.getCpf() + "/rejeicao"
+                    );
+                }
 
+                return new ListarSolicitacoesReturn(
+                    solicitacao.getCpf(),
+                    solicitacao.getNome(),
+                    solicitacao.getSalario().toString(),
+                    solicitacao.getStatus().toString(),
+                    solicitacao.getMotivo() != null ? solicitacao.getMotivo() : null,
+                    solicitacao.getDataProcessamento() != null ? solicitacao.getDataProcessamento().toString() : null,
+                    links
+                );
+            }).toList();
     }
 
     public SolicitacaoEntity getSolicitacaoByCpf(String cpf){

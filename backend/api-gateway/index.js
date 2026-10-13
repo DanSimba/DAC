@@ -38,6 +38,8 @@ app.post('/solicitacoes', async (req, res) => {
             body: JSON.stringify(req.body)
         });
 
+        console.log("Entrei no Post para registrar uma solicitação.");
+
         return await encaminhaResponse(response, res);
 
     } catch (error) {
@@ -50,45 +52,7 @@ app.post('/solicitacoes', async (req, res) => {
     }
 });
 
-
-  // console.log("Cheguei no Gateway.");
-  // try {
-  //   const response = await fetch(
-  //     `${process.env.MS_CLIENTE_URL}/solicitacoes`,
-  //     {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify(req.body)
-  //     }
-  //   );
-
-  //   const responseBodyText = await response.text();
-
-  //   let responseBodyJson = null;
-  //   try {
-  //     responseBodyJson = JSON.parse(responseBodyText);
-  //   } catch (e) {
-  //     // Se falhar o parse, significa que não é um JSON válido (mantém como texto)
-  //   }
-
-  //   res.status(response.status);
-
-  //   if (responseBodyJson) {
-  //     console.log(res.status);
-  //     res.json(responseBodyJson);
-  //   } else {
-  //     console.log(responseBodyText);
-  //     res.send(responseBodyText);
-  //   }
-  // } catch (error) {
-  //   console.error(error);
-
-  //   res.status(500).json({
-  //     message: 'Erro ao comunicar com o ms-client.'
-  //   });
-  // }
-// })
-
+// Rejeitar solicitações
 app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
   try {
     const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
@@ -96,6 +60,8 @@ app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(req.body)
     });
+
+    console.log("Entrei no Post para rejeitar uma solicitação.");
 
     return await encaminhaResponse(response, res);
 
@@ -105,6 +71,25 @@ app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
       status: 503, 
       mensagem: 'Serviço indisponível.' 
     });
+  }
+});
+
+// Lista as solicitações
+app.get('/solicitacoes', async (req, res) => {
+  try {
+    const queryParams = new URLSearchParams(req.query).toString();
+    const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
+    const response = await fetch(url);
+
+    console.log("Entrei no Get para listar todas as solicitações.");
+
+    await encaminhaResponse(response, res);
+  } catch (error) {
+    console.error('Erro ao listar solicitações. ', error);
+    res.status(503).json({
+        status: 503,
+        mensagem: 'Serviço indisponível.'
+      })
   }
 });
 

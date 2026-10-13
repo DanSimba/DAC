@@ -6,8 +6,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 @Service
 public class EmailService {
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     
     @Autowired
     private JavaMailSender javaMailSender;
@@ -17,14 +22,21 @@ public class EmailService {
 
     public String sendEmailText(String dest, String assunto, String message){
         try{
+            log.info("Iniciando envio de e-mail.");
+
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setFrom(rementente);
             simpleMailMessage.setTo(dest);
             simpleMailMessage.setSubject(assunto);
             simpleMailMessage.setText(message);
             javaMailSender.send(simpleMailMessage);
+
+            log.info("Enviando e-mail destinatario: {}", dest);
+            log.info("Enviando e-mail assunto: {}", assunto);
+            log.info("Enviando e-mail mensagem: {}", message);
             return "Enviado";
         } catch(Exception e){
+            log.error("Erro ao enviar email: {}", e);
             return "Erro ao enviar email";
         }
     };
