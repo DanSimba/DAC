@@ -38,6 +38,8 @@ app.post('/solicitacoes', async (req, res) => {
             body: JSON.stringify(req.body)
         });
 
+        console.log("Entrei no Post para registrar uma solicitação.");
+
         return await encaminhaResponse(response, res);
 
     } catch (error) {
@@ -59,6 +61,8 @@ app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
         body: JSON.stringify(req.body)
     });
 
+    console.log("Entrei no Post para rejeitar uma solicitação.");
+
     return await encaminhaResponse(response, res);
 
   } catch (error) {
@@ -67,6 +71,25 @@ app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
       status: 503, 
       mensagem: 'Serviço indisponível.' 
     });
+  }
+});
+
+// Lista as solicitações
+app.get('/solicitacoes', async (req, res) => {
+  try {
+    const queryParams = new URLSearchParams(req.query).toString();
+    const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
+    const response = await fetch(url);
+
+    console.log("Entrei no Get para listar todas as solicitações.");
+
+    await encaminhaResponse(response, res);
+  } catch (error) {
+    console.error('Erro ao listar solicitações. ', error);
+    res.status(503).json({
+        status: 503,
+        mensagem: 'Serviço indisponível.'
+      })
   }
 });
 

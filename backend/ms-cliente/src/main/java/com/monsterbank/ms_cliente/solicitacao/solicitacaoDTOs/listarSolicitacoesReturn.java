@@ -1,11 +1,14 @@
 package com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs;
 
-public record listarSolicitacoesReturn(
+import java.util.Map;
+
+public record ListarSolicitacoesReturn(
         String cpf,
         String nome,
         String salario,
         String status,
         String motivo,
-        String data
+        String data,
+        Map<String, String> links
 ) {
 }
