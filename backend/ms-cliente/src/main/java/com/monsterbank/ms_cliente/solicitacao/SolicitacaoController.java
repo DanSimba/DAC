@@ -41,6 +41,15 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacoes);
     }
 
+    @GetMapping("/{cpf}")
+    public ResponseEntity<SolicitacaoEntity> buscaSolicitacaoPorCpf(@PathVariable String cpf){
+        log.info("Entrei no Get de busca de uma solicitação.");
+
+        SolicitacaoEntity solicitacao = solicitacaoService.getSolicitacaoByCpf(cpf);
+        
+        return ResponseEntity.ok(solicitacao);
+    }
+
     @PostMapping
     public ResponseEntity<SolicitacaoEntity> registrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto) {
         log.info("Entrei no Post para registrar solicitação.");

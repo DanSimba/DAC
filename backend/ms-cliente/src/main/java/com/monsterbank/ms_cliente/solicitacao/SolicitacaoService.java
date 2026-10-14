@@ -174,6 +174,8 @@ public class SolicitacaoService {
     }
 
     public SolicitacaoEntity getSolicitacaoByCpf(String cpf){
+        log.info("Iniciando busca de solicitação para o CPF {}", cpf);
+        
         return solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
     }
 
