@@ -3,6 +3,7 @@ import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { Account } from '../../../domain/account/models/account.model';
+import { OperationSide } from '../../../enumeration/operation-side';
 
 @Injectable({
   providedIn: 'root',
@@ -91,23 +92,31 @@ export class ExtratoService {
 
   createMonthExt(acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
     const now = new Date();
+    let month = now.getMonth() + 1;
     let days = now.getDate();
 
-    while(days>0){
-      let idString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(days).padStart(2, '0')}`
-      let dateId = this.createDateId(idString);
+    while(month>0){
+      while(days>0){
+        let idString = `${now.getFullYear()}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
+        let dateId = this.createDateId(idString);
 
-      //miseria.ts
-      //encontra a ultima oper / transf na lista antes do dia vazio
-      //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
+        //miseria.ts
+        //encontra a ultima oper / transf na lista antes do dia vazio
+        //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
 
-      //procura se o dia ja consta na extList
-      let existingDay = this.extList().find((ext)=>(ext.dateId == dateId));
-      if(!existingDay){ //SE O DIA NAO EXISTE, CRIA VAZIO
-         this.createEmptyDay(dateId, acc);
+        //procura se o dia ja consta na extList
+        let existingDay = this.extList().find((ext)=>(ext.dateId == dateId));
+        if(!existingDay){ //SE O DIA NAO EXISTE, CRIA VAZIO
+          this.createEmptyDay(dateId, acc);
+        }
+        days--
       }
-      days--
+      month--
+      //typescript stravaganza: primeiro dia do mês -1 = qntdade de dias do mes anterior 
+      days = new Date(now.getFullYear(), month + 1, 0).getDate();
+      console.log("MONTH: ", month);
     }
+    console.log("EXTlIST: ", this.extList());
   }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)
