@@ -46,8 +46,7 @@ app.post('/solicitacoes', async (req, res) => {
         console.error('Erro de rede ao acessar ms-cliente:', error.message);
         return res.status(503).json({
             status: 503,
-            erro: "Service Unavailable",
-            mensagem: 'O serviço de solicitação está temporariamente indisponível.'
+            mensagem: 'Serviço indisponível.'
         });
     }
 });
@@ -83,13 +82,32 @@ app.get('/solicitacoes', async (req, res) => {
 
     console.log("Entrei no Get para listar todas as solicitações.");
 
-    await encaminhaResponse(response, res);
+    return await encaminhaResponse(response, res);
+
   } catch (error) {
     console.error('Erro ao listar solicitações. ', error);
-    res.status(503).json({
+    return res.status(503).json({
         status: 503,
         mensagem: 'Serviço indisponível.'
       })
+  }
+});
+
+// Lista uma solicitação
+app.get('/solicitacoes/:cpf', async (req, res) => {
+  try {
+    const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}`);
+
+    console.log("Entrei no Get para listar uma solicitação");
+    
+    return await encaminhaResponse(response, res);
+
+  } catch (error) {
+    console.error('Erro ao listar solicitação. ', error);
+    return res.status(503).json({
+      status: 503,
+      mensagem: 'Serviço indisponível.'
+    })
   }
 });
 
