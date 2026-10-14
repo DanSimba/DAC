@@ -46,7 +46,7 @@
                     [value]="dest()" 
                     #destin
                     (input)="destin.value = destin.value.slice(0, 3); dest.set(destin.value)"
-                    class="{{sent()?'hidden': 'flex'}} w-[20vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
+                    class="{{sent()?'hidden': 'flex'}} w-[26vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
                     >
             </div>
 
@@ -56,12 +56,12 @@
                 </h1>
                 
                 <div class="flex flex-row items-center gap-x-4 text-3xl">
+                    R$
                     <input type="number" placeholder="XX.XX" maxlength="11"
                     [value]="value()" 
                     (input)="value.set($event.target.valueAsNumber)"
                     class="{{sent()?'hidden': 'flex'}} w-[20vw] h-12 p-2 border-2 border-solid border-rosa scale-105 outline-none focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg transition-all duration-130"
                     >
-                    R$
                 </div>
                     
             </div>

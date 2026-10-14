@@ -5,8 +5,6 @@ import { TransferenceModel } from '../../../domain/operations/models/transferenc
 import { map, Observable, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
-import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
-import { response } from 'express';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +17,8 @@ export class AccountService {
       client_cpf: '',
       number   : '',
       balanco  : 0,
-      manager_id  : 0
+      manager_id  : 0,
+      createdAt: 9999
   })
 
   getAccount():Account{
@@ -53,7 +52,7 @@ export class AccountService {
     this.accountHttpService.findAccountByNumber(number).subscribe({
       next:(response)=>{
         this.account.set(response);
-        //console.log("conta: ", response);
+        console.log("conta: ", response);
       }
     })
   }
@@ -104,7 +103,8 @@ export class AccountService {
             balanco: response[response.length-1].saldoApos //ATUALIZA BALANCO
           }));
         }
-          
+        
+        //console.log('ACCOUNT QUE VAI PRA CREATEMONTH: ', this.account())
         //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
         this.extratoService.createMonthExt(this.account());
         console.log("lista de exts: ", response);
