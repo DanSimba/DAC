@@ -53,7 +53,7 @@ export class ExtratoService {
         }
   
         this.extList.update(exts=>[newExt, ...exts]);
-        console.log('extrato atualizado: ', this.extList());
+        //console.log('extrato atualizado: ', this.extList());
   }
   
   createEmptyDay(dateId: number, acc: Account){
@@ -90,7 +90,7 @@ export class ExtratoService {
   }
 
   createMonthExt(acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
-    console.log('ACCOUNT QUE TA NA CREATEMONTH: ', acc);
+    //console.log('ACCOUNT QUE TA NA CREATEMONTH: ', acc);
     const now = new Date();
     let month = now.getMonth() + 1;
     let days = now.getDate();
@@ -114,11 +114,11 @@ export class ExtratoService {
         days--
       }
       month--
-      //typescript stravaganza: primeiro dia do mês -1 = qntdade de dias do mes anterior 
-      days = new Date(now.getFullYear(), month + 1, 0).getDate();
+      //typescript stravaganza: primeiro dia do mês[0] = ultimo dia do último mês, ou seja, qntdade de dias do mes anterior 
+      days = new Date(now.getFullYear(), month, 0).getDate();
       //console.log("MONTH: ", month);
     }
-    console.log("EXTlIST: ", this.extList());
+    //console.log("EXTlIST: ", this.extList());
   }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)

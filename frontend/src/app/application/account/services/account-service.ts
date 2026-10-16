@@ -53,6 +53,9 @@ export class AccountService {
       next:(response)=>{
         this.account.set(response);
         console.log("conta: ", response);
+        
+        //JÁ BUSCA O EXTRATO LOGO EM SEGUIDA CASO ESTEJA NA TELA EXTRATO
+        this.listExtratos();
       }
     })
   }

@@ -27,6 +27,7 @@ export class Extrato implements OnInit{
   client = signal<Client>(this.clientService.getClient());
 
   date = signal<number>(0);
+  fotm = signal<number>(0); //FIRST OF THE MONTH
   minDate = signal<string>('');
 
   //MOCK lista com tds os extratos
@@ -35,13 +36,13 @@ export class Extrato implements OnInit{
   })
   //filtra o extrato pela data
   filteredList= computed(()=>{
-    return this.extList().filter((ext)=> ext.dateId<=this.date()).reverse();
+    return this.extList().filter((ext)=> ext.dateId<=this.date()&&ext.dateId>=this.fotm()).reverse();
   })
 
   ngOnInit(): void {
 
     //PRIMEIRO FAZ UM GETEXTRATOLIST
-    this.accountService.listExtratos();
+    //this.accountService.listExtratos();
     //this.extList.set(this.extratoService.getExtList());
 
     //console.log("LISTA QUE TA NO COMP: ", this.extList())
@@ -59,13 +60,16 @@ export class Extrato implements OnInit{
   }
 
   setDate(d:string){ //d = 'aaaa-mm-dd'
-
     //pega a string e tira os traços
     const dateInt = d.split("-");
     //console.log('dateInt: ', dateInt);
 
+    //seta a data
     this.date.set(+(dateInt[0]+dateInt[1]+dateInt[2]));
     console.log('date: ', this.date());
+
+    //seta o começo do mes junto
+    this.fotm.set(+(dateInt[0]+dateInt[1]+'01'));
   }
   
   //FAZ LITERALMENTE O CONTRARIO DA FUNÇÃO DE CIMA 
