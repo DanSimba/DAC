@@ -5,6 +5,7 @@ import com.monsterbank.ms_cliente.exception.ClienteNaoEncontradoException;
 import com.monsterbank.ms_cliente.exception.ErroCriacaoClienteException;
 import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoEntity;
+import com.monsterbank.ms_cliente.solicitacao.SolicitacaoRepository;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,9 @@ public class ClienteService {
 
     @Autowired
     private SolicitacaoService solicitacaoService;
+
+    @Autowired 
+    private SolicitacaoRepository solicitacaoRepository;
 
     public List<ClienteRetorno> listarClientes(String field, Integer page){
         PageRequest peageable = PageRequest.of(page, 50);
@@ -54,7 +58,7 @@ public class ClienteService {
 
     public void criarCliente(String cpf){
 
-        SolicitacaoEntity solicitacao = solicitacaoService.getSolicitacaoByCpf(cpf);
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
 
         try{
             ClienteEntity cliente = new ClienteEntity(

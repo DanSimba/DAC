@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RecusarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoHateoasResponse;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.ListarSolicitacoesReturn;
 import com.monsterbank.ms_cliente.utils.CpfUtils;
 import com.monsterbank.ms_cliente.mensageria.producer.SolicitacaoProducer;
@@ -34,7 +35,7 @@ public class SolicitacaoService {
 
     @Transactional
     public SolicitacaoEntity registrar(RegistrarSolicitacaoRequest dto) {
-        log.info("Iniciando registro de solicitação para o CPF: {}", dto.cpf());
+        log.info("{} --- Iniciando registro de solicitação para o CPF: {}", SolicitacaoService.class, dto.cpf());
 
         validarPorCPF(dto.cpf());
         validarEmailSolicitado(dto.email());
@@ -45,11 +46,11 @@ public class SolicitacaoService {
         try {
             salario = new BigDecimal(dto.salario());
             if(salario.compareTo(BigDecimal.ZERO) <= 0) {
-                log.warn("Salario zerado ou negativo para o CPF: {}", dto.cpf());
+                log.warn("{} --- Salario zerado ou negativo para o CPF: {}", SolicitacaoService.class, dto.cpf());
                 throw new SalarioInvalidoException(); 
             }
         } catch (NumberFormatException e) {
-            log.error("Erro ao converter salario para BigDecimal: {}, CPF: {}", dto.salario(), dto.cpf());
+            log.error("{} --- Erro ao converter salario para BigDecimal: {}, CPF: {}", SolicitacaoService.class, SolicitacaoService.class, dto.salario(), dto.cpf());
             throw new SalarioInvalidoException();
         }
 
@@ -69,19 +70,7 @@ public class SolicitacaoService {
                 );
 
         solicitacao = solicitacaoRepository.save(solicitacao);
-        log.info("Solicitacao salva como {} para o CPF: {}", solicitacao.getStatus(), dto.cpf());
-
-        RegistrarSolicitacaoRequest eventoDTO = new RegistrarSolicitacaoRequest(
-            solicitacao.getNome(),
-            solicitacao.getEmail(),
-            solicitacao.getCpf(),
-            solicitacao.getTelefone(),
-            solicitacao.getSalario().toString(),
-            solicitacao.getEndereco()
-        );
-
-        solicitacaoProducer.enviarParaAnalise(eventoDTO);
-        log.info("Solicitacao enviada para analise via RabbitMQ. Status: {}. CPF: {}", solicitacao.getStatus(), dto.cpf());
+        log.info("{} --- Solicitacao salva como {} para o CPF: {}", SolicitacaoService.class, solicitacao.getStatus(), dto.cpf());
 
         return solicitacao;
     }
@@ -92,7 +81,7 @@ public class SolicitacaoService {
             throw new CpfInvalidoException();
         }
 
-        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
 
         if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
             throw new SolicitacaoNaoPendenteException();
@@ -113,74 +102,101 @@ public class SolicitacaoService {
 
     @Transactional
     public SolicitacaoEntity rejeitar(String cpf, RecusarSolicitacaoRequest dto) {
-        log.info("Iniciando rejeicao da solicitacao para o CPF {}", cpf);
+        log.info("{} --- Iniciando rejeicao da solicitacao para o CPF {}", SolicitacaoService.class, cpf);
         if(!CpfUtils.validar(cpf)) {
             log.error("CPF {} invalido", cpf);
             throw new CpfInvalidoException();
         }
 
-        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
-        log.info("Status da solicitacao: {}", solicitacao.getStatus());
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        log.info("{} --- Status da solicitacao: {}", SolicitacaoService.class, solicitacao.getStatus());
 
         if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
-            log.error("Solicitacao nao pendente: {}", solicitacao.getStatus());
+            log.error("Solicitacao nao pendente: {}", SolicitacaoService.class, solicitacao.getStatus());
             throw new SolicitacaoNaoPendenteException();
         }
 
         solicitacao.rejeitar(dto.motivo());
-        log.info("Rejeitando solicitacao pelo motivo: {}", dto.motivo());
+        log.info("{} --- Rejeitando solicitacao pelo motivo: {}", SolicitacaoService.class, dto.motivo());
         solicitacaoRepository.save(solicitacao);
 
-        log.info("Enviando e-mail de rejeicao para {}", solicitacao.getEmail());
+        log.info("{} --- Enviando e-mail de rejeicao para {}", SolicitacaoService.class, solicitacao.getEmail());
         solicitacaoProducer.enviarEmailRejeicao(solicitacao.getEmail(), dto.motivo());
 
         return solicitacao;
     }
 
 
-    public List<ListarSolicitacoesReturn> listarSolicitacoes(StatusSolicitacao status, int page){
-        log.info("Iniciando busca das solicitações");
+    public ListarSolicitacoesReturn listarSolicitacoes(StatusSolicitacao status, int page) {
+        log.info("{} --- Iniciando busca das solicitações", SolicitacaoService.class);
         PageRequest pageable = PageRequest.of(page, 50);
         List<SolicitacaoEntity> lista;
 
         if (status != null) {
-            log.info("Busca de solicitação com filtro de status {}", status);
+            log.info("{} --- Busca de solicitação com filtro de status {}", SolicitacaoService.class, status);
             lista = solicitacaoRepository.findByStatus(status, pageable).getContent();
         } else {
-            log.info("Busca de solicitação sem filtro de status.");
+            log.info("{} --- Busca de solicitação sem filtro de status.", SolicitacaoService.class);
             lista = solicitacaoRepository.findAll(pageable).getContent();
         }
 
-        return lista.stream()
+        List<SolicitacaoHateoasResponse> listaHateoas = lista.stream()
             .map(solicitacao -> {
-                Map<String, String> links = null;
+                String baseApi = "http://localhost:8080/solicitacoes/";
+                Map<String, Map<String, String>> links = new java.util.HashMap<>();
+                
+                links.put("self", Map.of("href", baseApi + solicitacao.getCpf()));
+
                 if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
-                    links = Map.of(
-                        "aprovacao", "/solicitacoes/" + solicitacao.getCpf() + "/aprovacao",
-                        "rejeicao", "/solicitacoes/" + solicitacao.getCpf() + "/rejeicao"
-                    );
+                    links.put("aprovacao", Map.of("href", baseApi + solicitacao.getCpf() + "/aprovacao"));
+                    links.put("rejeicao", Map.of("href", baseApi + solicitacao.getCpf() + "/rejeicao"));
                 }
 
-                return new ListarSolicitacoesReturn(
+                return new SolicitacaoHateoasResponse(
                     solicitacao.getCpf(),
                     solicitacao.getNome(),
+                    solicitacao.getEmail(),
+                    solicitacao.getTelefone(),
                     solicitacao.getSalario().toString(),
+                    solicitacao.getEndereco(),
                     solicitacao.getStatus().toString(),
-                    solicitacao.getMotivo() != null ? solicitacao.getMotivo() : null,
+                    solicitacao.getMotivo(),
                     solicitacao.getDataProcessamento() != null ? solicitacao.getDataProcessamento().toString() : null,
                     links
                 );
             }).toList();
-    }
-
-    public SolicitacaoEntity getSolicitacaoByCpf(String cpf){
-        log.info("Iniciando busca de solicitação para o CPF {}", cpf);
         
-        return solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        return new ListarSolicitacoesReturn(listaHateoas);
     }
 
+    public SolicitacaoHateoasResponse getSolicitacaoByCpf(String cpf){
+        log.info("{} --- Iniciando busca de solicitação para o CPF {}", SolicitacaoService.class, cpf);
 
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        
+        String baseApi = "http://localhost:8080/solicitacoes/";
+        Map<String, Map<String, String>> links = new java.util.HashMap<>();
+        
+        links.put("self", Map.of("href", baseApi + solicitacao.getCpf()));
 
+        if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
+            links.put("aprovacao", Map.of("href", baseApi + solicitacao.getCpf() + "/aprovacao"));
+            links.put("rejeicao", Map.of("href", baseApi + solicitacao.getCpf() + "/rejeicao"));
+        }
+
+        return new SolicitacaoHateoasResponse(
+            solicitacao.getCpf(),
+            solicitacao.getNome(),
+            solicitacao.getEmail(),
+            solicitacao.getTelefone(),
+            solicitacao.getSalario().toString(),
+            solicitacao.getEndereco(),
+            solicitacao.getStatus().toString(),
+            solicitacao.getMotivo(),
+            solicitacao.getDataProcessamento() != null ? solicitacao.getDataProcessamento().toString() : null,
+            links
+        );
+    }
 
     private void validarPorCPF(String cpf){
         if(solicitacaoRepository.findByCpf(cpf).isPresent()){
@@ -202,22 +218,18 @@ public class SolicitacaoService {
     //-------------------------Erros SAGA----------------------------------------------------
 
     public void retornarSolicitacaoParaPendente(String cpf){
-
-        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
-
+        // SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        
         solicitacao.retornarParaPendente();
-
         solicitacaoRepository.save(solicitacao);
-
     }
-
 
     public void marcarSolicitacaoComoNaoAprovada(String cpf, String motivo){
-        SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+        // SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
+        SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        
         solicitacao.rejeitar(motivo);
         solicitacaoRepository.save(solicitacao);
-
     }
-
-
 }
