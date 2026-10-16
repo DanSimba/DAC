@@ -29,34 +29,12 @@ public class SolicitacaoProducer {
         this.rabbitTemplate = rabbitTemplate;
         this.objectMapper = objectMapper; 
     }
-    
-    public void enviarParaAnalise(RegistrarSolicitacaoRequest solicitacaoDto) {
-        String COMMAND_TYPE = GerenteCommandQueue.AVALIAR_SOLICITACAO.commandType();
-        String QUEUE_NAME = GerenteCommandQueue.AVALIAR_SOLICITACAO.queueName();
-        
-        log.info("Iniciando envio da solicitacao para o ms-gerente. Fila: {} - commandType: {}", QUEUE_NAME, COMMAND_TYPE);
-
-        JsonNode payload = objectMapper.valueToTree(solicitacaoDto);
-        String timestampString = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString();
-
-        SagaCommand command = new SagaCommand(
-            UUID.randomUUID().toString(),
-            COMMAND_TYPE,
-            timestampString,
-            payload
-        );
-        
-        rabbitTemplate.convertAndSend(QUEUE_NAME, command);
-        log.info("Enviando command: {}", command);
-        log.info("Enviando para fila: {}", QUEUE_NAME);
-        log.info("Enviando commandType: {}", COMMAND_TYPE);
-    }
 
     public void enviarEmailRejeicao(String email, String motivo) {
         String COMMAND_TYPE = EmailCommandQueue.REJEITAR_SOLICITACAO.commandType();
         String QUEUE_NAME = EmailCommandQueue.REJEITAR_SOLICITACAO.queueName();
 
-        log.info("Iniciando envio da solicitacao para o ms-email. Fila: {} - commandType: {}", QUEUE_NAME, COMMAND_TYPE);
+        log.info("{} --- Iniciando envio da solicitacao para o ms-email. Fila: {} - commandType: {}", SolicitacaoProducer.class, QUEUE_NAME, COMMAND_TYPE);
 
         try {
             java.util.Map<String, String> dadosEmail = java.util.Map.of(
@@ -76,11 +54,11 @@ public class SolicitacaoProducer {
             );
 
             rabbitTemplate.convertAndSend(QUEUE_NAME, command);
-            log.info("Enviando command: {}", command);
-            log.info("Enviando para fila: {}", QUEUE_NAME);
-            log.info("Enviando commandType: {}", COMMAND_TYPE);
+            log.info("{} --- Enviando command: {}", SolicitacaoProducer.class, command);
+            log.info("{} --- Enviando para fila: {}", SolicitacaoProducer.class, QUEUE_NAME);
+            log.info("{} --- Enviando commandType: {}", SolicitacaoProducer.class, COMMAND_TYPE);
         } catch (Exception e) {
-            log.error("Erro ao enviar comando de e-mail para a fila {}", QUEUE_NAME, e);
+            log.error("{} --- Erro ao enviar comando de e-mail para a fila {}", SolicitacaoProducer.class, QUEUE_NAME, e);
         }
     }
 }

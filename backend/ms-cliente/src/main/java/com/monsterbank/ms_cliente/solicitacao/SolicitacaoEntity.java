@@ -24,7 +24,7 @@ public class SolicitacaoEntity {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -129,66 +129,4 @@ public class SolicitacaoEntity {
         );
         return endereco;
     }
-
-
-    // public String getCpf() {
-    //     return cpf;
-    // }
-
-    // public String getNome() {
-    //     return nome;
-    // }
-
-    // public String getEmail() {
-    //     return email;
-    // }
-
-    // public String getTelefone() {
-    //     return telefone;
-    // }
-
-    // public BigDecimal getSalario() {
-    //     return salario;
-    // }
-
-    // public String getLogradouro() {
-    //     return logradouro;
-    // }
-
-    // public Integer getNumero() {
-    //     return numero;
-    // }
-
-    // public String getComplemento() {
-    //     return complemento;
-    // }
-
-    // public String getCep() {
-    //     return cep;
-    // }
-
-    // public String getCidade() {
-    //     return cidade;
-    // }
-
-    // public String getUf() {
-    //     return uf;
-    // }
-
-    // public StatusSolicitacao getStatus() {
-    //     return status;
-    // }
-
-    // public String getMotivo() {
-    //     return motivo;
-    // }
-
-    // public LocalDateTime getDataProcessamento() {
-    //     return dataProcessamento;
-    // }
-
-
-
-
-
 }

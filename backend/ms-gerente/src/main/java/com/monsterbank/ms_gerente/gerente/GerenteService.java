@@ -5,12 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-// import com.monsterbank.ms_gerente.gerente.solicitacao.solicitacaoEntity;
-// import com.monsterbank.ms_gerente.gerente.solicitacao.solicitacaoRepository;
-import com.monsterbank.ms_gerente.gerente.solicitacao.enumeration.StatusSolicitacao;
-
-import jakarta.transaction.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

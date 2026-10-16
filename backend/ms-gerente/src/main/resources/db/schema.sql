@@ -6,6 +6,5 @@ CREATE TABLE gerente (
     cpf                 CHAR(11)        NOT NULL UNIQUE,
     email               VARCHAR(150)    NOT NULL UNIQUE,
     telefone            VARCHAR(20)     NOT NULL UNIQUE,
-    ativo               BOOLEAN         NOT NULL DEFAULT TRUE,
-    quantidade_clientes INTEGER         NOT NULL
+    ativo               BOOLEAN         NOT NULL DEFAULT TRUE
 );
