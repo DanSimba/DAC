@@ -16,6 +16,9 @@ VALUES ('002', 0.00, '22233344455', 999888777666, 20261008);
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
 VALUES ('003', 0.00, '33344455566', 999888777666, 20261004);
 
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('004', 0.00, '44455566677', 999888777666, 20250304);
+
 --EXTRATOS $%¨&*((*&¨$#$%¨&*()))
 /*
 INSERT INTO extrato (acc_number, date_id, saldo_apos)

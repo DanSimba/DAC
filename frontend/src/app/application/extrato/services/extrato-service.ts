@@ -94,31 +94,32 @@ export class ExtratoService {
     const now = new Date();
     let month = now.getMonth() + 1;
     let days = now.getDate();
+      while(month>4){
+        while(days>0){
+          let idString = `${now.getFullYear()}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
+          let dateId = this.createDateId(idString);
 
-    while(month>0){
-      while(days>0){
-        let idString = `${now.getFullYear()}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
-        let dateId = this.createDateId(idString);
+          if(dateId<acc.createdAt) return;
 
-        if(dateId<acc.createdAt) return;
+          //miseria.ts
+          //encontra a ultima oper / transf na lista antes do dia vazio
+          //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
 
-        //miseria.ts
-        //encontra a ultima oper / transf na lista antes do dia vazio
-        //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
-
-        //procura se o dia ja consta na extList
-        let existingDay = this.extList().find((ext)=>(ext.dateId == dateId));
-        if(!existingDay){ //SE O DIA NAO EXISTE, CRIA VAZIO
-          this.createEmptyDay(dateId, acc);
+          //procura se o dia ja consta na extList
+          let existingDay = this.extList().find((ext)=>(ext.dateId == dateId));
+          if(!existingDay){ //SE O DIA NAO EXISTE, CRIA VAZIO
+            this.createEmptyDay(dateId, acc);
+          }
+          days--
         }
-        days--
+        month--
+        //typescript stravaganza: primeiro dia do mês[0] = ultimo dia do último mês, ou seja, qntdade de dias do mes anterior 
+        days = new Date(now.getFullYear(), month, 0).getDate();
+        //console.log("MONTH: ", month);
       }
-      month--
-      //typescript stravaganza: primeiro dia do mês[0] = ultimo dia do último mês, ou seja, qntdade de dias do mes anterior 
-      days = new Date(now.getFullYear(), month, 0).getDate();
-      //console.log("MONTH: ", month);
-    }
-    //console.log("EXTlIST: ", this.extList());
+      month = 11;
+      days = 31;
+    console.log("EXTlIST: ", this.extList());
   }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)
