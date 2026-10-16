@@ -6,17 +6,20 @@ public class AccountDTO {
     String clientCpf;
     BigDecimal balanco;
     Long managerId;
+    private Integer createdAt;
     
     public AccountDTO(
         String number,
         String clientCpf,
         BigDecimal balanco,
-        Long managerId
+        Long managerId,
+        Integer createdAt //aqui eu passo pq a conta já existe, não crio outra data
     ){
         this.number = number;
         this.clientCpf = clientCpf;
         this.balanco = balanco;
         this.managerId = managerId;
+        this.createdAt = createdAt;
     }
 
     public String getNumber() {
@@ -33,6 +36,10 @@ public class AccountDTO {
 
     public Long getManagerId() {
         return managerId;
+    }
+
+    public Integer getCreatedAt() {
+        return createdAt;
     }
 
 }

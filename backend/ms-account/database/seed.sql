@@ -4,15 +4,20 @@
 --ARRANCA DADOS E COLOCA DE NOVO
 TRUNCATE TABLE account, extrato, operation, transference; 
 
+--ALTER TABLE account ADD COLUMN created_at integer;
+
 --ACCOUNTS $%¨&*(*&¨%$&%)
-INSERT INTO account (number, balanco, client_cpf, manager_id)
-VALUES ('001', 0.00, '11122233344', 999888777666);
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('001', 0.00, '11122233344', 999888777666, 20260921);
 
-INSERT INTO account (number, balanco, client_cpf, manager_id)
-VALUES ('002', 0.00, '22233344455', 999888777666);
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('002', 0.00, '22233344455', 999888777666, 20261008);
 
-INSERT INTO account (number, balanco, client_cpf, manager_id)
-VALUES ('003', 0.00, '33344455566', 999888777666);
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('003', 0.00, '33344455566', 999888777666, 20261004);
+
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('004', 0.00, '44455566677', 999888777666, 20250304);
 
 --EXTRATOS $%¨&*((*&¨$#$%¨&*()))
 /*

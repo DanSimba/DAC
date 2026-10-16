@@ -31,6 +31,15 @@ export class ClientMenu implements OnInit{
 
   logout(){
     console.log('usuário saiu!!');
+
+    const na: Account= {
+        client_cpf: '',
+        number   : '',
+        balanco  : 0,
+        manager_id  : 0,
+        createdAt: 9999
+    }
+    this.accountService.setAccount(na);
     this.router.navigate([''])
   }
 }

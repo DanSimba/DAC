@@ -3,4 +3,5 @@ export interface Account {
     number   : string;
     balanco  : number;
     manager_id  : number;
+    createdAt: number;
 }

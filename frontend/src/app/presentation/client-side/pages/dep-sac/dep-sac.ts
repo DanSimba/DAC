@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PopUp } from '../../../shared/components/pop-up/pop-up';
-import { ClientService } from '../../../../application/client/services/client-service';
 import { AccountService } from '../../../../application/account/services/account-service';
 import { Account } from '../../../../domain/account/models/account.model';
 import { OperationSide } from '../../../../enumeration/operation-side';

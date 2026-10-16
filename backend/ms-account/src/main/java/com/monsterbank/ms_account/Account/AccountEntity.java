@@ -6,6 +6,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import java.math.BigDecimal;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 @Entity
 @Table(name = "account")
 public class AccountEntity {
@@ -22,6 +26,9 @@ public class AccountEntity {
 
     @Column(name = "manager_id", nullable = false)
     private Long managerId;
+
+    @Column(name = "created_at", nullable = false)
+    private Integer createdAt; //PADRAO AAAAMMDD
     
     public AccountEntity(
         String clientCpf,
@@ -33,6 +40,15 @@ public class AccountEntity {
         this.clientCpf = clientCpf;
         this.balanco = balanco;
         this.managerId = managerId;
+
+        //NESTE CASO, DIFERENTE DO EXTRATO, EU POSSO CRIAR A DATA AQ PQ 
+        // CREATED_AT NÃO É UM ID QUE EU USO PRA BUSCAR A CONTA
+        LocalDate now = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+
+        this.createdAt = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
+            now.format(DateTimeFormatter.BASIC_ISO_DATE)
+        );
+
     }
 
     public AccountEntity(){} //CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
@@ -53,9 +69,17 @@ public class AccountEntity {
         return this.managerId;
     }
 
+    public Integer getCreatedAt() {
+        return createdAt;
+    }
+
     //SETTERS---------------0987667890-=-098UYGKLOIU
 
     public void setBalanco(BigDecimal balanco) {
         this.balanco = balanco;
+    }
+
+    public void setCreatedAt(Integer createdAt) {
+        this.createdAt = createdAt;
     }
 }

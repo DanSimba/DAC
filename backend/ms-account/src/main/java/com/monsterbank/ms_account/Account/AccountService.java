@@ -55,7 +55,8 @@ public class AccountService {
                 acc.getNumber(),
                 acc.getClientCpf(),
                 acc.getBalanco(),
-                acc.getManagerId()
+                acc.getManagerId(),
+                acc.getCreatedAt()
             )
         );
     }
@@ -66,7 +67,8 @@ public class AccountService {
                 acc.getNumber(),
                 acc.getClientCpf(),
                 acc.getBalanco(),
-                acc.getManagerId()
+                acc.getManagerId(),
+                acc.getCreatedAt()
             )
         );
     }
@@ -77,7 +79,8 @@ public class AccountService {
                 acc.getNumber(),
                 acc.getClientCpf(),
                 acc.getBalanco(),
-                acc.getManagerId()
+                acc.getManagerId(),
+                acc.getCreatedAt()
             )
         );
     }
@@ -92,7 +95,7 @@ public class AccountService {
 
             this.accountRepository.save(acc);
 
-            AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId());
+            AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId(), acc.getCreatedAt());
             return accDto;
             
         } catch (Exception e) {
