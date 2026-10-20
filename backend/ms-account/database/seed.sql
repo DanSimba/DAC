@@ -7,17 +7,23 @@ TRUNCATE TABLE account, extrato, operation, transference;
 --ALTER TABLE account ADD COLUMN created_at integer;
 
 --ACCOUNTS $%¨&*(*&¨%$&%)
-INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('001', 0.00, '11122233344', 999888777666, 20260921);
+
+--JURO Q É SÓ PRA TESTAR O COMPOSITION
 
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('002', 0.00, '22233344455', 999888777666, 20261008);
+VALUES ('1291', 800.00, '12912861012', 999888777666, 20000101);
 
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('003', 0.00, '33344455566', 999888777666, 20261004);
+VALUES ('0950', 10000.00, '09506382000', 999888777666, 19901010);
 
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('004', 0.00, '44455566677', 999888777666, 20250304);
+VALUES ('8573', 200.00, '85733854057', 999888777666, 20121212);
+
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('5887', 150000.00, '58872160006', 999888777666, 20220222);
+
+INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
+VALUES ('7617', 1500.00, '76179646090', 999888777666, 20250101);
 
 --EXTRATOS $%¨&*((*&¨$#$%¨&*()))
 /*
