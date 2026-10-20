@@ -57,6 +57,9 @@ export class Extrato implements OnInit{
     //console.log("MIN: ", minString)
     this.minDate.set(minString);
     this.setDate(nowString);
+
+    //popula mes atual
+    this.extratoService.createMonthExt(now.getMonth() + 1, this.account());
   }
 
   setDate(d:string){ //d = 'aaaa-mm-dd'
@@ -70,6 +73,10 @@ export class Extrato implements OnInit{
 
     //seta o começo do mes junto
     this.fotm.set(+(dateInt[0]+dateInt[1]+'01'));
+
+    //popula mes escolhido
+    this.extratoService.createMonthExt(+dateInt[1], this.account());
+
   }
   
   //FAZ LITERALMENTE O CONTRARIO DA FUNÇÃO DE CIMA 

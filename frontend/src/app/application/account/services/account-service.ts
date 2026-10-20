@@ -100,6 +100,7 @@ export class AccountService {
     this.accountHttpService.listExtratos(this.account().number).subscribe({
       next:(response)=>{
         this.extratoService.setExtList(response);
+        this.extratoService.setRealList(response);
         if(response.length>0){
           this.account.update(current => ({
             ...current,  
@@ -109,7 +110,7 @@ export class AccountService {
         
         //console.log('ACCOUNT QUE VAI PRA CREATEMONTH: ', this.account())
         //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
-        this.extratoService.createMonthExt(this.account());
+        //this.extratoService.createMonthExt(this.account()); //TROCADO PRA O COMP EXTRATO
         console.log("lista de exts: ", response);
       }
     })
