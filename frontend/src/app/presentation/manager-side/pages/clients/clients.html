@@ -37,7 +37,11 @@
           } @empty {
             <tr>
               <td colspan="5" class="p-8 text-center text-white/50">
-                Nenhum cliente encontrado para a busca "{{ termoBusca }}".
+                @if (termoBusca) {
+                  Nenhum cliente encontrado para a busca "{{ termoBusca }}".
+                } @else {
+                  Nenhum cliente encontrado.
+                }
               </td>
             </tr>
           }

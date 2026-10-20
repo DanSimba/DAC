@@ -1,4 +1,4 @@
-// DTO pra enviar o motivo da rejeição pro back acho que da bom
-export interface RejeitarClientePayload {
+// DTO pra enviar o motivo da recusa pro back acho que da bom
+export interface RecusarClientePayload {
   motivo: string;
 }
