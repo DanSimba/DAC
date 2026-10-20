@@ -1,0 +1,23 @@
+info:
+  name: Criar Conta
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://localhost:8082/account/create
+  body:
+    type: json
+    data: |-
+      {
+        "cpf": "52998224725",
+        "managerId": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

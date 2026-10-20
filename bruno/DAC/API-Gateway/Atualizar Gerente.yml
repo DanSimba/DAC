@@ -1,0 +1,25 @@
+info:
+  name: Atualizar Gerente
+  type: http
+  seq: 10
+
+http:
+  method: PUT
+  url: http://localhost:8080/gerentes/{id}
+  body:
+    type: json
+    data: |-
+      {
+        "nome": "Maria Silva Atualizada",
+        "cpf": "12345678901",
+        "email": "maria.silva@monsterbank.com",
+        "telefone": "41988887777"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

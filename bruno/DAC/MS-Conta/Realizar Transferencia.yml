@@ -1,0 +1,27 @@
+info:
+  name: Realizar Transferencia
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: http://localhost:8082/account/transfer
+  body:
+    type: json
+    data: |-
+      {
+        "cpfOrigin": "52998224725",
+        "nameOrigin": "Joao da Silva",
+        "accOrigin": "000001",
+        "accDestiny": "000002",
+        "value": 50.00,
+        "datetime": "20/10/2026 14:30"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
