@@ -76,18 +76,25 @@ public class SolicitacaoService {
     }
 
 
+    @Transactional
     public SolicitacaoSagaDTO aprovar(String cpf) {
         if(!CpfUtils.validar(cpf)){
+            log.error("{} --- CPF {} Inválido", SolicitacaoService.class, cpf);
             throw new CpfInvalidoException();
         }
 
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
 
         if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
+            log.error("{} --- A solicitação não está pendente: {} ", SolicitacaoService.class, solicitacao.getStatus());
             throw new SolicitacaoNaoPendenteException();
         }
 
+        log.info("{} --- Solicitação antes da aprovação: {}", SolicitacaoService.class, solicitacao.getStatus());
         solicitacao.aprovar();
+        log.info("{} --- Solicitação depois da aprovação: {}", SolicitacaoService.class, solicitacao.getStatus());
+
+        log.info("{} --- Salvando solicitação para o CPF {}", SolicitacaoService.class, solicitacao.getCpf());
         solicitacaoRepository.save(solicitacao);
 
         return new SolicitacaoSagaDTO(
@@ -217,6 +224,7 @@ public class SolicitacaoService {
 
     //-------------------------Erros SAGA----------------------------------------------------
 
+    @Transactional
     public void retornarSolicitacaoParaPendente(String cpf){
         // SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
@@ -225,6 +233,7 @@ public class SolicitacaoService {
         solicitacaoRepository.save(solicitacao);
     }
 
+    @Transactional
     public void marcarSolicitacaoComoNaoAprovada(String cpf, String motivo){
         // SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
