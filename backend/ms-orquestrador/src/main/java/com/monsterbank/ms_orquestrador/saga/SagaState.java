@@ -3,22 +3,45 @@ package com.monsterbank.ms_orquestrador.saga;
 import tools.jackson.databind.JsonNode;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SagaState {
     public enum Status { EM_ANDAMENTO, COMPENSANDO, CONCLUIDA, FALHA }
 
     private final String sagaId;
+
+    @JsonIgnore
     private final String cpf;
+    
+    @JsonProperty("payload")
     private final JsonNode payloadInicial;
+    
+    @JsonProperty("timestamp")
+    private LocalDateTime atualizadoEm;
+    
     private String etapaAtual;
     private Status status;
-    private LocalDateTime atualizadoEm;
     private String erro;
+    private String tipo;
+    private Integer etapaAtual_teste;
 
-    public SagaState(String sagaId, String cpf, JsonNode payloadInicial, String etapaAtual) {
+    // Comentado para teste
+    // public SagaState(String sagaId, String cpf, JsonNode payloadInicial, String etapaAtual) {
+    //     this.sagaId = sagaId;
+    //     this.cpf = cpf;
+    //     this.payloadInicial = payloadInicial;
+    //     this.etapaAtual = etapaAtual;
+    //     this.status = Status.EM_ANDAMENTO;
+    //     this.atualizadoEm = LocalDateTime.now();
+    // }
+
+    public SagaState(String sagaId, String tipo, JsonNode payloadInicial, Integer etapaAtual) {
         this.sagaId = sagaId;
-        this.cpf = cpf;
+        this.tipo = tipo;
+        this.cpf = payloadInicial.get("cpf").asString();
         this.payloadInicial = payloadInicial;
-        this.etapaAtual = etapaAtual;
+        this.etapaAtual_teste = etapaAtual;
         this.status = Status.EM_ANDAMENTO;
         this.atualizadoEm = LocalDateTime.now();
     }

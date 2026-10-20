@@ -77,9 +77,13 @@ services:
     environment:
       MS_GERENTE_URL: http://ms-gerente:8084
       MS_CLIENTE_URL: http://ms-cliente:8083
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on:
       - ms-gerente
       - ms-cliente
+      - redis
+      - rabbitmq
     networks:
       - monsterbank-net
 

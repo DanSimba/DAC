@@ -3,6 +3,7 @@ package com.monsterbank.ms_orquestrador.saga;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaCommand;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
 import com.monsterbank.ms_orquestrador.messaging.producer.ClienteCommandProducer;
+import com.monsterbank.ms_orquestrador.redis.SagaStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class SagaService {
 
+    private final SagaStateRepository sagaStateRepository;
     public static final String APROVAR_CLIENTE = "aprovar-cliente";
     public static final String APROVAR_SOLICITACAO = "cliente.aprovar-solicitacao";
     public static final String CRIAR_CLIENTE = "cliente.criar";
@@ -25,20 +27,42 @@ public class SagaService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, SagaState> sagas = new ConcurrentHashMap<>();
 
-    public SagaService(ClienteCommandProducer clienteCommandProducer) {
+    public SagaService(ClienteCommandProducer clienteCommandProducer, SagaStateRepository sagaStateRepository) {
         this.clienteCommandProducer = clienteCommandProducer;
+        this.sagaStateRepository = sagaStateRepository;
     }
+
+    // Comentado para testar fazer com que o próprio orquestrador mantenha a SAGA, sem armazenar em memória
+    // public void iniciar(SagaCommand command) {
+    //     validarInicio(command);
+    //     String cpf = command.payload().get("cpf").asString();
+    //     SagaState state = new SagaState(command.sagaId(), cpf, command.payload(), APROVAR_SOLICITACAO);
+
+    //     if (sagas.putIfAbsent(command.sagaId(), state) != null) {
+    //         log.info("Saga {} ja iniciada; comando duplicado ignorado", command.sagaId());
+    //         return;
+    //     }
+    //     enviar(state, APROVAR_SOLICITACAO);
+    // }
+
 
     public void iniciar(SagaCommand command) {
         validarInicio(command);
-        String cpf = command.payload().get("cpf").asString();
-        SagaState state = new SagaState(command.sagaId(), cpf, command.payload(), APROVAR_SOLICITACAO);
 
-        if (sagas.putIfAbsent(command.sagaId(), state) != null) {
-            log.info("Saga {} ja iniciada; comando duplicado ignorado", command.sagaId());
+        if (sagaStateRepository.existe(command.sagaId())) {
             return;
         }
-        enviar(state, APROVAR_SOLICITACAO);
+
+        SagaState sagaState = new SagaState(
+            command.sagaId(),
+            APROVAR_SOLICITACAO,
+            command.payload(),
+            1
+        );
+
+        sagaStateRepository.salvar(sagaState);
+        
+        enviar(sagaState, APROVAR_SOLICITACAO);
     }
 
     /**

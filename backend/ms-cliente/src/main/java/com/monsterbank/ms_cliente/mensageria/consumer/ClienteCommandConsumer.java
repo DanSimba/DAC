@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 @Component
 public class ClienteCommandConsumer {
+    private static final Logger log = LoggerFactory.getLogger(ClienteCommandConsumer.class);
 
     private final SolicitacaoService solicitacaoService;
     private final ClienteService clienteService;
@@ -44,18 +45,22 @@ public class ClienteCommandConsumer {
     public void receber(SagaCommand command){
         ClienteReplyQueue replyQueue = ClienteReplyQueue.fromCommandType(command.tipo())
                 .orElse(ClienteReplyQueue.COMANDO_DESCONHECIDO);
+        
+        log.info("{} --- Iniciando consumo do ms.cliente.cmd", ClienteCommandConsumer.class);
 
         try{
             switch (command.tipo()){
 
                 case "cliente.aprovar-solicitacao" -> {
+                    log.info("{} --- Fila cliente.aprovar-solicitacao", ClienteCommandConsumer.class);
                     String cpf = command.payload().get("cpf").asString();
 
+                    log.info("{} --- Encaminhando a solicitação do CPF {} para a service", ClienteCommandConsumer.class, cpf);
                     SolicitacaoSagaDTO solicitacao = solicitacaoService.aprovar(cpf);
-
 
                     JsonNode payload = objectMapper.valueToTree(solicitacao);
 
+                    log.info("{} --- Enviando resposta de sucesso para a command: {}", ClienteCommandConsumer.class, command);
                     enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
@@ -158,6 +163,8 @@ public class ClienteCommandConsumer {
                 payload
 
         );
+
+        log.info("{} --- Enviando resposta: {}", ClienteCommandConsumer.class, reply);
 
         responseProducer.enviar(replyQueue, reply);
     }

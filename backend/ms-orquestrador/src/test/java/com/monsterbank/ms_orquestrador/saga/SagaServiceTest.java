@@ -3,6 +3,8 @@ package com.monsterbank.ms_orquestrador.saga;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaCommand;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
 import com.monsterbank.ms_orquestrador.messaging.producer.ClienteCommandProducer;
+import com.monsterbank.ms_orquestrador.redis.SagaStateRepository;
+
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -14,7 +16,9 @@ import static org.mockito.Mockito.verify;
 class SagaServiceTest {
 
     private final ClienteCommandProducer clienteCommandProducer = mock(ClienteCommandProducer.class);
-    private final SagaService sagaService = new SagaService(clienteCommandProducer);
+    private final SagaStateRepository sagaStateRepository = mock(SagaStateRepository.class);
+    private final SagaService sagaService = new SagaService(clienteCommandProducer, sagaStateRepository);
+    //private final SagaService sagaService = new SagaService(clienteCommandProducer);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
