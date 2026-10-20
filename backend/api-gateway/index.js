@@ -51,6 +51,7 @@ async function iniciarServidor() {
       res.send('Olá Mundo!');
     });
 
+    //pedaço SOLICITAÇÂO 
     // Encaminha o cliente recebido do front para o ms-cliente
     app.post('/solicitacoes', async (req, res) => {
         try {
@@ -178,7 +179,10 @@ async function iniciarServidor() {
       }
     });
 
-    // para o CRUD de gerentes 
+
+
+    // para o lado de GERENTE 
+    // get gerente
     app.get('/gerentes', async(req, res) => {
       try{
         const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente`);
@@ -204,9 +208,10 @@ async function iniciarServidor() {
       }
     })
 
+    // post gerente
     app.post('/gerentes', async(req, res) => {
       try{
-        const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
+        const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente`,
           {
             method: 'POST',
             headers: {
@@ -225,6 +230,7 @@ async function iniciarServidor() {
 
     });
 
+    //put gerente
     app.put('/gerentes/:id', async(req, res) => {
       try{
         const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
@@ -246,6 +252,7 @@ async function iniciarServidor() {
 
     });
 
+    //delete gerente
     app.delete('/gerentes/:id', async(req,res) =>{
       try{
         const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`,
@@ -262,6 +269,55 @@ async function iniciarServidor() {
       }
     });
 
+
+    //pedaço CLIENTE 
+    function formataSaldo(valor){
+      return Number(valor).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      } );
+    }
+
+    app.get('/clientes', async(req, res) => {
+      try{
+        const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
+        if (!clienteresponse.ok){
+          return res.status(502).json({
+            message: 'Erro ao comunicar com ms-cliente'
+          });
+        }
+        const clientes = await clienteresponse.json();
+
+        const resultado = await Promise.all(
+          clientes.map(async (cliente) => {
+            const contaresponse = await fetch(`${process.env.MS_ACCOUNT_URL}/account/findByCpf/${encodeURIComponent(cliente.cpf)}`);
+
+            if (!contaresponse.ok){
+              throw new Error(`Erro ao consultar o cliente  ${cliente.cpf}`);
+            }
+
+            const conta = await contaresponse.json();
+
+            return {
+              cpf: cliente.cpf,
+              nome: cliente.nome,
+              cidade: cliente.cidade,
+              estado: cliente.estado,
+              saldo: formataSaldo(conta.balanco)
+            }
+
+          })
+        );
+
+        return res.json(resultado);
+
+      }catch (error){
+        console.error('Erro ao catar os cliente-> ', error);
+        res.status(502).json({
+          message: 'Erro ao compor os dados'
+        });
+      }
+    });
 
     app.listen(port, () => {
       console.log(`Servidor rodando em http://localhost:${port}`);
