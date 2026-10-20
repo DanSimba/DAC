@@ -10,11 +10,16 @@ import { Account } from '../../../domain/account/models/account.model';
 export class ExtratoService {
 
   private extList = signal<ExtratoModel[]> ([]);
+  private realList = signal<ExtratoModel[]> ([]); //LISTA DE EXTRATOS SEM OS VAZIOS, SOMENTE OPERAÇÕES QUE REALMENTE ACONTECERAM
 
   //SOLUÇÃO ALTERNATIVA: PASSAR A LISTA INTEIRA DNV
   setExtList(el: ExtratoModel[]){
     this.extList.set(el);
     //console.log("EXTLIST ESTÁ ASSIM: ", this.extList())
+  }
+
+  setRealList(rl: ExtratoModel[]){
+    this.realList.set(rl);
   }
 
   addToExtList(ext: ExtratoModel){
@@ -89,12 +94,14 @@ export class ExtratoService {
     return this.extList();
   }
 
-  createMonthExt(acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
+  createMonthExt(month: number, acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
+    //ARRANCA OS VAZIOS ANTERIORES E DEIXA SÓ OS EXTS DE VRDD
+    this.setExtList(this.realList());
+    
     //console.log('ACCOUNT QUE TA NA CREATEMONTH: ', acc);
     const now = new Date();
-    let month = now.getMonth() + 1;
-    let days = now.getDate();
-      while(month>4){
+    //let month = now.getMonth() + 1;
+    let days = new Date(now.getFullYear(), month, 0).getDate();
         while(days>0){
           let idString = `${now.getFullYear()}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
           let dateId = this.createDateId(idString);
@@ -112,13 +119,9 @@ export class ExtratoService {
           }
           days--
         }
-        month--
         //typescript stravaganza: primeiro dia do mês[0] = ultimo dia do último mês, ou seja, qntdade de dias do mes anterior 
-        days = new Date(now.getFullYear(), month, 0).getDate();
+        //days = new Date(now.getFullYear(), month, 0).getDate();
         //console.log("MONTH: ", month);
-      }
-      month = 11;
-      days = 31;
     console.log("EXTlIST: ", this.extList());
   }
 
