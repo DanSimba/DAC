@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { ManagerDTO } from '../../domain/manager/models/managerDTO';
 import { SolicitacaoCadastro } from '../../domain/manager/models/solicitacao-cadastro.model';
 import { ClienteConsulta } from '../../domain/manager/models/consulta-cliente.model';
-import { RejeitarClientePayload } from '../../domain/manager/models/manager-requests.model';
+import { RecusarClientePayload } from '../../domain/manager/models/manager-requests.model';
 
 @Injectable({
   providedIn: 'root',
@@ -42,8 +42,8 @@ export class ManagerHttpService {
     return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovar`, null);
   }
 
-  rejeitarSolicitacao(cpf: string, payload: RejeitarClientePayload): Observable<void>{
-    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/rejeitar`, payload);
+  recusarSolicitacao(cpf: string, payload: RecusarClientePayload): Observable<void>{
+    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/recusar`, payload);
   }
 
   //buscar todos os clientes na pag de consultar clientes

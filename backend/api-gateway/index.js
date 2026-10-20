@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { timeStamp } = require('console');
 const redis = require('redis');
@@ -20,12 +21,12 @@ app.use(express.json());
 //pra tratar responses sem corpo e encaminhar status code: 
 async function encaminhaResponse(response, res) {
   const texto = await response.text();
-  if(!texto){
+  if (!texto) {
     return res.status(response.status).end();
   }
-  try{
+  try {
     return res.status(response.status).json(JSON.parse(texto));
-  }catch{
+  } catch {
     return res.status(response.status).send(texto);
   }
 }
@@ -51,28 +52,118 @@ async function iniciarServidor() {
       res.send('Olá Mundo!');
     });
 
-    //pedaço SOLICITAÇÂO 
-    // Encaminha o cliente recebido do front para o ms-cliente
-    app.post('/solicitacoes', async (req, res) => {
-        try {
-            const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(req.body)
-            });
 
-            console.log("Entrei no Post para registrar uma solicitação.");
+// Login
 
-            return await encaminhaResponse(response, res);
+app.post('/login', async (req, res) => {
+  const { email, senha } = req.body;
 
-        } catch (error) {
-            console.error('Erro de rede ao acessar ms-cliente:', error.message);
-            return res.status(503).json({
-                status: 503,
-                mensagem: 'Serviço indisponível.'
-            });
-        }
+  if (!email || !senha) {
+    return res.status(400).json({
+      status: 400,
+      mensagem: 'E-mail e senha são obrigatórios.'
     });
+  }
+
+  try {
+    const authResponse = await fetch(`${process.env.MS_AUTH_URL}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+
+    const data = await authResponse.json();
+
+    if (!authResponse.ok) {
+      return res.status(authResponse.status).json(data);
+    }
+
+    const usuarioInfo = data.usuario || data;
+
+    const token = jwt.sign(
+      {
+        email: usuarioInfo.email,
+        tipo: usuarioInfo.tipo
+      },
+      "MONSTERBANK",
+      { expiresIn: "120m" }
+    );
+
+    return res.status(200).json({
+      status: 200,
+      mensagem: 'Autorizado.',
+      token,
+      dados: data
+    });
+
+  } catch (error) {
+    console.error('Erro no login:', error.message);
+    return res.status(500).json({
+      status: 500,
+      mensagem: 'Erro com o login.'
+    });
+  }
+});
+
+// Valida Token
+
+app.get("validacao", (req, res) => {
+  const authHeader = req.header["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if(!token) return res.status(403).json({error: "Não autorizado"});
+
+  jwt.verify(token, "MONSTERBANK", (err, email) => {
+    if(err) return res.status(403).json({error: "Não autorizado"});
+
+    res.json({message: "AUTORIZADO", email});
+
+  });
+
+});
+
+
+
+// Encaminha o cliente recebido do front para o ms-cliente
+app.post('/solicitacoes', async (req, res) => {
+  try {
+    const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+
+    console.log("Entrei no Post para registrar uma solicitação.");
+
+    return await encaminhaResponse(response, res);
+
+  } catch (error) {
+    console.error('Erro de rede ao acessar ms-cliente:', error.message);
+    return res.status(503).json({
+      status: 503,
+      mensagem: 'Serviço indisponível.'
+    });
+  }
+});
+
+// Rejeitar solicitações
+// app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
+//   try {
+//     const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(req.body)});
+//             return await encaminhaResponse(response, res);
+
+//         } catch (error) {
+//             console.error('Erro de rede ao acessar ms-cliente:', error.message);
+//             return res.status(503).json({
+//                 status: 503,
+//                 mensagem: 'Serviço indisponível.'
+//             });
+//         }
+//     });
+// pq caralhos tinha 2 dessa eu não sei, mas mantem essa joça aqui 
 
     // Rejeitar solicitações
     app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
@@ -96,50 +187,56 @@ async function iniciarServidor() {
       }
     });
 
-    // Aprovar solicitações
-    app.post('/solicitacoes/:cpf/aprovacao', async (req, res) => {
-      try {
-        console.log("Entrei no Post para aprovar uma solicitação.");
-        
-        const cpf = req.params.cpf;
-        const sagaId = crypto.randomUUID();
-        const jobEstado = {
-          jobId : sagaId,
-          status : "PENDENTE",
-          resultType : null,
-          dominio : "clientes",
-          resourceId : cpf,
-          erro : null
-        };
 
-        await redisClient.set(
-          `job:${sagaId}`,
-          JSON.stringify(jobEstado),
-          {EX : 300}
-        );
+  // Aprovar solicitações
+  app.post('/solicitacoes/:cpf/aprovacao', async (req, res) => {
+    try {
+      console.log("Entrei no Post para aprovar uma solicitação.");
 
-        const sagaMessage = {
-          sagaId : sagaId,
-          tipo : "aprovar-cliente",
-          timestamp : new Date().toISOString(),
-          payload : { cpf : cpf }
-        };
+      const cpf = req.params.cpf;
+      const sagaId = crypto.randomUUID();
 
-        rabbitmqChannel.sendToQueue(
-          'saga.cmd',
-          Buffer.from(JSON.stringify(sagaMessage))
-        );
+      const jobEstado = {
+        jobId: sagaId,
+        status: "PENDENTE",
+        resultType: null,
+        dominio: "clientes",
+        resourceId: cpf,
+        erro: null
+      };
 
-        return res.status(202).json({ jobId : sagaId});
+      await redisClient.set(
+        `job:${sagaId}`,
+        JSON.stringify(jobEstado),
+        { EX: 300 }
+      );
 
-      } catch (error) {
-        console.error(`Erro de rede ao rejeitar CPF ${req.params.cpf}:`, error.message);
-        return res.status(503).json({
-          status: 503, 
-          mensagem: 'Serviço indisponível.' 
-        });
-      }
-    });
+      const sagaMessage = {
+        sagaId: sagaId,
+        tipo: "aprovar-cliente",
+        timestamp: new Date().toISOString(),
+        payload: { cpf: cpf }
+      };
+
+      rabbitmqChannel.sendToQueue(
+        'saga.cmd',
+        Buffer.from(JSON.stringify(sagaMessage))
+      );
+
+      return res.status(202).json({ jobId: sagaId });
+
+    } catch (error) {
+      console.error(
+        `Erro ao aprovar solicitação do CPF ${req.params.cpf}:`,
+        error.message
+      );
+
+      return res.status(503).json({
+        status: 503,
+        mensagem: 'Serviço indisponível.'
+      });
+    }
+  });
 
     // Lista as solicitações
     app.get('/solicitacoes', async (req, res) => {
@@ -150,36 +247,18 @@ async function iniciarServidor() {
 
         console.log("Entrei no Get para listar todas as solicitações.");
 
-        return await encaminhaResponse(response, res);
+    console.log("Entrei no Get para listar uma solicitação");
 
-      } catch (error) {
-        console.error('Erro ao listar solicitações. ', error);
-        return res.status(503).json({
-            status: 503,
-            mensagem: 'Serviço indisponível.'
-          })
-      }
-    });
+    return await encaminhaResponse(response, res);
 
-    // Lista uma solicitação
-    app.get('/solicitacoes/:cpf', async (req, res) => {
-      try {
-        const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}`);
-
-        console.log("Entrei no Get para listar uma solicitação");
-        
-        return await encaminhaResponse(response, res);
-
-      } catch (error) {
-        console.error('Erro ao listar solicitação. ', error);
-        return res.status(503).json({
-          status: 503,
-          mensagem: 'Serviço indisponível.'
-        })
-      }
-    });
-
-
+  } catch (error) {
+    console.error('Erro ao listar solicitação. ', error);
+    return res.status(503).json({
+      status: 503,
+      mensagem: 'Serviço indisponível.'
+    })
+  }
+});
 
     // para o lado de GERENTE 
     // get gerente
@@ -193,7 +272,7 @@ async function iniciarServidor() {
           message: 'Erro ao comunicar com ms gerente'
         });
       }
-    });
+    })
 
     //esqueci a merda do get por id
     app.get('/gerentes/:id', async(req, res) =>{
@@ -319,13 +398,12 @@ async function iniciarServidor() {
       }
     });
 
-    app.listen(port, () => {
+ app.listen(port, () => {
       console.log(`Servidor rodando em http://localhost:${port}`);
     });
   } catch(error) {
     console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
     process.exit(1);
   }
-}
 
-iniciarServidor();
+iniciarServidor()}
