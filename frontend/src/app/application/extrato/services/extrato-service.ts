@@ -62,7 +62,7 @@ export class ExtratoService {
   }
 
 
-  createMonthExt(month: number, acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
+  createMonthExt(month: number, year: number, acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
     //ARRANCA OS VAZIOS ANTERIORES E DEIXA SÓ OS EXTS DE VRDD
     this.setExtList(this.realList());
 
@@ -71,7 +71,7 @@ export class ExtratoService {
     //let month = now.getMonth() + 1;
     let days = new Date(now.getFullYear(), month, 0).getDate();
         while(days>0){
-          let idString = `${now.getFullYear()}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
+          let idString = `${year}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
           let dateId = this.createDateId(idString);
 
           if(dateId<acc.createdAt) return;
