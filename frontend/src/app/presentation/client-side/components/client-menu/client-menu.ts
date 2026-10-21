@@ -25,7 +25,7 @@ export class ClientMenu implements OnInit{
   })
 
   ngOnInit(): void {
-    this.accountService.findAccountByNumber("003"); //a resposta ja ta subcrita lá no service, ai a account daqui só puxa o resultado pronto de la
+    this.accountService.findAccountByNumber("0950"); //a resposta ja ta subcrita lá no service, ai a account daqui só puxa o resultado pronto de la
     //console.log("CONTA PUXADA: ", this.account())
   }
 
