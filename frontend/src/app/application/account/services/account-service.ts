@@ -69,6 +69,7 @@ export class AccountService {
           console.log("EXTRATO CRIADO: ", response);
         
           this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
 
           this.account.update(current => ({
             ...current,  
@@ -85,6 +86,7 @@ export class AccountService {
         map((response) => {
           console.log("EXTRATO VINDO DO BACK: ", response)
           this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
 
           this.account.update(current => ({
             ...current,  

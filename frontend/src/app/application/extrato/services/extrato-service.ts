@@ -1,7 +1,5 @@
 import { Injectable, signal } from '@angular/core';
 import { ExtratoModel } from '../../../domain/operations/models/extrato.model';
-import { OperationModel } from '../../../domain/operations/models/operation.model';
-import { TransferenceModel } from '../../../domain/operations/models/transference.model';
 import { Account } from '../../../domain/account/models/account.model';
 
 @Injectable({
@@ -18,6 +16,11 @@ export class ExtratoService {
     //console.log("EXTLIST ESTÁ ASSIM: ", this.extList())
   }
 
+  getExtList():ExtratoModel[]{
+    //console.log("EXT(LIST SENDO PEGA: ", this.extList());
+    return this.extList();
+  }
+
   setRealList(rl: ExtratoModel[]){
     this.realList.set(rl);
   }
@@ -26,39 +29,8 @@ export class ExtratoService {
         this.extList.update(current=>[...current, ext]);
   }
 
-  createExtrato(ext: OperationModel|TransferenceModel, dateId: number, acc: Account){ 
-      //procura por esse id no extrato (se já tem o dia, coloca ext lá)
-        const extDay = this.extList().find(day => day.dateId==dateId)
-        if(extDay){
-            if(ext.type == 'operation'){
-                extDay.opers.push(ext);
-                extDay.saldoApos = acc.balanco;
-                console.log('extrato atualizado: ', this.extList());
-            } else{
-                extDay.transfs.push(ext);
-                extDay.saldoApos = acc.balanco;
-                console.log('extrato atualizado: ', this.extList());
-            }
-            return
-        }
-        
-      //caso não ache o dia (é o primeiro extrato do dia), cria um novo
-        const newExt: ExtratoModel = {
-          accNumber: acc.number,
-          transfs: [],
-          opers: [],
-          dateId: dateId,
-          saldoApos: acc.balanco //JA ESTA ATUALIZADO NA FUNÇÃO DE OPERAR()/TRANFERIR()
-        }
-  
-        if(ext.type == 'operation'){
-          newExt.opers.push(ext);
-        } else{
-          newExt.transfs.push(ext);
-        }
-  
-        this.extList.update(exts=>[newExt, ...exts]);
-        //console.log('extrato atualizado: ', this.extList());
+  addToRealList(ext: ExtratoModel){
+     this.realList.update(current=>[...current, ext]);
   }
   
   createEmptyDay(dateId: number, acc: Account){
@@ -89,15 +61,11 @@ export class ExtratoService {
     //console.log('extrato atualizado com dia vazio: ', this.extList());
   }
 
-  getExtList():ExtratoModel[]{
-    //console.log("EXT(LIST SENDO PEGA: ", this.extList());
-    return this.extList();
-  }
 
   createMonthExt(month: number, acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
     //ARRANCA OS VAZIOS ANTERIORES E DEIXA SÓ OS EXTS DE VRDD
     this.setExtList(this.realList());
-    
+
     //console.log('ACCOUNT QUE TA NA CREATEMONTH: ', acc);
     const now = new Date();
     //let month = now.getMonth() + 1;
