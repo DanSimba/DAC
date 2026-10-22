@@ -4,52 +4,64 @@ import com.monsterbank.ms_cliente.cliente.ClienteService;
 import com.monsterbank.ms_cliente.exception.*;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_cliente.mensageria.dto.SagaReply;
-import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
+import com.monsterbank.ms_cliente.mensageria.enumeration.ClienteReplyQueue;
+import com.monsterbank.ms_cliente.mensageria.producer.OrquestradorResponseProducer;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class ClienteCommandConsumer {
+    private static final Logger log = LoggerFactory.getLogger(ClienteCommandConsumer.class);
 
-    private final RabbitTemplate rabbitTemplate;
     private final SolicitacaoService solicitacaoService;
     private final ClienteService clienteService;
     private final ObjectMapper objectMapper;
-
+    private final OrquestradorResponseProducer responseProducer;
 
     public ClienteCommandConsumer(
-            RabbitTemplate rabbitTemplate,
             SolicitacaoService solicitacaoService,
             ClienteService clienteService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            OrquestradorResponseProducer responseProducer
     ) {
-        this.rabbitTemplate = rabbitTemplate;
         this.solicitacaoService = solicitacaoService;
         this.clienteService = clienteService;
         this.objectMapper = objectMapper;
-
+        this.responseProducer = responseProducer;
     }
 
     @RabbitListener(queues = "ms.cliente.cmd")
     public void receber(SagaCommand command){
+        ClienteReplyQueue replyQueue = ClienteReplyQueue.fromCommandType(command.tipo())
+                .orElse(ClienteReplyQueue.COMANDO_DESCONHECIDO);
+        
+        log.info("{} --- Iniciando consumo do ms.cliente.cmd", ClienteCommandConsumer.class);
+
         try{
             switch (command.tipo()){
 
                 case "cliente.aprovar-solicitacao" -> {
+                    log.info("{} --- Fila cliente.aprovar-solicitacao", ClienteCommandConsumer.class);
                     String cpf = command.payload().get("cpf").asString();
 
+                    log.info("{} --- Encaminhando a solicitação do CPF {} para a service", ClienteCommandConsumer.class, cpf);
                     SolicitacaoSagaDTO solicitacao = solicitacaoService.aprovar(cpf);
-
 
                     JsonNode payload = objectMapper.valueToTree(solicitacao);
 
-                    enviarRespostaSucesso(command, payload);
+                    log.info("{} --- Enviando resposta de sucesso para a command: {}", ClienteCommandConsumer.class, command);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
                 case "cliente.criar" ->{
@@ -60,7 +72,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
 
                 }
 
@@ -72,7 +84,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
                 case "cliente.marcar-nao-aprovada" ->{
@@ -85,7 +97,7 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
                 case "cliente.compensar-criacao" ->{
@@ -96,36 +108,41 @@ public class ClienteCommandConsumer {
 
                     JsonNode payload = objectMapper.createObjectNode();
 
-                    enviarRespostaSucesso(command, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
-                default -> enviarRespostaErro(command, "COMANDO_DESCONHECIDO");
+                default -> enviarRespostaErro(command, replyQueue, "COMANDO_DESCONHECIDO");
 
             }
         } catch(CpfInvalidoException e){
-        enviarRespostaErro(
-                command,
-                "CPF_INVALIDO"
-        );
+            enviarRespostaErro(
+                    command,
+                    replyQueue,
+                    "CPF_INVALIDO"
+            );
 
         } catch (SolicitacaoNaoPendenteException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "SOLICITACAO_NAO_PENDENTE"
             );
         } catch (ErroCriacaoClienteException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "ERRO_CRIACAO_CLIENTE"
             );
         } catch (SolicitacaoNaoEncontradaException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "SOLICITACAO_NAO_ENCONTRADA"
             );
         } catch (ClienteNaoEncontradoException e){
             enviarRespostaErro(
                     command,
+                    replyQueue,
                     "CLIENTE_NAO_ENCONTRADO"
             );
         }
@@ -133,10 +150,13 @@ public class ClienteCommandConsumer {
 
     }
 
-    private void enviarRespostaSucesso(SagaCommand command, JsonNode payload){
+    private void enviarRespostaSucesso(
+            SagaCommand command,
+            ClienteReplyQueue replyQueue,
+            JsonNode payload
+    ){
         SagaReply reply = new SagaReply(
                 command.sagaId(),
-                command.tipo(),
                 LocalDateTime.now().toString(),
                 "SUCESSO",
                 null,
@@ -144,13 +164,18 @@ public class ClienteCommandConsumer {
 
         );
 
-        rabbitTemplate.convertAndSend("orquestrador.reply", reply);
+        log.info("{} --- Enviando resposta: {}", ClienteCommandConsumer.class, reply);
+
+        responseProducer.enviar(replyQueue, reply);
     }
 
-    private void enviarRespostaErro(SagaCommand command, String erro){
+    private void enviarRespostaErro(
+            SagaCommand command,
+            ClienteReplyQueue replyQueue,
+            String erro
+    ){
         SagaReply reply = new SagaReply(
                 command.sagaId(),
-                command.tipo(),
                 LocalDateTime.now().toString(),
                 "FALHA",
                 erro,
@@ -158,8 +183,7 @@ public class ClienteCommandConsumer {
 
         );
 
-        rabbitTemplate.convertAndSend("orquestrador.reply", reply);
-
+        responseProducer.enviar(replyQueue, reply);
     }
 
 }

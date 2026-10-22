@@ -1,11 +1,11 @@
 info:
-  name: Get Solicitacoes
+  name: Listar Solicitacoes
   type: http
   seq: 4
 
 http:
   method: GET
-  url: http://localhost:8081/clientes/solicitacoes
+  url: http://localhost:8083/solicitacoes?page=0
   auth: inherit
 
 settings:

@@ -1,0 +1,25 @@
+info:
+  name: Realizar Operacao
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: http://localhost:8082/account/operate
+  body:
+    type: json
+    data: |-
+      {
+        "accNumber": "000001",
+        "side": "DEP",
+        "value": 100.00,
+        "datetime": "20/10/2026 14:30"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

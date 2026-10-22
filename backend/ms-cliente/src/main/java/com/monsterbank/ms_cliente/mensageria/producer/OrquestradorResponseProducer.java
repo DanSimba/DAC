@@ -1,6 +1,8 @@
 package com.monsterbank.ms_cliente.mensageria.producer;
 
 import com.monsterbank.ms_cliente.mensageria.dto.SagaReply;
+import com.monsterbank.ms_cliente.mensageria.enumeration.ClienteReplyQueue;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +16,10 @@ public class OrquestradorResponseProducer {
     }
 
 
-    public void enviar(SagaReply reply){
+    public void enviar(ClienteReplyQueue replyQueue, SagaReply reply){
 
         rabbitTemplate.convertAndSend(
-                "orquestrador.replay",
+                replyQueue.queueName(),
                 reply
         );
 

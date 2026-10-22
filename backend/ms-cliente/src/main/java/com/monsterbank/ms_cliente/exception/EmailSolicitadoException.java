@@ -3,6 +3,6 @@ package com.monsterbank.ms_cliente.exception;
 public class EmailSolicitadoException extends RuntimeException{
 
     public EmailSolicitadoException(){
-        super("Email já utilizado por um usuário!");
+        super("CPF já possui solicitação/conta, ou e-mail já usado em outra solicitação");
     }
 }

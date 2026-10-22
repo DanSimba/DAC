@@ -4,7 +4,6 @@ import tools.jackson.databind.JsonNode;
 
 public record SagaReply(
         String sagaId,
-        String tipo,
         String timestamp,
         String status,
         String erro,
