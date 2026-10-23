@@ -28,6 +28,7 @@ export class AccountService {
 
   setAccount(a:Account){
     this.account.set(a);
+    console.log("conta: ", this.account());
   }
 
   getMockAcc(){

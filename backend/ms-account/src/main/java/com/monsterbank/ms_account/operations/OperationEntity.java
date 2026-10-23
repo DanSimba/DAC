@@ -3,6 +3,8 @@ package com.monsterbank.ms_account.operations;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
+import com.monsterbank.ms_account.operations.operationDTOs.OperationDTO;
+
 import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -36,6 +38,14 @@ public class OperationEntity {
     private String datetime; //DD/MM/AAAA hh:mm
 
     public OperationEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
+
+    public OperationEntity(OperationDTO op){
+        this.type = "operation";
+        this.side = op.getSide();
+        this.accNumber = op.getAccNumber();
+        this.value = op.getValue();
+        this.datetime = op.getDatetime();
+    }
 
     public OperationSide getSide() {
         return this.side;
