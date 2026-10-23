@@ -52,7 +52,6 @@ export class ExtratoService {
       if (index === -1) {
         novaLista.push(emptyDay);
       } else {
-        //Se achar, insere exatamente naquela posição
         novaLista.splice(index, 0, emptyDay);
       }
       
@@ -68,17 +67,15 @@ export class ExtratoService {
 
     //console.log('ACCOUNT QUE TA NA CREATEMONTH: ', acc);
     const now = new Date();
-    //let month = now.getMonth() + 1;
+
+    //typescript stravaganza: primeiro dia do mês[0] = ultimo dia do último mês, ou seja, qntdade de dias do mes anterior
     let days = new Date(now.getFullYear(), month, 0).getDate();
+
         while(days>0){
           let idString = `${year}-${String(month).padStart(2, '0')}-${String(days).padStart(2, '0')}`
           let dateId = this.createDateId(idString);
 
           if(dateId<acc.createdAt) return;
-
-          //miseria.ts
-          //encontra a ultima oper / transf na lista antes do dia vazio
-          //let lastOp = this.extList().find((ext)=>(ext.opers.length>0||ext.tranfs.length>0)&&ext.id<id);
 
           //procura se o dia ja consta na extList
           let existingDay = this.extList().find((ext)=>(ext.dateId == dateId));
@@ -86,10 +83,7 @@ export class ExtratoService {
             this.createEmptyDay(dateId, acc);
           }
           days--
-        }
-        //typescript stravaganza: primeiro dia do mês[0] = ultimo dia do último mês, ou seja, qntdade de dias do mes anterior 
-        //days = new Date(now.getFullYear(), month, 0).getDate();
-        //console.log("MONTH: ", month);
+        } 
     console.log("EXTlIST: ", this.extList());
   }
 

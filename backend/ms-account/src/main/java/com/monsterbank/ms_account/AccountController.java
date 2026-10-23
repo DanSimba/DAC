@@ -6,7 +6,7 @@ import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
 
-import com.monsterbank.ms_account.operations.operationDTOs.ExtratoDTO;
+import com.monsterbank.ms_account.operations.operationDTOs.*;
 import com.monsterbank.ms_account.account.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,12 +64,12 @@ public class AccountController {
      }
 
      @PostMapping("/operate")
-     public ResponseEntity<ExtratoDTO> operate(@RequestBody OperationEntity op){
+     public ResponseEntity<ExtratoDTO> operate(@RequestBody OperationDTO op){
           return ResponseEntity.ok(this.accountService.operate(op));
      }
 
      @PostMapping("/transfer")
-     public ResponseEntity<ExtratoDTO> transfer(@RequestBody TransferenceEntity t){
+     public ResponseEntity<ExtratoDTO> transfer(@RequestBody TransferenceDTO t){
           return ResponseEntity.ok(this.accountService.transfer(t));
      }
 }

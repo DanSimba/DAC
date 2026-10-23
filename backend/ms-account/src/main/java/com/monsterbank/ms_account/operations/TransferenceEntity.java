@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.monsterbank.ms_account.operations.operationDTOs.TransferenceDTO;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -43,6 +45,16 @@ public class TransferenceEntity {
     private String datetime; //DIFERENTE DE DATEID
 
     public TransferenceEntity(){}//CONSTRUTOR QUE O HIBERNATE USA PARA DEVOLVER OQ EU BUSCO DO REPO
+
+    public TransferenceEntity(TransferenceDTO t){
+        this.type = "transference";
+        this.cpfOrigin = t.getCpfOrigin();
+        this.nameOrigin = t.getNameOrigin();
+        this.accOrigin = t.getAccOrigin();
+        this.accDestiny = t.getAccDestiny();
+        this.value = t.getValue();
+        this.datetime = t.getDatetime();
+    }
 
     public Long getId() {
         return this.id;

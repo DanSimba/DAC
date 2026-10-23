@@ -13,7 +13,7 @@ import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
 import com.monsterbank.ms_account.operations.enums.OperationSide;
-import com.monsterbank.ms_account.operations.operationDTOs.ExtratoDTO;
+import com.monsterbank.ms_account.operations.operationDTOs.*;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
 
 import java.util.List;
@@ -105,7 +105,7 @@ public class AccountService {
 
     
     @Transactional
-    public ExtratoDTO operate(OperationEntity op){
+    public ExtratoDTO operate(OperationDTO op){
             //MUDAR BALANCO
             AccountEntity acc = this.accountRepository
             .findByNumber(op.getAccNumber())
@@ -140,8 +140,10 @@ public class AccountService {
                         acc.getNumber(),
                         balancoFinal
                     ));
+                
+                OperationEntity opEntity = new OperationEntity(op);
 
-                ext.addOperation(op);
+                ext.addOperation(opEntity);
                 ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
                 this.extratoRepository.save(ext);
 
@@ -156,7 +158,7 @@ public class AccountService {
 
     
     @Transactional
-    public ExtratoDTO transfer(TransferenceEntity t){
+    public ExtratoDTO transfer(TransferenceDTO t){
             //ENCONTRAR AMBAS AS CONTAS
                 AccountEntity originAcc = this.accountRepository
                 .findByNumber(t.getAccOrigin())
@@ -198,7 +200,8 @@ public class AccountService {
                         balancoFinalOrigin
                     ));
 
-                extOrigin.addTransference(t);
+                TransferenceEntity tOriginEntity = new TransferenceEntity(t);
+                extOrigin.addTransference(tOriginEntity);
                 extOrigin.setSaldoApos(balancoFinalOrigin); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
                 this.extratoRepository.save(extOrigin);
 
@@ -207,18 +210,17 @@ public class AccountService {
             Hibernate.initialize(extOrigin.getOpers());
 
             //CRIA NOVO EXTRATO DO DESTINATARIO
-            final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
-            //CRIA UM CLONE DA TRANSFERENCIA MAS MUDA O EXTRATO
-                TransferenceEntity destinyTransf = t;
+                final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
                 ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
                         .orElseGet(() -> new ExtratoEntity(
                             nowId,
                             destinyAcc.getNumber(),
                             balancoFinalDestiny
                         ));
-                destinyTransf.setExtrato(extDestiny);
 
-                extDestiny.addTransference(destinyTransf);
+                //CRIA UM CLONE DA TRANSFERENCIA MAS MUDA O EXTRATO
+                TransferenceEntity tDestinyEntity = new TransferenceEntity(t);
+                extDestiny.addTransference(tDestinyEntity);
                 extDestiny.setSaldoApos(balancoFinalDestiny); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
                 this.extratoRepository.save(extDestiny);
             
@@ -241,7 +243,7 @@ public class AccountService {
         }
 
         return exts.stream()
-            .map(ExtratoDTO::new) //mapeia cada item pra DTO
+            .map(ExtratoDTO::new) //mapeia cada item pra DTO (passa o ext como argumento no construtor)
             .collect(Collectors.toList());
     }
 }

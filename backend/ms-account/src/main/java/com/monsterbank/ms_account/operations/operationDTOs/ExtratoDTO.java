@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 
@@ -13,8 +14,8 @@ import com.monsterbank.ms_account.operations.TransferenceEntity;
 public class ExtratoDTO {
 
     private Integer dateId;
-    private List<OperationEntity> opers;
-    private List<TransferenceEntity> transfs;
+    private List<OperationDTO> opers;
+    private List<TransferenceDTO> transfs;
     private String accNumber;
     private BigDecimal saldoApos;
 
@@ -33,10 +34,9 @@ public class ExtratoDTO {
     }
 
     public ExtratoDTO(ExtratoEntity ee){
-         this.dateId = ee.getDateId();
-
-        this.opers = ee.getOpers();
-        this.transfs = ee.getTransfs();
+        this.dateId = ee.getDateId();
+        this.opers = ee.getOpers().stream().map(OperationDTO::new).collect(Collectors.toList());
+        this.transfs = ee.getTransfs().stream().map(TransferenceDTO::new).collect(Collectors.toList());
         this.accNumber = ee.getAccNumber();
         this.saldoApos = ee.getSaldoApos();
     }
@@ -45,11 +45,11 @@ public class ExtratoDTO {
         return dateId;
     }
 
-    public List<OperationEntity> getOpers() {
+    public List<OperationDTO> getOpers() {
         return opers;
     }
 
-    public List<TransferenceEntity> getTransfs() {
+    public List<TransferenceDTO> getTransfs() {
         return transfs;
     }
 
