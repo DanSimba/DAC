@@ -1,0 +1,16 @@
+info:
+  name: Aprovar Solicitacao
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://localhost:8083/solicitacoes/{cpf}/approvacao
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

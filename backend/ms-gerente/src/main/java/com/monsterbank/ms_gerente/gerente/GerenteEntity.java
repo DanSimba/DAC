@@ -27,5 +27,4 @@ public class GerenteEntity {
     private String email;
     private String telefone;
     private Boolean ativo;
-
 }
