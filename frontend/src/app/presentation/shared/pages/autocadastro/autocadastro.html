@@ -1,190 +1,200 @@
-<div class="mx-auto max-w-2xl p-6 shadow-lg border rounded-lg my-8">
-  
-  <h2 class="text-2xl font-bold">Solicitação de Autocadastro - BANTADS</h2>
-  <p class="text-sm text-gray-600 mb-6">Preencha seus dados para solicitar a abertura de conta.</p>
-  
+<div class="flex flex-col w-screen max-w-full min-h-screen py-4 justify-center items-center gap-y-3 bg-linear-to-t from-azure to-marinho to-35% overflow-x-hidden">
+
+  <h1 class="text-5xl text-white font-monster">AUTOCADASTRO</h1>
+
   @if (mensagemSucesso) {
-    <div class="p-3 bg-green-100 border rounded border-green-400 text-green-700 mb-4">
+    <div class="w-[85vw] max-w-2xl p-3 bg-green-900/30 border border-green-500/50 text-green-400 font-display rounded text-center font-bold">
       {{ mensagemSucesso }}
     </div>
   }
 
   @if (mensagemErro) {
-    <div class="p-3 bg-red-100 border rounded border-red-400 text-red-700 mb-4">
+    <div class="w-[85vw] max-w-2xl p-3 bg-red-900/30 border border-red-500/50 text-red-400 font-display rounded text-center font-bold">
       {{ mensagemErro }}
     </div>
   }
 
-  <form (ngSubmit)="onSubmit()">
+  <div class="w-[85vw] max-w-2xl p-6 rounded-lg bg-black/50 border border-white/10 text-white font-display shadow-lg">
     
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4"> 
-      <div class="md:col-span-8">
-        <label class="text-sm font-medium">Nome Completo *</label> 
-        <input 
-          type="text" 
-          name="nome" 
-          [(ngModel)]="client.nome" 
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="Ex: João Banana Coitadinho da Silva"
-        />
-      </div>
+    <p class="text-sm text-white/60 mb-4">
+      Preencha seus dados para solicitar a abertura de conta no BANTADS.
+    </p>
 
-      <div class="md:col-span-4">
-        <label class="text-sm font-medium">CPF *</label>
-        <input 
-          type="text" 
-          name="cpf" 
-          [(ngModel)]="client.cpf"
-          (keydown)="bloquearNaoNumeros($event)"
-          (input)="formatarCPF()"
-          maxlength="14"
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="000.000.000-00"
-        />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-4 mb-4">
-      <div>
-        <label class="text-sm font-medium">E-mail *</label>
-        <input 
-          type="email" 
-          name="email" 
-          [(ngModel)]="client.email" 
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="cliente@email.com"
-        />
-      </div>
-
-      <div>
-        <label class="text-sm font-medium">Telefone</label>
-        <input 
-          type="text" 
-          name="telefone" 
-          [(ngModel)]="client.telefone"
-          (keydown)="bloquearNaoNumeros($event)"
-          (input)="formatarTelefone()"
-          maxlength="15"
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="(99) 99999-9999"
-        />
-      </div>
-
-      <div>
-        <label class="text-sm font-medium">Salário (R$) *</label>
-        <input 
-          type="text" 
-          name="salario" 
-          [(ngModel)]="salarioExibicao"
-          (keydown)="bloquearNaoNumeros($event)"
-          (input)="formatarSalario()" 
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="R$ 2500.00"
-        />
-      </div>
-    </div>
-
-    <h3 class="text-lg font-bold mt-6 mb-3 border-b pb-1">Endereço</h3>
-
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
-      <div class="md:col-span-3">
-        <label class="text-sm font-medium">CEP</label>
-        <input 
-          type="text" 
-          name="cep" 
-          [(ngModel)]="address.cep" 
-          (input)="verifyCep(address.cep)"
-          mask="00000-000"
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="80000-000"
-        />
-      </div>
-
-      <div class="md:col-span-7">
-        <label class="text-sm font-medium">Rua</label>
-        <input 
-          type="text" 
-          name="logradouro" 
-          [(ngModel)]="address.logradouro"
-          [readonly]="ruaBloqueada"
-          [class.bg-gray-300]="ruaBloqueada"
-          [class.cursor-not-allowed]="ruaBloqueada" 
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="Rua / Avenida..."
-        />
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="text-sm font-medium">Número</label>
-        <input 
-          type="text" 
-          name="numero" 
-          [(ngModel)]="address.numero" 
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="123"
-        />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
-      <div class="md:col-span-3">
-        <label class="text-sm font-medium">Complemento</label>
-        <input 
-          type="text" 
-          name="complemento" 
-          [(ngModel)]="address.complemento" 
-          class="w-full border border-gray-400 rounded p-2"
-          placeholder="Apto 101"
-        />
-      </div>
-
-      <div class="md:col-span-4">
-        <label class="text-sm font-medium">Bairro</label>
-        <input 
-          type="text"
-          name="bairro"
-          [(ngModel)]="address.bairro"
-          readonly
-          class="w-full border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
-          placeholder="Jardim das Américas"
-        />
-      </div>
-
-      <div class="md:col-span-5">
-        <label class="text-sm font-medium">Cidade / UF</label>
-        <div class="flex gap-2">
+    <form (ngSubmit)="onSubmit()">
+      
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-3"> 
+        <div class="md:col-span-8">
+          <label class="block text-sm font-bold mb-1">Nome Completo *</label> 
           <input 
             type="text" 
-            name="cidade" 
-            [(ngModel)]="address.cidade" 
-            readonly
-            class="w-3/4 border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
-            placeholder="Curitiba"
+            name="nome" 
+            [(ngModel)]="client.nome" 
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="Ex: João Banana Coitadinho da Silva"
           />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-bold mb-1">CPF *</label>
           <input 
             type="text" 
-            name="uf" 
-            [(ngModel)]="address.uf" 
-            readonly
-            class="w-1/4 border border-gray-400 rounded p-2 bg-gray-300 cursor-not-allowed"
-            placeholder="PR"
+            name="cpf" 
+            [(ngModel)]="client.cpf"
+            (keydown)="bloquearNaoNumeros($event)"
+            (input)="formatarCPF()"
+            maxlength="14"
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="000.000.000-00"
           />
         </div>
       </div>
-    </div>
 
-    <button 
-      type="submit" 
-      class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-800">
-      Enviar Solicitação
-    </button>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+        <div>
+          <label class="block text-sm font-bold mb-1">E-mail *</label>
+          <input 
+            type="email" 
+            name="email" 
+            [(ngModel)]="client.email" 
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="cliente@email.com"
+          />
+        </div>
 
-    <div class="mt-6 text-center text-sm text-gray-600 border-t pt-4">
-      Já possui uma conta? 
-      <a routerLink="/login" class="text-blue-600 font-semibold hover:underline">
-        Fazer login
-      </a>
-    </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Telefone *</label>
+          <input 
+            type="text" 
+            name="telefone" 
+            [(ngModel)]="client.telefone"
+            (keydown)="bloquearNaoNumeros($event)"
+            (input)="formatarTelefone()"
+            maxlength="15"
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="(99) 99999-9999"
+          />
+        </div>
 
-  </form>
+        <div>
+          <label class="block text-sm font-bold mb-1">Salário (R$) *</label>
+          <input 
+            type="text" 
+            name="salario" 
+            [(ngModel)]="salarioExibicao"
+            (keydown)="bloquearNaoNumeros($event)"
+            (input)="formatarSalario()" 
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="R$ 2500.00"
+          />
+        </div>
+      </div>
+
+      <h3 class="text-lg font-title font-bold mt-4 mb-2 border-b border-white/10 pb-1">
+        Endereço
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-3">
+        <div class="md:col-span-3">
+          <label class="block text-sm font-bold mb-1">CEP</label>
+          <input 
+            type="text" 
+            name="cep" 
+            [(ngModel)]="address.cep" 
+            (input)="verifyCep(address.cep)"
+            mask="00000-000"
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="80000-000"
+          />
+        </div>
+
+        <div class="md:col-span-7">
+          <label class="block text-sm font-bold mb-1">Rua</label>
+          <input 
+            type="text" 
+            name="logradouro" 
+            [(ngModel)]="address.logradouro"
+            [readonly]="ruaBloqueada"
+            [class.bg-white_5]="ruaBloqueada"
+            [class.text-white_50]="ruaBloqueada"
+            [class.cursor-not-allowed]="ruaBloqueada" 
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="Rua / Avenida..."
+          />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-bold mb-1">Número</label>
+          <input 
+            type="text" 
+            name="numero" 
+            [(ngModel)]="address.numero" 
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="123"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-5">
+        <div class="md:col-span-3">
+          <label class="block text-sm font-bold mb-1">Complemento</label>
+          <input 
+            type="text" 
+            name="complemento" 
+            [(ngModel)]="address.complemento" 
+            class="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+            placeholder="Apto 101"
+          />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-bold mb-1">Bairro</label>
+          <input 
+            type="text"
+            name="bairro"
+            [(ngModel)]="address.bairro"
+            readonly
+            class="w-full bg-white/5 border border-white/20 rounded-lg p-2 text-white/50 placeholder-white/30 cursor-not-allowed outline-none"
+            placeholder="Jardim das Américas"
+          />
+        </div>
+
+        <div class="md:col-span-5">
+          <label class="block text-sm font-bold mb-1">Cidade / UF</label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              name="cidade" 
+              [(ngModel)]="address.cidade" 
+              readonly
+              class="w-3/4 bg-white/5 border border-white/20 rounded-lg p-2 text-white/50 placeholder-white/30 cursor-not-allowed outline-none"
+              placeholder="Curitiba"
+            />
+            <input 
+              type="text" 
+              name="uf" 
+              [(ngModel)]="address.uf" 
+              readonly
+              class="w-1/4 bg-white/5 border border-white/20 rounded-lg p-2 text-white/50 placeholder-white/30 text-center cursor-not-allowed outline-none"
+              placeholder="PR"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="w-full bg-rosa hover:opacity-90 text-white font-title text-lg font-bold py-2.5 rounded-lg transition-all cursor-pointer">
+        Enviar Solicitação
+      </button>
+
+      <div class="mt-4 text-center text-sm text-white/60 border-t border-white/10 pt-3">
+        Já possui uma conta? 
+        <a routerLink="/login" class="text-azure font-bold hover:underline ml-1">
+          Fazer login
+        </a>
+      </div>
+
+    </form>
+  </div>
+
 </div>
