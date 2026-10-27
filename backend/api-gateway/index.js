@@ -46,11 +46,16 @@ async function iniciarServidor() {
     console.log("Conectando ao RabbitMQ...")
     const rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
     rabbitmqChannel = await rabbitMqConnection.createChannel();
-    console.log("Conectado ao RabbitMQ.")
+    console.log("Conectado ao RabbitMQ.");
+  }catch(){
 
-    app.get('/', (req, res) => {
-      res.send('Olá Mundo!');
-    });
+  }
+
+};
+
+  app.get('/', (req, res) => {
+    res.send('Olá Mundo!');
+  });
 
 
 // Login
