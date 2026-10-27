@@ -47,8 +47,14 @@ async function iniciarServidor() {
     const rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
     rabbitmqChannel = await rabbitMqConnection.createChannel();
     console.log("Conectado ao RabbitMQ.");
-  }catch(){
 
+    app.listen(port, () => {
+      console.log(`Servidor rodando em http://localhost:${port}`);
+    });
+  
+  } catch(error) {
+    console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
+    process.exit(1);
   }
 
 };
@@ -403,12 +409,5 @@ app.post('/solicitacoes', async (req, res) => {
       }
     });
 
- app.listen(port, () => {
-      console.log(`Servidor rodando em http://localhost:${port}`);
-    });
-  } catch(error) {
-    console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
-    process.exit(1);
-  }
 
-iniciarServidor()}
+iniciarServidor();
