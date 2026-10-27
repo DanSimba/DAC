@@ -368,6 +368,7 @@ app.post('/solicitacoes', async (req, res) => {
       } );
     }
 
+    //lista cliente + saldo 
     app.get('/clientes', async(req, res) => {
       try{
         const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
@@ -409,5 +410,43 @@ app.post('/solicitacoes', async (req, res) => {
       }
     });
 
+    //tranferencia
+    app.post('/account/transfer', async(req, res) =>{
+      try {
+        const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/transfer`,
+          {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(req.body)
+          }
+        )
+        await encaminhaResponse(response, res)
+      } catch (error) {
+        console.error('Erro ao realizar a transferencia -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        })
+      }
+    });
+
+    //operação 
+    app.post('/account/operate', async(req, res) =>{
+      try {
+        const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
+          {
+            method: 'POST',
+            headers: {'Content-Type':'applicaation/json'},
+            body: JSON.stringify(req.body)
+
+          }
+        )
+        await encaminhaResponse(response,res)
+      } catch (error) {
+        console.error('Erro ao realizar a operação -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        })
+      }
+    });
 
 iniciarServidor();
