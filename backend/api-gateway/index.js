@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { timeStamp } = require('console');
 const redis = require('redis');
 const amqp = require('amqplib');
+const { stat } = require('fs');
 
 const app = express();
 const port = 8080;
@@ -133,6 +134,29 @@ app.get('/validacao', (req, res) => {
 
 });
 
+//função complementar pra validação do token
+function validaJWT(req, res, next){
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')){
+    return res.status(401).json({
+      message: 'token não informado'
+    })
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const usuario = jwt.verify(
+      token, 'MONSTERBANK'
+    )
+    req.usuario = usuario
+    return next()
+  } catch (error) {
+    return res.status(401).json({
+      message: 'token inválido ou expirado'
+    })
+    
+  }
+
+}
 
 
 // Encaminha o cliente recebido do front para o ms-cliente
