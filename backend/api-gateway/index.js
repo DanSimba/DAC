@@ -52,7 +52,7 @@ async function iniciarServidor() {
       console.log(`Servidor rodando em http://localhost:${port}`);
     });
   
-  } catch(error) {
+  } catch (error) {
     console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
     process.exit(1);
   }
@@ -118,7 +118,7 @@ app.post('/login', async (req, res) => {
 
 // Valida Token
 
-app.get("validacao", (req, res) => {
+app.get('/validacao', (req, res) => {
   const authHeader = req.header("authorization");
   const token = authHeader && authHeader.split(" ")[1];
 
