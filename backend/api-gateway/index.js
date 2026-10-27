@@ -46,11 +46,22 @@ async function iniciarServidor() {
     console.log("Conectando ao RabbitMQ...")
     const rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
     rabbitmqChannel = await rabbitMqConnection.createChannel();
-    console.log("Conectado ao RabbitMQ.")
+    console.log("Conectado ao RabbitMQ.");
 
-    app.get('/', (req, res) => {
-      res.send('Olá Mundo!');
+    app.listen(port, () => {
+      console.log(`Servidor rodando em http://localhost:${port}`);
     });
+  
+  } catch (error) {
+    console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
+    process.exit(1);
+  }
+
+};
+
+  app.get('/', (req, res) => {
+    res.send('Olá Mundo!');
+  });
 
 
 // Login
@@ -107,8 +118,8 @@ app.post('/login', async (req, res) => {
 
 // Valida Token
 
-app.get("validacao", (req, res) => {
-  const authHeader = req.header["authorization"];
+app.get('/validacao', (req, res) => {
+  const authHeader = req.header("authorization");
   const token = authHeader && authHeader.split(" ")[1];
 
   if(!token) return res.status(403).json({error: "Não autorizado"});
@@ -398,12 +409,5 @@ app.post('/solicitacoes', async (req, res) => {
       }
     });
 
- app.listen(port, () => {
-      console.log(`Servidor rodando em http://localhost:${port}`);
-    });
-  } catch(error) {
-    console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
-    process.exit(1);
-  }
 
-iniciarServidor()}
+iniciarServidor();
