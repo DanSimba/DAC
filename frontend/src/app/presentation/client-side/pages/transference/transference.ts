@@ -63,7 +63,12 @@ export class Transference{
         datetime: this.accountService.getCurrentTimeFormated()
       }
 
-      console.log("SALDO NA HORA DA TRANSF: ", this.account().balanco);
+      if(concreteTransference.accOrigin == concreteTransference.accDestiny){ //TA MANDANDO DINHEIRO PRA SI MSM
+        this.showPopUp('Este é você!!!', 'fail')
+        return
+      }
+
+      //console.log("SALDO NA HORA DA TRANSF: ", this.account().balanco);
 
       console.log("CONCRETETRANSF: ", concreteTransference);
 
