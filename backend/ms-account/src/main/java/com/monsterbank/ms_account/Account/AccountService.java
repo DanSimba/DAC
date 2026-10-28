@@ -175,6 +175,9 @@ public class AccountService {
                 .findByNumber(t.getAccDestiny())
                 .orElseThrow(() -> new ErroContaNaoEncontradaException());
 
+                //seta o cpfdest que não veio do front
+                t.setCpfDestiny(destinyAcc.getClientCpf());
+
             //REMOVE E ADICIONA VALORES
                 //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION
                     BigDecimal novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());

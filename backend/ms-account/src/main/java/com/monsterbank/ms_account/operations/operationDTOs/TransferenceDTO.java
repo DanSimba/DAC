@@ -8,6 +8,7 @@ public class TransferenceDTO {
 
     private String type = "transference";
     private String cpfOrigin;
+    private String cpfDestiny;
     private String nameOrigin;
     private String nameDestiny;
     private String accOrigin;
@@ -21,6 +22,7 @@ public class TransferenceDTO {
     //CONSTRUTOR QUE O EXTRATODTO USA PRA CRIA AS LISTAS COM BASE NO CONTEUDO DE TRANSFS DO EXTRATOENTITY
     public TransferenceDTO(TransferenceEntity te){
         this.cpfOrigin = te.getCpfOrigin();
+        this.cpfDestiny = te.getCpfDestiny();
         this.accOrigin = te.getAccOrigin();
         this.nameOrigin = te.getNameOrigin();
         this.accDestiny = te.getAccDestiny();
@@ -31,13 +33,17 @@ public class TransferenceDTO {
         this.nameDestiny = "";
     }
 
-    public TransferenceDTO(String cpfOrigin, String nameOrigin, String accOrigin, String accDestiny, BigDecimal value, String datetime){
+    public TransferenceDTO(String cpfOrigin, String cpfDestiny, String nameOrigin, String accOrigin, String accDestiny, BigDecimal value, String datetime){
         this.cpfOrigin = cpfOrigin;
+        this.cpfDestiny = cpfDestiny;
         this.nameOrigin = nameOrigin;
         this.accOrigin = accOrigin;
         this.accDestiny = accDestiny;
         this.value = value;
         this.datetime = datetime;
+
+        this.nameDestiny = "";
+        this.cpfDestiny = "";
     }
 
     //GETTERS E SETTERS SÓ PRO JACKSON NÃO DAR PITI
@@ -47,6 +53,10 @@ public class TransferenceDTO {
 
     public String getCpfOrigin() {
         return cpfOrigin;
+    }
+
+    public String getCpfDestiny() {
+        return cpfDestiny;
     }
 
     public String getNameOrigin() {
@@ -79,6 +89,10 @@ public class TransferenceDTO {
 
     public void setCpfOrigin(String cpfOrigin) {
         this.cpfOrigin = cpfOrigin;
+    }
+
+    public void setCpfDestiny(String cpfDestiny) {
+        this.cpfDestiny = cpfDestiny;
     }
 
     public void setNameOrigin(String nameOrigin) {

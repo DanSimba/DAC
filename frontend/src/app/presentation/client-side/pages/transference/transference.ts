@@ -78,7 +78,7 @@ export class Transference{
 
           //ANIMAÇÃO MTO FODA E LIMMPA INPUTS
 
-          console.log("RESPONSE: ", response);
+          console.log("RESPONSE (CONTA ATUALIZADA): ", response);
           this.sent.set(true);
 
           setTimeout(() => {

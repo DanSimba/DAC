@@ -5,7 +5,7 @@
 TRUNCATE TABLE account, extrato, operation, transference; 
 
 --ALTER TABLE account DROP COLUMN name_origin;
---ALTER TABLE transference ADD name_origin VARCHAR(255);
+--ALTER TABLE transference ADD cpf_destiny VARCHAR(255);
 
 --ACCOUNTS $%¨&*(*&¨%$&%)
 
@@ -133,10 +133,11 @@ VALUES ('1291', 20200115, 2500.00);
 INSERT INTO extrato (acc_number, date_id, saldo_apos)
 VALUES ('1291', 20200120, 800.00);
 
-    INSERT INTO transference (type, cpf_origin, name_origin, acc_origin, acc_destiny, value, datetime, extrato_id)
+    INSERT INTO transference (type, cpf_origin, cpf_destiny, name_origin, acc_origin, acc_destiny, value, datetime, extrato_id)
     SELECT
         'transference',
         '12912861012',
+        '64065268052',
         'Catharyna',
         '1291',
         '0950',
@@ -151,10 +152,11 @@ VALUES ('1291', 20200120, 800.00);
 --CLEUDONIO
 INSERT INTO extrato (acc_number, date_id, saldo_apos)
 VALUES ('0950', 20200120, 1700.00);
-    INSERT INTO transference (type, cpf_origin, name_origin, acc_origin, acc_destiny, value, datetime, extrato_id)
+    INSERT INTO transference (type, cpf_origin, cpf_destiny, name_origin, acc_origin, acc_destiny, value, datetime, extrato_id)
     SELECT
         'transference',
         '12912861012',
+        '64065268052',
         'Catharyna',
         '1291',
         '0950',
