@@ -57,6 +57,13 @@ export class AccountService {
         
         //JÁ BUSCA O EXTRATO LOGO EM SEGUIDA CASO ESTEJA NA TELA EXTRATO
         this.listExtratos();
+      },
+      error: (err) => {
+        console.log("Conta não encontrada!!! :(")
+         this.account.update(current => ({
+            ...current,  
+            number: 'X'
+          }));
       }
     })
   }

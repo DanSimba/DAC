@@ -8,7 +8,9 @@ public class TransferenceDTO {
 
     private String type = "transference";
     private String cpfOrigin;
+    private String cpfDestiny;
     private String nameOrigin;
+    private String nameDestiny;
     private String accOrigin;
     private String accDestiny;
     private BigDecimal value;
@@ -20,20 +22,28 @@ public class TransferenceDTO {
     //CONSTRUTOR QUE O EXTRATODTO USA PRA CRIA AS LISTAS COM BASE NO CONTEUDO DE TRANSFS DO EXTRATOENTITY
     public TransferenceDTO(TransferenceEntity te){
         this.cpfOrigin = te.getCpfOrigin();
-        this.nameOrigin = te.getNameOrigin();
+        this.cpfDestiny = te.getCpfDestiny();
         this.accOrigin = te.getAccOrigin();
+        this.nameOrigin = te.getNameOrigin();
         this.accDestiny = te.getAccDestiny();
         this.value = te.getValue();
         this.datetime = te.getDatetime();
+
+        //O DTO VAI PARA O GATEWAY COM O NAMEDEST VAZIO, O GATEWAY DEVE REQUISITAR ESTAR PARTE DA COMPOSIÇÃO PARA O MS-CLIENTE
+        this.nameDestiny = "";
     }
 
-    public TransferenceDTO(String cpfOrigin, String nameOrigin, String accOrigin, String accDestiny, BigDecimal value, String datetime){
+    public TransferenceDTO(String cpfOrigin, String cpfDestiny, String nameOrigin, String accOrigin, String accDestiny, BigDecimal value, String datetime){
         this.cpfOrigin = cpfOrigin;
+        this.cpfDestiny = cpfDestiny;
         this.nameOrigin = nameOrigin;
         this.accOrigin = accOrigin;
         this.accDestiny = accDestiny;
         this.value = value;
         this.datetime = datetime;
+
+        this.nameDestiny = "";
+        this.cpfDestiny = "";
     }
 
     //GETTERS E SETTERS SÓ PRO JACKSON NÃO DAR PITI
@@ -45,8 +55,16 @@ public class TransferenceDTO {
         return cpfOrigin;
     }
 
+    public String getCpfDestiny() {
+        return cpfDestiny;
+    }
+
     public String getNameOrigin() {
         return nameOrigin;
+    }
+
+    public String getNameDestiny() {
+        return nameDestiny;
     }
 
     public String getAccOrigin() {
@@ -73,8 +91,16 @@ public class TransferenceDTO {
         this.cpfOrigin = cpfOrigin;
     }
 
+    public void setCpfDestiny(String cpfDestiny) {
+        this.cpfDestiny = cpfDestiny;
+    }
+
     public void setNameOrigin(String nameOrigin) {
         this.nameOrigin = nameOrigin;
+    }
+
+    public void setNameDestiny(String nameDestiny) {
+        this.nameDestiny = nameDestiny;
     }
 
     public void setAccOrigin(String accOrigin) {

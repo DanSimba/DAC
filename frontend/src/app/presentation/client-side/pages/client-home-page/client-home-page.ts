@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,5 +17,7 @@ export class ClientHomePage {
 
   client = signal<Client>(this.clientService.getClient());
   accountService = inject(AccountService);
-  account = signal<Account>(this.accountService.getAccount());
+  account = computed(():Account =>{
+    return this.accountService.getAccount();
+  })
 }

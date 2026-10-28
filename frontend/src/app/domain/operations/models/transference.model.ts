@@ -5,9 +5,9 @@ export interface TransferenceModel {
     type: 'transference';
     cpfOrigin: string;
     nameOrigin: string;
-
+    nameDestiny: string;
+    
     //cpf_destiny:string;
-    //name_destiny: string;
     accOrigin: string;
     accDestiny: string;
 
