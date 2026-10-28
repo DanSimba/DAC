@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
                         .body(error);
         }
 
-         //EXCEÇÃO DE ERRO AO CRIAR CONTA
+         //EXCEÇÃO DE ERRO CONTA NÃO ENCONTRADA
         @ExceptionHandler(ErroContaNaoEncontradaException.class)
         public ResponseEntity<ErrorResponse> handleErroContaNaoEncontrada(ErroContaNaoEncontradaException e) {
                 ErrorResponse error = new ErrorResponse(

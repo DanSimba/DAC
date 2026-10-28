@@ -4,30 +4,31 @@
 --ARRANCA DADOS E COLOCA DE NOVO
 TRUNCATE TABLE account, extrato, operation, transference; 
 
---ALTER TABLE account ADD COLUMN created_at integer;
+--ALTER TABLE account DROP COLUMN name_origin;
+--ALTER TABLE transference ADD name_origin VARCHAR(255);
 
 --ACCOUNTS $%¨&*(*&¨%$&%)
 
 --CONTAS REQS
 --catharyna
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('1291', 0.00, '98574307084', 12912861012, 20000101);
+VALUES ('1291', 800.00, '98574307084', 12912861012, 20000101);
 
 --cleudonio
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('0950', 0.00, '64065268052', 09506382000, 19901010);
+VALUES ('0950', 10000.00, '64065268052', 09506382000, 19901010);
 
 --catianna
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('8573', 0.00, '23862179060', 85733854057, 20121212);
+VALUES ('8573', 3700.00, '23862179060', 85733854057, 20121212);
 
 --cutardo
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('5887', 0.00, '98574307084', 58872160006, 20220222);
+VALUES ('5887', 150000.00, '98574307084', 58872160006, 20220222);
 
 --coandrya
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('7617', 0.00, '64065268052', 76179646090, 20260101);
+VALUES ('7617', 1500.00, '64065268052', 76179646090, 20260101);
 
 --EXTRATOS $%¨&*((*&¨$#$%¨&*()))
 --CUTARDO

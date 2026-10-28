@@ -9,6 +9,7 @@ public class TransferenceDTO {
     private String type = "transference";
     private String cpfOrigin;
     private String nameOrigin;
+    private String nameDestiny;
     private String accOrigin;
     private String accDestiny;
     private BigDecimal value;
@@ -20,11 +21,14 @@ public class TransferenceDTO {
     //CONSTRUTOR QUE O EXTRATODTO USA PRA CRIA AS LISTAS COM BASE NO CONTEUDO DE TRANSFS DO EXTRATOENTITY
     public TransferenceDTO(TransferenceEntity te){
         this.cpfOrigin = te.getCpfOrigin();
-        this.nameOrigin = te.getNameOrigin();
         this.accOrigin = te.getAccOrigin();
+        this.nameOrigin = te.getNameOrigin();
         this.accDestiny = te.getAccDestiny();
         this.value = te.getValue();
         this.datetime = te.getDatetime();
+
+        //O DTO VAI PARA O GATEWAY COM O NAMEDEST VAZIO, O GATEWAY DEVE REQUISITAR ESTAR PARTE DA COMPOSIÇÃO PARA O MS-CLIENTE
+        this.nameDestiny = "";
     }
 
     public TransferenceDTO(String cpfOrigin, String nameOrigin, String accOrigin, String accDestiny, BigDecimal value, String datetime){
@@ -47,6 +51,10 @@ public class TransferenceDTO {
 
     public String getNameOrigin() {
         return nameOrigin;
+    }
+
+    public String getNameDestiny() {
+        return nameDestiny;
     }
 
     public String getAccOrigin() {
@@ -75,6 +83,10 @@ public class TransferenceDTO {
 
     public void setNameOrigin(String nameOrigin) {
         this.nameOrigin = nameOrigin;
+    }
+
+    public void setNameDestiny(String nameDestiny) {
+        this.nameDestiny = nameDestiny;
     }
 
     public void setAccOrigin(String accOrigin) {
