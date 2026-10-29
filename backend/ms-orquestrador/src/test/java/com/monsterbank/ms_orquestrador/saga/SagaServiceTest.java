@@ -2,10 +2,15 @@ package com.monsterbank.ms_orquestrador.saga;
 
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaCommand;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
+import com.monsterbank.ms_orquestrador.messaging.producer.AuthCommandProducer;
 import com.monsterbank.ms_orquestrador.messaging.producer.ClienteCommandProducer;
+import com.monsterbank.ms_orquestrador.messaging.producer.ContaCommandProducer;
+import com.monsterbank.ms_orquestrador.messaging.producer.EmailCommandProducer;
+import com.monsterbank.ms_orquestrador.messaging.producer.GerenteCommandProducer;
 import com.monsterbank.ms_orquestrador.redis.SagaStateRepository;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -25,7 +30,24 @@ class SagaServiceTest {
 
     private final ClienteCommandProducer clienteCommandProducer = mock(ClienteCommandProducer.class);
     private final SagaStateRepository sagaStateRepository = mock(SagaStateRepository.class);
-    private final SagaService sagaService = new SagaService(clienteCommandProducer, sagaStateRepository);
+    private final GerenteCommandProducer gerenteCommandProducer = mock(GerenteCommandProducer.class);
+    private final ContaCommandProducer contaCommandProducer = mock(ContaCommandProducer.class);
+    private final AuthCommandProducer authCommandProducer = mock(AuthCommandProducer.class);
+    private final EmailCommandProducer emailCommandProducer = mock(EmailCommandProducer.class);
+    private final StringRedisTemplate stringRedisTemplate = mock(StringRedisTemplate.class);
+    
+    //private final SagaService sagaService = new SagaService(clienteCommandProducer, sagaStateRepository);
+    
+    private final SagaService sagaService = new SagaService(
+            clienteCommandProducer,
+            gerenteCommandProducer,
+            contaCommandProducer,
+            authCommandProducer,
+            emailCommandProducer,
+            sagaStateRepository,
+            stringRedisTemplate
+    );
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, SagaState> estados = new HashMap<>();
 

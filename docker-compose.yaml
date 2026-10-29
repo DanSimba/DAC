@@ -175,7 +175,7 @@ services:
       - "8082:8080"
       
     networks:
-    - monsterbank-net
+      - monsterbank-net
 
   front-end:
     build: ./frontend
@@ -197,6 +197,15 @@ services:
       - "8084:8084"
     depends_on:
       - db-gerente
+      - rabbitmq
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-gerente:5432/ms-gerente
+      - SPRING_DATASOURCE_USERNAME=ms-gerente
+      - SPRING_DATASOURCE_PASSWORD=psql
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     networks:
       - monsterbank-net
 
