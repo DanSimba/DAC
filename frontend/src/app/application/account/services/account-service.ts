@@ -2,9 +2,10 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Account } from '../../../domain/account/models/account.model';
 import { ExtratoService } from '../../extrato/services/extrato-service';
 import { TransferenceModel } from '../../../domain/operations/models/transference.model';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
+import { response } from 'express';
 
 @Injectable({
   providedIn: 'root',
@@ -49,23 +50,34 @@ export class AccountService {
     })
   }
 
-  findAccountByNumber(number: string){
-    this.accountHttpService.findAccountByNumber(number).subscribe({
-      next:(response)=>{
-        this.account.set(response);
-        console.log("conta: ", response);
-        
-        //JÁ BUSCA O EXTRATO LOGO EM SEGUIDA CASO ESTEJA NA TELA EXTRATO
-        this.listExtratos();
-      },
-      error: (err) => {
-        console.log("Conta não encontrada!!! :(")
-         this.account.update(current => ({
-            ...current,  
-            number: 'X'
-          }));
-      }
-    })
+  findAccountByNumber(number: string): Observable<Account>{
+    return this.accountHttpService.findAccountByNumber(number).pipe(
+      switchMap((accountResponse) => {
+        this.account.set(accountResponse);
+        //console.log("CONTA PUXADA: ", accountResponse);
+
+        //JÁ ENCADEIA O LISTEXTRATO DIRETO AQUI DENTRO
+        return this.accountHttpService.listExtratos(accountResponse.number).pipe(
+          map((extratoResponse) => {
+            // Salva os extratos reais vindos do backend
+            this.extratoService.setExtList(extratoResponse);
+            this.extratoService.setRealList(extratoResponse);
+            
+            if (extratoResponse.length > 0) {
+              this.account.update(current => ({
+                ...current,  
+                balanco: extratoResponse[extratoResponse.length - 1].saldoApos
+              }));
+            }
+            
+            console.log("2. Lista real salva no Service: ", extratoResponse);
+            
+            // Retorna a conta atualizada para o componente
+            return this.account();
+          })
+        );
+      })
+    );
   }
 
   //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA

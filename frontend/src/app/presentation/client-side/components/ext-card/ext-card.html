@@ -1,4 +1,4 @@
-<div class="flex flex-row w-full h-[20vh] p-2 gap-x-4 bg-black/50 border-5 border-solid {{type()=='dep'?'border-azure hover:bg-linear-to-t from-azure/60 to-[black/50] to-40%': type()=='sac'?  'border-rosa hover:bg-linear-to-t from-rosa/60 to-[black/50] to-40%':'bg-black/50 border-5 border-solid border-white hover:bg-linear-to-t from-white/60 to-[black/50] to-40%'}} text-white text-2xl font-display font-title hover:scale-102 transition-all duration-130 rounded-xl">
+<div class="flex flex-row w-full h-[20vh] p-2 gap-x-4 bg-black/50 border-5 border-solid {{type()=='dep'||transfInstance()?.accOrigin != account().number?'border-azure hover:bg-linear-to-t from-azure/60 to-[black/50] to-40%': type()=='sac'||transfInstance()?.accOrigin == account().number?  'border-rosa hover:bg-linear-to-t from-rosa/60 to-[black/50] to-40%':''}} text-white text-2xl font-display font-title hover:scale-102 transition-all duration-130 rounded-xl">
     @if(type() == 'dep'){
         <div class="flex flex-row w-fit h-full justify-center gap-x-3 items-center px-2 border-r-2 border-r-white border-r-solid">
                 <p>Depósito</p> <mat-icon>arrow_downward</mat-icon>   

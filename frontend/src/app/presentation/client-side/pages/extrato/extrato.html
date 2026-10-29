@@ -12,16 +12,40 @@
             </div>
 
         <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
-                Data: 
+                De: 
                 <input type="date" 
-                (input)="setDate($event.target.value)"
+                [value]="stringfyDateId(startDate())"
+                (input)="setStartDate($event.target.value)"
                 [min]="minDate()"
+                [max]="maxDate()"
+                class="w-fit focus:outline-none cursor-pointer">
+        </div>
+
+         <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-rosa rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
+                Até: 
+                <input type="date" 
+                [value]="stringfyDateId(endDate())"
+                (input)="setEndDate($event.target.value)"
+                [min]="minDate()"
+                [max]="maxDate()"
                 class="w-fit focus:outline-none cursor-pointer">
         </div>
     </div>
 
     <div class="flex flex-col w-full h-full items-start p-2 gap-y-2 overflow-y-auto overflow-x-hidden scrollbar-none">
 
+        @if(account().number==''){
+            <div class="flex flex-col w-[56vw] h-[64vh] gap-y-10 justify-center items-center">
+
+                <h1 class="font-monster text-7xl text-white">Carregando...</h1>
+            </div>
+        }@else if (account().number=='X') {
+            <div class="flex flex-col w-[56vw] h-[64vh] gap-y-10 justify-center items-center">
+
+                <h1 class="font-monster text-7xl text-white">Conta não encontrada!!!</h1>
+                <p class="text-7xl">💀</p>
+            </div>
+        } @else {
             <div class="flex flex-col w-full h-full p-10 gap-y-6 text-white font-title text-2xl">
                 @for (ext of filteredList(); track $index) {
                     <div class="flex flex-col justify-between p-4 gap-y-4 bg-black/50 border-5 border-solid border-rosa rounded-2xl">
@@ -48,6 +72,8 @@
                     </div>
                 }
             </div>
+        }
+            
 
     </div>
 </div>
