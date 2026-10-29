@@ -273,6 +273,30 @@ app.post('/solicitacoes', async (req, res) => {
     }
   });
 
+  // Rota de Polling da SAGA (R9, R13, R15, R16)
+  app.get('/jobs/:jobId/status', async (req, res) => {
+    try {
+      const jobId = req.params.jobId;
+      const jobRedis = await redisClient.get(`job:${jobId}`);
+      
+      if (!jobRedis) {
+        return res.status(404).json({
+          status: 404,
+          mensagem: 'Job não encontrado ou expirado.'
+        });
+      }
+  
+      return res.status(200).json(JSON.parse(jobRedis));
+  
+    } catch (error) {
+      console.error(`Erro ao buscar status do job ${req.params.jobId}:`, error.message);
+      return res.status(500).json({
+        status: 500, 
+        mensagem: 'Erro interno no Gateway.'
+      });
+    }
+  });
+
     // Lista as solicitações
     app.get('/solicitacoes', async (req, res) => {
       try {

@@ -18,6 +18,10 @@ public class RabbitConfig {
     public static final String CLIENTE_MARCAR_NAO_APROVADA_REPLY_QUEUE = "ms.cliente.marcar-nao-aprovada.reply";
     public static final String CLIENTE_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.cliente.compensar-criacao.reply";
     public static final String CLIENTE_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.cliente.comando-desconhecido.reply";
+    public static final String GERENTE_LISTAR_ATIVOS_REPLY_QUEUE = "ms.gerente.listar-ativos.reply";
+    public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
+    public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
+    public static final String CONTA_CRIAR_REPLY_QUEUE = "ms.conta.criar.reply";
 
     @Bean
     public Queue sagaCmdQueue(){
@@ -62,6 +66,26 @@ public class RabbitConfig {
     @Bean
     public JacksonJsonMessageConverter jsonMessageConverter() {
         return new JacksonJsonMessageConverter();
+    }
+
+    @Bean
+    public Queue gerenteListarAtivosReplyQueue() {
+        return new Queue(GERENTE_LISTAR_ATIVOS_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaIdentificarGerenteReplyQueue() {
+        return new Queue(CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authCriarUsuarioReplyQueue() {
+        return new Queue(AUTH_CRIAR_USUARIO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaCriarReplyQueue() {
+        return new Queue(CONTA_CRIAR_REPLY_QUEUE, true);
     }
 
     @Bean
