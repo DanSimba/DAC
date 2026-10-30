@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ExtratoModel } from '../../../../domain/operations/models/extrato.model';
@@ -15,11 +15,13 @@ import { AccountService } from '../../../../application/account/services/account
   templateUrl: './extrato.html',
   styleUrl: './extrato.css',
 })
-export class Extrato implements OnInit{
+export class Extrato implements OnInit, OnDestroy{
   location = inject(Location);
 
   accountService = inject(AccountService);
-  account = signal<Account>(this.accountService.getAccount());
+  account = computed(():Account =>{
+    return this.accountService.getAccount();
+  })
 
   clientService = inject(ClientService);
   extratoService = inject(ExtratoService);
@@ -35,6 +37,7 @@ export class Extrato implements OnInit{
   extList = computed(():ExtratoModel[]=>{
     return this.extratoService.getExtList();
   })
+
   //filtra o extrato pela data
   filteredList= computed(()=>{
     return this.extList().filter((ext)=> ext.dateId<=this.endDate()&&ext.dateId>=this.startDate()&&ext.dateId>=this.account().createdAt).reverse();
@@ -42,12 +45,8 @@ export class Extrato implements OnInit{
 
   ngOnInit(): void {
 
-    //PRIMERIA COISA É GARANTIR QUE TEM CONTA
-    this.accountService.findAccountByNumber("0950").subscribe({
-      next: (response)=>{
         //console.log("CONTA PUXADA: ", response);
-        this.account.set(response);
-            //console.log("LISTA QUE TA NO COMP: ", this.extList())
+        //console.log("LISTA QUE TA NO COMP: ", this.extList())
     
         const now = new Date();
         //ganbiarra pra tranformar Date no formato que o input aceita
@@ -63,11 +62,10 @@ export class Extrato implements OnInit{
 
         //popula mes atual
         this.extratoService.createMonthExt(now.getMonth() + 1, now.getFullYear(), this.account());
-      },
-      error:(err)=>{
-        console.log("ERROR: ", err);
-      }
-    });
+  }
+
+  ngOnDestroy(): void {
+    this.extratoService.clearMonthExt();
   }
 
   setDate(d:string){ //d = 'aaaa-mm-dd'
@@ -96,9 +94,11 @@ export class Extrato implements OnInit{
   setStartDate(d:string){ //d = 'aaaa-mm-dd'
     const dateInt = d.split("-");
     this.startDate.set(+(dateInt[0]+dateInt[1]+dateInt[2]));
+
+    //CASO O USUÁRIO ESCOLHA MOSTRAR MAIS DE UM MES, POPULA A LISTA COM TDS OS MESES QUE ENTRAM
+    this.extratoService.createMonthExt(+dateInt[1], +dateInt[0], this.account())
   }
   
-  //FAZ LITERALMENTE O CONTRARIO DA FUNÇÃO DE CIMA 
   formatDateId(d:number):string{
     const dString = d.toString();
     //console.log('DSTRING: ', dString)

@@ -59,7 +59,6 @@ export class AccountService {
         //JÁ ENCADEIA O LISTEXTRATO DIRETO AQUI DENTRO
         return this.accountHttpService.listExtratos(accountResponse.number).pipe(
           map((extratoResponse) => {
-            // Salva os extratos reais vindos do backend
             this.extratoService.setExtList(extratoResponse);
             this.extratoService.setRealList(extratoResponse);
             
@@ -70,9 +69,8 @@ export class AccountService {
               }));
             }
             
-            console.log("2. Lista real salva no Service: ", extratoResponse);
-            
-            // Retorna a conta atualizada para o componente
+            console.log("LISTA CRUA: ", extratoResponse);
+        
             return this.account();
           })
         );
