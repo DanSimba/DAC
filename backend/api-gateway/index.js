@@ -459,7 +459,7 @@ app.post('/solicitacoes', async (req, res) => {
         const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
           {
             method: 'POST',
-            headers: {'Content-Type':'applicaation/json'},
+            headers: {'Content-Type':'application/json'},
             body: JSON.stringify(req.body)
 
           }
