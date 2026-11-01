@@ -36,10 +36,21 @@ public class ClienteController {
 
     }
 
+    //RETORNA SÓ A STRING NOME
+    @GetMapping("/findNameByCpf/{cpf}")
+     public ResponseEntity<String> findNameByCpf(@PathVariable("cpf") String cpf){
+          return ResponseEntity.ok(this.clienteService.findNameByCpf(cpf));
+     }
+
+     //RETORNA O CLIENTE INTEIRO
+     @GetMapping("/findByCpf/{cpf}")
+     public ResponseEntity<ClienteRetorno> findByCpf(@PathVariable("cpf") String cpf){
+          return ResponseEntity.ok(this.clienteService.findByCpf(cpf));
+     }
+
     // @GetMapping("/solicitacoes")
     // public ResponseEntity<List<ListarSolicitacoesReturn>> getSolicitacaos(@RequestParam(defaultValue = "0") int page){
     //     return ResponseEntity.ok(solicitacaoService.listarSolicitacoes(page));
     // }
-
 
 }

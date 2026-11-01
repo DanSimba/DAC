@@ -54,6 +54,7 @@ export class Transference{
         type:'transference',
         cpfOrigin: this.client().cpf,
         nameOrigin: this.client().name,
+        nameDestiny: '', //VAI PARA O MS-ACCOUNT VAZIO, O GATEWAY QUE PROCURA ISSO AQ
         accOrigin: this.account().number,
         
         accDestiny: concreteDest.toString(),
@@ -61,6 +62,13 @@ export class Transference{
         value: concreteValue,
         datetime: this.accountService.getCurrentTimeFormated()
       }
+
+      if(concreteTransference.accOrigin == concreteTransference.accDestiny){ //TA MANDANDO DINHEIRO PRA SI MSM
+        this.showPopUp('Este é você!!!', 'fail')
+        return
+      }
+
+      //console.log("SALDO NA HORA DA TRANSF: ", this.account().balanco);
 
       console.log("CONCRETETRANSF: ", concreteTransference);
 
@@ -70,7 +78,7 @@ export class Transference{
 
           //ANIMAÇÃO MTO FODA E LIMMPA INPUTS
 
-          console.log("RESPONSE: ", response);
+          console.log("RESPONSE (CONTA ATUALIZADA): ", response);
           this.sent.set(true);
 
           setTimeout(() => {
@@ -80,6 +88,7 @@ export class Transference{
           }, 3000);
         }, 
         error: (err) => {
+          console.log("ERR:: ", err)
           this.showPopUp('Destinatário não encontrado!!!', 'fail');
           return
         }

@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
                         .body(error);
         }
 
-         //EXCEÇÃO DE ERRO AO CRIAR CONTA
+         //EXCEÇÃO DE ERRO CONTA NÃO ENCONTRADA
         @ExceptionHandler(ErroContaNaoEncontradaException.class)
         public ResponseEntity<ErrorResponse> handleErroContaNaoEncontrada(ErroContaNaoEncontradaException e) {
                 ErrorResponse error = new ErrorResponse(
@@ -52,8 +52,22 @@ public class GlobalExceptionHandler {
                         .body(error);
         }
 
+         //EXCEÇÃO DE ERRO MALABARISMO DE DINHEIRO
+        @ExceptionHandler(MalabarismoException.class)
+        public ResponseEntity<ErrorResponse> handleMalabarismoException(MalabarismoException e) {
+                ErrorResponse error = new ErrorResponse(
+                        403, //forbidden: pode não man
+                        "ERRO_MALABARISMO",
+                        e.getMessage()
+                );
+
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(error);
+        }
+
         //TRATAMENTO GENERICO
-        /*@ExceptionHandler(Exception.class)
+        @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleGeneric(
                 Exception e) {
                         
@@ -66,11 +80,11 @@ public class GlobalExceptionHandler {
                         "ERRO_INTERNO",
                         "Erro genérico!!! :("
                         ));
-        }*/
-
-        @ExceptionHandler(Exception.class)
-        public Exception handleGeneric( //enquanto eu estiver debuggando eu vou fzr isso aq msm
-                Exception e) {
-                        return e;
         }
+
+        //@ExceptionHandler(Exception.class)
+        //public Exception handleGeneric( //enquanto eu estiver debuggando eu vou fzr isso aq msm
+        //        Exception e) {
+        //                return e;
+        //}
 }

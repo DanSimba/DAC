@@ -8,6 +8,7 @@ import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
+import com.monsterbank.ms_account.exceptions.MalabarismoException;
 
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
@@ -61,28 +62,30 @@ public class AccountService {
         );
     }
 
-    public Optional<AccountDTO> findAccountByCpf(String cpf){
-        return this.accountRepository.findByClientCpf(cpf).map(
-            acc -> new AccountDTO(
+    public AccountDTO findAccountByCpf(String cpf){
+        AccountEntity acc = this.accountRepository.findByClientCpf(cpf)
+                .orElseThrow(() -> new ErroContaNaoEncontradaException());
+       
+        return new AccountDTO(
                 acc.getNumber(),
                 acc.getClientCpf(),
                 acc.getBalanco(),
                 acc.getManagerId(),
                 acc.getCreatedAt()
-            )
-        );
+            );
     }
 
-    public Optional<AccountDTO> findAccountByNumber(String number){
-        return this.accountRepository.findByNumber(number).map(
-            acc -> new AccountDTO(
+    public AccountDTO findAccountByNumber(String number){
+        AccountEntity acc = this.accountRepository.findByNumber(number)
+                .orElseThrow(() -> new ErroContaNaoEncontradaException());
+       
+        return new AccountDTO(
                 acc.getNumber(),
                 acc.getClientCpf(),
                 acc.getBalanco(),
                 acc.getManagerId(),
                 acc.getCreatedAt()
-            )
-        );
+            );
     }
 
     public AccountDTO createAccount(String cpf, Long managerId){
@@ -159,6 +162,10 @@ public class AccountService {
     
     @Transactional
     public ExtratoDTO transfer(TransferenceDTO t){
+
+        //VERIFICA MALABARISMO
+        if(t.getAccOrigin() == t.getAccDestiny())throw new MalabarismoException();
+
             //ENCONTRAR AMBAS AS CONTAS
                 AccountEntity originAcc = this.accountRepository
                 .findByNumber(t.getAccOrigin())
@@ -168,10 +175,14 @@ public class AccountService {
                 .findByNumber(t.getAccDestiny())
                 .orElseThrow(() -> new ErroContaNaoEncontradaException());
 
+                //seta o cpfdest que não veio do front
+                t.setCpfDestiny(destinyAcc.getClientCpf());
+
             //REMOVE E ADICIONA VALORES
                 //VERIFICA SE TEM SALDO: SE N TEM RETORNA EXCEPTION
                     BigDecimal novoBalancoOrigin = originAcc.getBalanco().subtract(t.getValue());
                     if(novoBalancoOrigin.compareTo(BigDecimal.ZERO)<0) throw new SaldoInsuficienteException();
+                    
                     originAcc.setBalanco(novoBalancoOrigin);
 
                 BigDecimal novoBalancoDestiny = destinyAcc.getBalanco().add(t.getValue());

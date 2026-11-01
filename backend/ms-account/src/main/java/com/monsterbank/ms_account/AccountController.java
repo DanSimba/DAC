@@ -40,12 +40,12 @@ public class AccountController {
      }
 
      @GetMapping("/findByCpf/{cpf}")
-     public ResponseEntity<Optional<AccountDTO>> findAccountByCpf(@PathVariable("cpf") String cpf){
+     public ResponseEntity<AccountDTO> findAccountByCpf(@PathVariable("cpf") String cpf){
           return ResponseEntity.ok(this.accountService.findAccountByCpf(cpf));
      }
 
      @GetMapping("/findByNumber/{number}")
-     public ResponseEntity<Optional<AccountDTO>> findAccountByNumber(@PathVariable("number") String number){
+     public ResponseEntity<AccountDTO> findAccountByNumber(@PathVariable("number") String number){
           return ResponseEntity.ok(this.accountService.findAccountByNumber(number));
      }
 

@@ -29,6 +29,9 @@ public class TransferenceEntity {
     @Column(name = "cpf_origin", nullable = false)
     private String cpfOrigin;
 
+    @Column(name = "cpf_destiny", nullable = false)
+    private String cpfDestiny;
+
     @Column(name = "name_origin", nullable = false)
     private String nameOrigin;
 
@@ -49,6 +52,7 @@ public class TransferenceEntity {
     public TransferenceEntity(TransferenceDTO t){
         this.type = "transference";
         this.cpfOrigin = t.getCpfOrigin();
+        this.cpfDestiny = t.getCpfDestiny();
         this.nameOrigin = t.getNameOrigin();
         this.accOrigin = t.getAccOrigin();
         this.accDestiny = t.getAccDestiny();
@@ -70,6 +74,10 @@ public class TransferenceEntity {
 
     public String getCpfOrigin() {
         return this.cpfOrigin;
+    }
+
+    public String getCpfDestiny() {
+        return cpfDestiny;
     }
 
     public String getNameOrigin() {
@@ -102,6 +110,10 @@ public class TransferenceEntity {
 
     public void setCpfOrigin(String cpfOrigin) {
         this.cpfOrigin = cpfOrigin;
+    }
+
+    public void setCpfDestiny(String cpfDestiny) {
+        this.cpfDestiny = cpfDestiny;
     }
 
     public void setNameOrigin(String nameOrigin) {

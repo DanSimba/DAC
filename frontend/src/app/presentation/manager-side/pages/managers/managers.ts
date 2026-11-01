@@ -46,7 +46,7 @@ export class Managers implements OnInit{
       email: manager.email,
       telefone: manager.telefone,
     }
-    this.formAberto.set(false);
+    this.formAberto.set(true);
   }
 
   fecharForm(): void{

@@ -60,10 +60,7 @@ export class ExtratoService {
     //console.log('extrato atualizado com dia vazio: ', this.extList());
   }
 
-
   createMonthExt(month: number, year: number, acc: Account){ //roda por tds os dias do mÊs adicionando extratos á lista
-    //ARRANCA OS VAZIOS ANTERIORES E DEIXA SÓ OS EXTS DE VRDD
-    this.setExtList(this.realList());
 
     //console.log('ACCOUNT QUE TA NA CREATEMONTH: ', acc);
     const now = new Date();
@@ -85,6 +82,12 @@ export class ExtratoService {
           days--
         } 
     console.log("EXTlIST: ", this.extList());
+  }
+
+  clearMonthExt(){
+    //ARRANCA OS VAZIOS ANTERIORES E DEIXA SÓ OS EXTS DE VRDD
+    this.setExtList(this.realList());
+    console.log('LIMPOU EXTLIST: ', this.extList());
   }
 
   //--------FUNÇÕES DE DATA----#$%¨&*)(*&¨%$#)

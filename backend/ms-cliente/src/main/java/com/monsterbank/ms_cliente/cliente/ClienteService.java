@@ -93,5 +93,23 @@ public class ClienteService {
         return "12312321";
     }
 
+    public String findNameByCpf(String cpf){
+        ClienteEntity cliente = clienteRepository.findByCpf(cpf)
+        .orElseThrow(() -> new ClienteNaoEncontradoException());
+
+        return cliente.getCpf();
+    }
     
+    public ClienteRetorno findByCpf(String cpf){
+        ClienteEntity cliente = clienteRepository.findByCpf(cpf)
+        .orElseThrow(() -> new ClienteNaoEncontradoException());
+
+        return new ClienteRetorno(
+                        cliente.getCpf(),
+                        cliente.getNome(),
+                        cliente.getCidade(),
+                        cliente.getUf(),
+                        getSalario(cliente.getCpf())
+                );
+    }
 }

@@ -10,9 +10,6 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 @Service
 public class SagaService {
 
@@ -25,26 +22,10 @@ public class SagaService {
     private static final Logger log = LoggerFactory.getLogger(SagaService.class);
     private final ClienteCommandProducer clienteCommandProducer;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Map<String, SagaState> sagas = new ConcurrentHashMap<>();
-
     public SagaService(ClienteCommandProducer clienteCommandProducer, SagaStateRepository sagaStateRepository) {
         this.clienteCommandProducer = clienteCommandProducer;
         this.sagaStateRepository = sagaStateRepository;
     }
-
-    // Comentado para testar fazer com que o próprio orquestrador mantenha a SAGA, sem armazenar em memória
-    // public void iniciar(SagaCommand command) {
-    //     validarInicio(command);
-    //     String cpf = command.payload().get("cpf").asString();
-    //     SagaState state = new SagaState(command.sagaId(), cpf, command.payload(), APROVAR_SOLICITACAO);
-
-    //     if (sagas.putIfAbsent(command.sagaId(), state) != null) {
-    //         log.info("Saga {} ja iniciada; comando duplicado ignorado", command.sagaId());
-    //         return;
-    //     }
-    //     enviar(state, APROVAR_SOLICITACAO);
-    // }
-
 
     public void iniciar(SagaCommand command) {
         validarInicio(command);
@@ -55,8 +36,9 @@ public class SagaService {
 
         SagaState sagaState = new SagaState(
             command.sagaId(),
-            APROVAR_SOLICITACAO,
+            APROVAR_CLIENTE,
             command.payload(),
+            APROVAR_SOLICITACAO,
             1
         );
 
@@ -70,13 +52,17 @@ public class SagaService {
      * acrescentada aqui sem acoplar os listeners aos demais microsservicos.
      */
     public void processarResposta(String operacao, SagaReply reply) {
-        SagaState state = sagas.get(reply.sagaId());
+        SagaState state = sagaStateRepository.buscarPorId(reply.sagaId());
         if (state == null) {
             log.warn("Resposta da saga {} ignorada: estado inexistente", reply.sagaId());
             return;
         }
-        if (!state.etapaAtual().equals(operacao)) {
-            log.warn("Saga {} aguardava {}, mas recebeu {}", reply.sagaId(), state.etapaAtual(), operacao);
+        if (state.finalizada()) {
+            log.info("Resposta da saga {} ignorada: saga ja finalizada", reply.sagaId());
+            return;
+        }
+        if (!operacao.equals(state.operacaoAtual())) {
+            log.warn("Saga {} aguardava {}, mas recebeu {}", reply.sagaId(), state.operacaoAtual(), operacao);
             return;
         }
 
@@ -91,21 +77,23 @@ public class SagaService {
     private void processarAprovacao(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) {
             state.falhar(reply.erro());
-            sagas.remove(state.sagaId());
+            sagaStateRepository.salvar(state);
             return;
         }
-        state.avancarPara(CRIAR_CLIENTE);
+        state.avancarPara(CRIAR_CLIENTE, 2);
+        sagaStateRepository.salvar(state);
         enviar(state, CRIAR_CLIENTE);
     }
 
     private void processarCriacao(SagaState state, SagaReply reply) {
         if (reply.sucesso()) {
             state.concluir();
-            sagas.remove(state.sagaId());
+            sagaStateRepository.salvar(state);
             log.info("Saga {} concluiu a parte do MS Cliente", state.sagaId());
             return;
         }
-        state.compensar(COMPENSAR_APROVACAO, reply.erro());
+        state.compensar(COMPENSAR_APROVACAO, 3, reply.erro());
+        sagaStateRepository.salvar(state);
         enviar(state, COMPENSAR_APROVACAO);
     }
 
@@ -117,7 +105,7 @@ public class SagaService {
             state.falhar("Falha ao compensar aprovacao: " + reply.erro());
             log.error("Saga {} falhou durante a compensacao", state.sagaId());
         }
-        sagas.remove(state.sagaId());
+        sagaStateRepository.salvar(state);
     }
 
     private void enviar(SagaState state, String tipo) {
