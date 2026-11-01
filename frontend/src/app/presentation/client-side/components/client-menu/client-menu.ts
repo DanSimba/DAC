@@ -5,7 +5,6 @@ import { ClientService } from '../../../../application/client/services/client-se
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AccountService } from '../../../../application/account/services/account-service';
-import { response } from 'express';
 
 @Component({
   selector: 'app-client-menu',
