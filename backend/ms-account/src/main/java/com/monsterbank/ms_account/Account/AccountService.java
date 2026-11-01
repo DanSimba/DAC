@@ -9,7 +9,7 @@ import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
 import com.monsterbank.ms_account.exceptions.MalabarismoException;
-
+import com.monsterbank.ms_account.exceptions.NullTransactionException;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
@@ -109,6 +109,10 @@ public class AccountService {
     
     @Transactional
     public ExtratoDTO operate(OperationDTO op){
+
+            //CHECAR SE OP É NULA (VALUE == 0)
+            if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
+
             //MUDAR BALANCO
             AccountEntity acc = this.accountRepository
             .findByNumber(op.getAccNumber())
@@ -162,6 +166,9 @@ public class AccountService {
     
     @Transactional
     public ExtratoDTO transfer(TransferenceDTO t){
+
+        //CHECAR SE A TRANSF É NULA (VALUE == 0)
+        if(t.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
 
         //VERIFICA MALABARISMO
         if(t.getAccOrigin() == t.getAccDestiny())throw new MalabarismoException();
