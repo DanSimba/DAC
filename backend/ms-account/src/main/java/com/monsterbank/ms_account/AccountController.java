@@ -28,10 +28,10 @@ public class AccountController {
           this.accountService = as;
      }
 
-     @GetMapping("/test")
-     public String test() {
+     @GetMapping("/health")
+     public ResponseEntity<Void> test() {
           System.out.println("MSACCOUNT FUNFANDO FI");
-          return "ms-account funcionando!";
+          return ResponseEntity.ok().build();
      }
 
      @GetMapping("/getMockAcc")

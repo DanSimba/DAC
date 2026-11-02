@@ -66,6 +66,20 @@ public class GlobalExceptionHandler {
                         .body(error);
         }
 
+        //EXCEÇÃO TRANSAÇÃO NULA
+        @ExceptionHandler(NullTransactionException.class)
+        public ResponseEntity<ErrorResponse> handleNullTransactionException(MalabarismoException e) {
+                ErrorResponse error = new ErrorResponse(
+                        403, //forbidden: pode não man
+                        "ERRO_NULL_TRANSACTION",
+                        e.getMessage()
+                );
+
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(error);
+        }
+
         //TRATAMENTO GENERICO
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleGeneric(

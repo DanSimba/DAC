@@ -29,7 +29,7 @@ export class Extrato implements OnInit, OnDestroy{
   client = signal<Client>(this.clientService.getClient());
 
   endDate = signal<number>(0);
-  startDate = signal<number>(0); //FIRST OF THE MONTH
+  startDate = signal<number>(0);
   minDate = signal<string>('');
   maxDate = signal<string>('');
 
@@ -77,12 +77,13 @@ export class Extrato implements OnInit, OnDestroy{
     this.endDate.set(+(dateInt[0]+dateInt[1]+dateInt[2]));
     //console.log('enddate: ', this.endDate());
 
-    //seta o começo do mes junto
-    this.startDate.set(+(dateInt[0]+dateInt[1]+'01'));
+    //seta o começo um mes antes do fim
+    this.startDate.set(+(dateInt[0]+(+dateInt[1]-1)+'01'));
     //console.log('startdate: ', this.startDate());
 
-    //popula mes escolhido
+    //popula mes atual e o anterior que vai aparecer
     this.extratoService.createMonthExt(+dateInt[1], +dateInt[0], this.account());
+    this.extratoService.createMonthExt((+dateInt[1]-1), +dateInt[0], this.account());
 
   }
 
