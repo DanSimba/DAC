@@ -39,11 +39,11 @@ export class ManagerHttpService {
   }
 
   aprovarSolicitacao(cpf: string): Observable<void>{
-    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovar`, null);
+    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovacao`, null);
   }
 
   recusarSolicitacao(cpf: string, payload: RecusarClientePayload): Observable<void>{
-    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/recusar`, payload);
+    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/rejeicao`, payload);
   }
 
   //buscar todos os clientes na pag de consultar clientes
