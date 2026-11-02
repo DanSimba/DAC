@@ -49,7 +49,7 @@
             <th class="p-4 font-bold">NOME</th>
             <th class="p-4 font-bold text-right">SALÁRIO</th>
             <th class="p-4 font-bold text-center">STATUS</th>
-            <th class="p-4 font-bold">DATA / HORA DECISÃO</th>
+            <th class="p-4 font-bold">DATA / HORA PROCESSAMENTO</th>
             <th class="p-4 font-bold text-center">AÇÕES</th>
           </tr>
         </thead>
@@ -74,7 +74,7 @@
                 @if (item.status === 'PENDENTE') {
                   <span class="text-white/40">-</span>
                 } @else {
-                  <span>{{ item.dataHoraDecisao }}</span>
+                  <span>{{ item.dataHoraProcessamento }}</span>
                 }
               </td>
 
@@ -142,7 +142,7 @@
           CPF: <span class="text-white">{{ solicitacaoSelecionada?.cpf }}</span>
           @if (modoModal === 'VER_MOTIVO') {
             <br>
-            Data da decisão: <span class="text-white">{{ solicitacaoSelecionada?.dataHoraDecisao }}</span>
+            Data de processamento: <span class="text-white">{{ solicitacaoSelecionada?.dataHoraProcessamento }}</span>
           }
         </p>
 

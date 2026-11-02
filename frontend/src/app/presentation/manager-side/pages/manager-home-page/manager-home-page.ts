@@ -19,7 +19,7 @@ export class ManagerHomePage implements OnInit {
       nome: 'Moster Hunter 2',
       salario: 'R$ 3.200,00',
       status: 'APROVADO',
-      dataHoraDecisao: '18/09/2026 15:30'
+      dataHoraProcessamento: '18/09/2026 15:30'
     },
     {
       cpf: '967.654.321-00',
@@ -51,14 +51,14 @@ export class ManagerHomePage implements OnInit {
       salario: 'R$ 1.800,00',
       status: 'NAO_APROVADO',
       motivo: 'Renda incompatível com o declarado.',
-      dataHoraDecisao: '18/09/2026 09:00'
+      dataHoraProcessamento: '18/09/2026 09:00'
     },
     {
       cpf: '656.789.123-43',
       nome: 'Monster Bike De Sousa',
       salario: 'R$ 3.200,00',
       status: 'APROVADO',
-      dataHoraDecisao: '19/09/2026 10:15'
+      dataHoraProcessamento: '19/09/2026 10:15'
     },
     {
       cpf: '587.654.321-01',
@@ -90,7 +90,7 @@ export class ManagerHomePage implements OnInit {
       salario: 'R$ 1.900,00',
       status: 'NAO_APROVADO',
       motivo: 'Renda incompatível com o declarado.',
-      dataHoraDecisao: '18/09/2026 09:00'
+      dataHoraProcessamento: '18/09/2026 09:00'
     },
     {
       cpf: '223.125.123-10',
@@ -98,35 +98,35 @@ export class ManagerHomePage implements OnInit {
       salario: 'R$ 1.300,00',
       status: 'NAO_APROVADO',
       motivo: 'Documento ilegível.',
-      dataHoraDecisao: '26/09/2026 09:00'
+      dataHoraProcessamento: '26/09/2026 09:00'
     },
     {
       cpf: '223.032.123-19',
       nome: 'Serasa Negativado',
       salario: 'R$ 1.580,00',
       status: 'APROVADO',
-      dataHoraDecisao: '26/09/2026 16:20'
+      dataHoraProcessamento: '26/09/2026 16:20'
     },
     {
       cpf: '173.082.193-19',
       nome: 'Barata Maluca',
       salario: 'R$ 1.550,00',
       status: 'APROVADO',
-      dataHoraDecisao: '30/09/2026 11:00'
+      dataHoraProcessamento: '30/09/2026 11:00'
     },
     {
       cpf: '823.032.163-29',
       nome: 'Barrata',
       salario: 'R$ 2.850,00',
       status: 'APROVADO',
-      dataHoraDecisao: '28/09/2026 17:00'
+      dataHoraProcessamento: '28/09/2026 17:00'
     },
     {
       cpf: '225.036.124-13',
       nome: 'Barata Voadora',
       salario: 'R$ 1.350,00',
       status: 'APROVADO',
-      dataHoraDecisao: '29/09/2026 14:10'
+      dataHoraProcessamento: '29/09/2026 14:10'
     }
   ];
   */
@@ -157,8 +157,8 @@ export class ManagerHomePage implements OnInit {
 
   public carregarSolicitacoes(): void {
     this.managerService.listarSolicitacoes().subscribe({
-      next: (solicitacoes) =>
-        { this.solicitacoes = solicitacoes;
+      next: (resposta: any) =>
+        { this.solicitacoes = resposta.solicitacoes || resposta;
       },
       error: (erro) => {
         console.error('Erro ao carregar solicitações:', erro);
@@ -174,13 +174,16 @@ export class ManagerHomePage implements OnInit {
     /*
     //teste com mock
     solicitacao.status = 'APROVADO';
-    solicitacao.dataHoraDecisao = new Date().toLocaleString('pt-BR');
+    solicitacao.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
     this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
     this.ajustarPaginaAposRemocao();
     */
 
      // /*
-    this.managerService.aprovarSolicitacao(solicitacao.cpf).subscribe({
+
+    const cpfLimpo = solicitacao.cpf.replace(/\D/g, '');
+    
+    this.managerService.aprovarSolicitacao(cpfLimpo).subscribe({
       next: () => {
         this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
         this.carregarSolicitacoes(); 
@@ -205,7 +208,7 @@ export class ManagerHomePage implements OnInit {
       //teste com mock
       this.solicitacaoSelecionada.status = 'NAO_APROVADO';
       this.solicitacaoSelecionada.motivo = this.motivo;
-      this.solicitacaoSelecionada.dataHoraDecisao = new Date().toLocaleString('pt-BR');
+      this.solicitacaoSelecionada.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
       this.mensagemSucesso = `A solicitação de ${this.solicitacaoSelecionada.nome} foi recusada.`;
       this.fecharModal();
       this.ajustarPaginaAposRemocao();
@@ -215,7 +218,9 @@ export class ManagerHomePage implements OnInit {
     // /*  
     const payload = { motivo: this.motivo }; 
 
-      this.managerService.recusarSolicitacao(this.solicitacaoSelecionada.cpf, payload).subscribe({
+      const cpfLimpo = this.solicitacaoSelecionada.cpf.replace(/\D/g, '');
+
+      this.managerService.recusarSolicitacao(cpfLimpo, payload).subscribe({
         next: () => {
           this.mensagemSucesso = `A solicitação de ${this.solicitacaoSelecionada?.nome} foi recusada.`;
           this.fecharModal();
@@ -235,10 +240,10 @@ export class ManagerHomePage implements OnInit {
 
     if (this.filtroAtual !== 'PENDENTE') {
       return filtradas.sort((a, b) => {
-        if (!a.dataHoraDecisao) return 1;
-        if (!b.dataHoraDecisao) return -1;
+        if (!a.dataHoraProcessamento) return 1;
+        if (!b.dataHoraProcessamento) return -1;
 
-        return b.dataHoraDecisao.localeCompare(a.dataHoraDecisao);
+        return b.dataHoraProcessamento.localeCompare(a.dataHoraProcessamento);
       });
     }
     return filtradas;
