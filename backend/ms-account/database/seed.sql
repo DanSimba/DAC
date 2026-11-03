@@ -12,23 +12,23 @@ TRUNCATE TABLE account, extrato, operation, transference;
 --CONTAS REQS
 --catharyna
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('1291', 800.00, '98574307084', 12912861012, 20000101);
+VALUES ('1291', 800.00, '12912861012', 98574307084, 20000101);
 
 --cleudonio
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('0950', 10000.00, '64065268052', 09506382000, 19901010);
+VALUES ('0950', 10000.00, '09506382000', 64065268052, 19901010);
 
 --catianna
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('8573', 3700.00, '23862179060', 85733854057, 20121212);
+VALUES ('8573', 3700.00, '85733854057', 23862179060, 20121212);
 
 --cutardo
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('5887', 150000.00, '98574307084', 58872160006, 20220222);
+VALUES ('5887', 150000.00, '58872160006', 98574307084, 20220222);
 
 --coandrya
 INSERT INTO account (number, balanco, client_cpf, manager_id, created_at)
-VALUES ('7617', 1500.00, '64065268052', 76179646090, 20260101);
+VALUES ('7617', 1500.00, '76179646090', 64065268052, 20260101);
 
 --EXTRATOS $%¨&*((*&¨$#$%¨&*()))
 --CUTARDO

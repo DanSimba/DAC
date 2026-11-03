@@ -10,9 +10,20 @@
 
             <h1 class="text-7xl text-white font-monster">EXTRATO</h1>
             </div>
+            
+         <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-rosa rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
+                Fim: 
+                <input type="date" 
+                 onkeydown="return false"
+                [value]="stringfyDateId(endDate())"
+                (input)="setEndDate($event.target.value)"
+                [min]="stringfyDateId(startDate())"
+                [max]="maxDate()"
+                class="w-fit focus:outline-none cursor-pointer">
+        </div>
 
-        <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
-                De: 
+         <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-azure rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
+                Início: 
                 <input type="date" 
                  onkeydown="return false"
                 [value]="stringfyDateId(startDate())"
@@ -22,16 +33,6 @@
                 class="w-fit focus:outline-none cursor-pointer">
         </div>
 
-         <div class="flex flex-row w-fit items-center px-2 py-1 gap-2 hover:scale-105 bg-white/50 border-5 border-solid border-rosa rounded-2xl text-black text-2xl font-display font-title transition-all duration-130">
-                Até: 
-                <input type="date" 
-                 onkeydown="return false"
-                [value]="stringfyDateId(endDate())"
-                (input)="setEndDate($event.target.value)"
-                [min]="stringfyDateId(startDate())"
-                [max]="maxDate()"
-                class="w-fit focus:outline-none cursor-pointer">
-        </div>
 
         <!-- <div class="flex flex-row w-[8vw] h-[6vh] justify-center items-center rounded-lg bg-rosa text-xl font-title text-white font-display transition-all duration-130 hover:scale-102 hover:shadow-[3px_3px_0px_var(--color-azure)] cursor-pointer"
         (click)="setWindow()">
