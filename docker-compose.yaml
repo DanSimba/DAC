@@ -13,6 +13,12 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck: # testando verificação do rabbitmq antes de subir o api-gateway
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
     networks:
       - monsterbank-net
 
@@ -85,11 +91,19 @@ services:
       MS_ACCOUNT_URL: http://ms-account:8080
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      - ms-gerente
-      - ms-cliente
-      - redis
-      - rabbitmq
+    depends_on: # testando verificação do rabbitmq antes de subir o api-gateway
+      ms-gerente:
+        condition: service_started
+      ms-cliente:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+          condition: service_healthy
+      # - ms-gerente
+      # - ms-cliente
+      # - redis
+      # - rabbitmq
     networks:
       - monsterbank-net
 

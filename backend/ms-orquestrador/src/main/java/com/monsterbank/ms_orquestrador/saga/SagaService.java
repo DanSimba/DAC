@@ -61,9 +61,11 @@ public class SagaService {
     }
 
     public void iniciar(SagaCommand command) {
+        log.info("{} --- Iniciando SAGA", SagaService.class);
         validarInicio(command);
 
         if (sagaStateRepository.existe(command.sagaId())) {
+            log.warn("{} --- SAGA já existente. ID: {}", SagaService.class, command.sagaId());
             return;
         }
 
@@ -75,8 +77,10 @@ public class SagaService {
             1
         );
 
+        log.info("{} --- Salvando SAGA. ID: {}, Etapa: {}, Tipo: {}, Operação: {}", SagaService.class, sagaState.getSagaId(), sagaState.getEtapaAtual(), sagaState.getTipo(), sagaState.getOperacaoAtual());
         sagaStateRepository.salvar(sagaState);
         
+        log.info("{} --- Salvando SAGA. ID: {}", SagaService.class, sagaState.getSagaId());
         enviar(clienteCommandProducer, sagaState, APROVAR_SOLICITACAO, command.payload());
     }
     /**
@@ -122,17 +126,22 @@ public class SagaService {
     // }
 
     private void processarAprovacao(SagaState state, SagaReply reply) {
+        log.info("{} --- Iniciando processarAprovacao()", SagaService.class);
         if (!reply.sucesso()) {
+            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
             state.falhar(reply.erro());
             sagaStateRepository.salvar(state);
             return;
         }
         
+        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
         ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
         payload.set("dadosSolicitacao", reply.payload());
         state.setPayload(payload);
         
+        log.info("{} --- Avançar saga para LISTAR_GERENTES: {}", SagaService.class, LISTAR_GERENTES);
         state.avancarPara(LISTAR_GERENTES, 2);
+
         sagaStateRepository.salvar(state);
         enviar(gerenteProducer, state, LISTAR_GERENTES, objectMapper.createObjectNode());
     }
@@ -269,6 +278,7 @@ public class SagaService {
     }
 
     private void enviar(Object producer, SagaState state, String tipo, JsonNode payload) {
+        log.info("{} --- Enviando SAGA {}", SagaService.class, payload);
         if (producer instanceof ClienteCommandProducer c) c.enviar(state.sagaId(), tipo, payload);
         else if (producer instanceof GerenteCommandProducer g) g.enviar(state.sagaId(), tipo, payload);
         else if (producer instanceof ContaCommandProducer ct) ct.enviar(state.sagaId(), tipo, payload);

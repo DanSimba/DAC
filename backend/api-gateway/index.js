@@ -159,46 +159,66 @@ function validaJWT(req, res, next){
 }
 
 
-// Encaminha o cliente recebido do front para o ms-cliente
-app.post('/solicitacoes', async (req, res) => {
-  try {
-    const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
+    // Encaminha o cliente recebido do front para o ms-cliente
+    app.post('/solicitacoes', async (req, res) => {
+      try {
+        const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req.body)
+        });
+
+        console.log("Entrei no Post para registrar uma solicitação.");
+
+        return await encaminhaResponse(response, res);
+
+      } catch (error) {
+        console.error('Erro de rede ao acessar ms-cliente:', error.message);
+        return res.status(503).json({
+          status: 503,
+          mensagem: 'Serviço indisponível.'
+        });
+      }
     });
 
-    console.log("Entrei no Post para registrar uma solicitação.");
+    // Lista as solicitações
+    app.get('/solicitacoes', async (req, res) => {
+      try {
+        const queryParams = new URLSearchParams(req.query).toString();
+        const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
+        const response = await fetch(url);
 
-    return await encaminhaResponse(response, res);
+        console.log("Entrei no Get para listar todas as solicitações.");
 
-  } catch (error) {
-    console.error('Erro de rede ao acessar ms-cliente:', error.message);
-    return res.status(503).json({
-      status: 503,
-      mensagem: 'Serviço indisponível.'
+        return await encaminhaResponse(response, res);
+
+      } catch (error) {
+        console.error('Erro ao listar solicitação. ', error);
+        return res.status(503).json({
+          status: 503,
+          mensagem: 'Serviço indisponível.'
+        })
+      }
     });
-  }
-});
 
-// Rejeitar solicitações
-// app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
-//   try {
-//     const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(req.body)});
-//             return await encaminhaResponse(response, res);
+  // Listar solicitações por cpf
+  app.get('/solicitacoes/:cpf', async (req, res) => {
+    try {
+      const url = `${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}`;
+      const response = await fetch(url);
 
-//         } catch (error) {
-//             console.error('Erro de rede ao acessar ms-cliente:', error.message);
-//             return res.status(503).json({
-//                 status: 503,
-//                 mensagem: 'Serviço indisponível.'
-//             });
-//         }
-//     });
-// pq caralhos tinha 2 dessa eu não sei, mas mantem essa joça aqui 
+      console.log("Entrei no Get para listar uma solicitação");
+      
+      return await encaminhaResponse(response, res);
+
+    } catch (error) {
+        console.error('Erro de rede ao acessar ms-cliente:', error.message);
+        return res.status(503).json({
+            status: 503,
+            mensagem: 'Serviço indisponível.'
+        });
+      }
+    });
 
     // Rejeitar solicitações
     app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
@@ -296,28 +316,6 @@ app.post('/solicitacoes', async (req, res) => {
       });
     }
   });
-
-    // Lista as solicitações
-    app.get('/solicitacoes', async (req, res) => {
-      try {
-        const queryParams = new URLSearchParams(req.query).toString();
-        const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
-        const response = await fetch(url);
-
-        console.log("Entrei no Get para listar todas as solicitações.");
-
-    console.log("Entrei no Get para listar uma solicitação");
-
-    return await encaminhaResponse(response, res);
-
-  } catch (error) {
-    console.error('Erro ao listar solicitação. ', error);
-    return res.status(503).json({
-      status: 503,
-      mensagem: 'Serviço indisponível.'
-    })
-  }
-});
 
     // para o lado de GERENTE 
     // get gerente com quantidade de clientes por gerente

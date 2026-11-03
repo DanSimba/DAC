@@ -9,6 +9,10 @@ public enum GerenteReplyQueue {
         "gerente.avaliar-solicitacao",
         "ms.gerente.avaliar-solicitacao.reply"
     ),
+    LISTAR_GERENTES_ATIVOS(
+        "gerente.listar-ativos",
+        "ms.gerente.listar-ativos.reply"
+    ),
     COMANDO_DESCONHECIDO(
             null,
             "ms.cliente.comando-desconhecido.reply"

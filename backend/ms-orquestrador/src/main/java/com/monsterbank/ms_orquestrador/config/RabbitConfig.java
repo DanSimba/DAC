@@ -18,6 +18,7 @@ public class RabbitConfig {
     public static final String CLIENTE_MARCAR_NAO_APROVADA_REPLY_QUEUE = "ms.cliente.marcar-nao-aprovada.reply";
     public static final String CLIENTE_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.cliente.compensar-criacao.reply";
     public static final String CLIENTE_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.cliente.comando-desconhecido.reply";
+    public static final String GERENTE_COMMAND_QUEUE = "ms.gerente.cmd";
     public static final String GERENTE_LISTAR_ATIVOS_REPLY_QUEUE = "ms.gerente.listar-ativos.reply";
     public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
     public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
