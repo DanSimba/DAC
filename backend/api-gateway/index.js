@@ -320,15 +320,41 @@ app.post('/solicitacoes', async (req, res) => {
 });
 
     // para o lado de GERENTE 
-    // get gerente
+    // get gerente com quantidade de clientes por gerente
     app.get('/gerentes', async(req, res) => {
       try{
-        const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente`);
-        await encaminhaResponse(response, res);
+        const [gerenteResponse, contaResponse] = await Promise.all([
+          fetch(`${process.env.MS_GERENTE_URL}/gerente`),
+          fetch(`${process.env.MS_ACCOUNT_URL}/account`)
+        ])
+        if(!gerenteResponse.ok || !contaResponse.ok){
+          return res.status(502).json({
+            message: 'Erro ao comunicar com os ms´s'
+          })
+        }
+
+        const gerentes = await gerenteResponse.json()
+        const contas = await contaResponse.json()
+
+        const resultado = gerentes.map(gerente =>{
+          const quantClientes = contas.filter(
+            conta => Number(conta.managerId) === Number(gerente.id)
+          ).lenght;
+          return{
+            ...gerente,
+            quantClientes
+          }
+        })
+
+        resultado.sort((a,b) =>
+          a.nome.localeCompare(b.nome, 'pt-BR')
+        )
+        return res.json(resultado)
+
       }catch (error){
-        console.error('Erro a listar gerentes-> ', error);
+        console.error('Erro ao compor dados de gerentes-> ', error);
         res.status(502).json({
-          message: 'Erro ao comunicar com ms gerente'
+          message: 'Erro ao comunicar com ms gerente e ms-account'
         });
       }
     })
@@ -483,7 +509,7 @@ app.post('/solicitacoes', async (req, res) => {
         const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
           {
             method: 'POST',
-            headers: {'Content-Type':'applicaation/json'},
+            headers: {'Content-Type':'application/json'},
             body: JSON.stringify(req.body)
 
           }

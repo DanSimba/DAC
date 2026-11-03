@@ -11,7 +11,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface ExtratoRepository extends JpaRepository<ExtratoEntity, String>{
+public interface ExtratoRepository extends JpaRepository<ExtratoEntity, Long>{
     
     Optional<ExtratoEntity> findByDateIdAndAccNumber(Integer dateId, String accNumber);
 

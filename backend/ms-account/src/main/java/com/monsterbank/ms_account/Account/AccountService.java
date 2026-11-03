@@ -1,15 +1,15 @@
-package com.monsterbank.ms_account.account;
+package com.monsterbank.ms_account.Account;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.Account.AccountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
 import com.monsterbank.ms_account.exceptions.MalabarismoException;
-
+import com.monsterbank.ms_account.exceptions.NullTransactionException;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
@@ -62,6 +62,17 @@ public class AccountService {
         );
     }
 
+    public List<AccountDTO> listaContas(){
+        return accountRepository.findAll().stream().map(
+            acc -> new AccountDTO(
+                acc.getNumber(),
+                acc.getClientCpf(),
+                acc.getBalanco(),
+                acc.getManagerId(),
+                acc.getCreatedAt())
+        ).toList();
+    }
+
     public AccountDTO findAccountByCpf(String cpf){
         AccountEntity acc = this.accountRepository.findByClientCpf(cpf)
                 .orElseThrow(() -> new ErroContaNaoEncontradaException());
@@ -109,6 +120,10 @@ public class AccountService {
     
     @Transactional
     public ExtratoDTO operate(OperationDTO op){
+
+            //CHECAR SE OP É NULA (VALUE == 0)
+            if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
+
             //MUDAR BALANCO
             AccountEntity acc = this.accountRepository
             .findByNumber(op.getAccNumber())
@@ -162,6 +177,9 @@ public class AccountService {
     
     @Transactional
     public ExtratoDTO transfer(TransferenceDTO t){
+
+        //CHECAR SE A TRANSF É NULA (VALUE == 0)
+        if(t.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
 
         //VERIFICA MALABARISMO
         if(t.getAccOrigin() == t.getAccDestiny())throw new MalabarismoException();
