@@ -62,6 +62,17 @@ public class AccountService {
         );
     }
 
+    public List<AccountDTO> listaContas(){
+        return accountRepository.findAll().stream().map(
+            acc -> new AccountDTO(
+                acc.getNumber(),
+                acc.getClientCpf(),
+                acc.getBalanco(),
+                acc.getManagerId(),
+                acc.getCreatedAt())
+        ).toList();
+    }
+
     public AccountDTO findAccountByCpf(String cpf){
         AccountEntity acc = this.accountRepository.findByClientCpf(cpf)
                 .orElseThrow(() -> new ErroContaNaoEncontradaException());

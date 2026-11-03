@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -34,9 +37,15 @@ public class AccountController {
           return ResponseEntity.ok().build();
      }
 
+     //vou deixar aqui só por encargo de conciencia por enquanto
      @GetMapping("/getMockAcc")
      public ResponseEntity<Optional<AccountDTO>> getMockAcc(){
           return ResponseEntity.ok(this.accountService.getMockAcc());
+     }
+
+     @GetMapping 
+     public ResponseEntity<List<AccountDTO>> listContas(){
+          return ResponseEntity.ok(this.accountService.listaContas());
      }
 
      @GetMapping("/findByCpf/{cpf}")
