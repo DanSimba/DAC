@@ -1,13 +1,13 @@
 package com.monsterbank.ms_account;
 
 import com.monsterbank.ms_account.Account.AccountDTOs.CreateAccountRequest;
-import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.Account.AccountDTOs.AccountDTO;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
 
 import com.monsterbank.ms_account.operations.operationDTOs.*;
-import com.monsterbank.ms_account.account.AccountService;
+import com.monsterbank.ms_account.Account.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
