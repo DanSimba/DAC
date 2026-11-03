@@ -111,10 +111,14 @@ public class ClienteCommandConsumer {
                     enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
-                default -> enviarRespostaErro(command, replyQueue, "COMANDO_DESCONHECIDO");
+                default -> {
+                    log.warn("{} --- Erro: COMANDO_DESCONHECIDO", ClienteCommandConsumer.class);
+                    enviarRespostaErro(command, replyQueue, "COMANDO_DESCONHECIDO");}
+                
 
             }
         } catch(CpfInvalidoException e){
+            log.warn("{} --- Erro: CPF_INVALIDO", ClienteCommandConsumer.class, e);
             enviarRespostaErro(
                     command,
                     replyQueue,
@@ -122,24 +126,28 @@ public class ClienteCommandConsumer {
             );
 
         } catch (SolicitacaoNaoPendenteException e){
+            log.warn("{} --- Erro: SOLICITACAO_NAO_PENDENTE", ClienteCommandConsumer.class, e);
             enviarRespostaErro(
                     command,
                     replyQueue,
                     "SOLICITACAO_NAO_PENDENTE"
             );
         } catch (ErroCriacaoClienteException e){
+            log.warn("{} --- Erro: ERRO_CRIACAO_CLIENTE", ClienteCommandConsumer.class, e);
             enviarRespostaErro(
                     command,
                     replyQueue,
                     "ERRO_CRIACAO_CLIENTE"
             );
         } catch (SolicitacaoNaoEncontradaException e){
+            log.warn("{} --- Erro: SOLICITACAO_NAO_ENCONTRADA", ClienteCommandConsumer.class, e);
             enviarRespostaErro(
                     command,
                     replyQueue,
                     "SOLICITACAO_NAO_ENCONTRADA"
             );
         } catch (ClienteNaoEncontradoException e){
+            log.warn("{} --- Erro: CLIENTE_NAO_ENCONTRADO", ClienteCommandConsumer.class, e);
             enviarRespostaErro(
                     command,
                     replyQueue,
@@ -183,6 +191,7 @@ public class ClienteCommandConsumer {
 
         );
 
+        log.info("{} --- Enviando resposta: {}", ClienteCommandConsumer.class, reply);
         responseProducer.enviar(replyQueue, reply);
     }
 
