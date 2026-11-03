@@ -109,7 +109,9 @@ public class SagaService {
             case CRIAR_CLIENTE -> processarCriacaoCliente(state, reply);
             case CRIAR_USUARIO -> processarCriacaoUsuario(state, reply);
             case CRIAR_CONTA -> processarCriacaoConta(state, reply);
-            case COMPENSAR_APROVACAO -> finalizarCompensacao(state, reply);
+            case COMPENSAR_CRIACAO_CLIENTE -> processarCompensacaoCriacaoCliente(state, reply);
+            case COMPENSAR_APROVACAO -> finalizarCompensacao(state, reply, "aprovacao");
+            case MARCAR_NAO_APROVADA -> finalizarCompensacao(state, reply, "marcacao da solicitacao como nao aprovada");
             default -> log.warn("Operacao {} nao pertence a esta etapa da saga", operacao);
         }
     }
@@ -185,14 +187,7 @@ public class SagaService {
 
     private void processarCriacaoUsuario(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) {
-            if ("EMAIL_DUPLICADO".equals(reply.erro())) {
-                ObjectNode motivo = objectMapper.createObjectNode().put("cpf", state.cpf()).put("motivo", "E-mail já cadastrado");
-                enviar(clienteCommandProducer, state, MARCAR_NAO_APROVADA, motivo);
-            } else {
-                iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
-            }
-            enviar(clienteCommandProducer, state, COMPENSAR_CRIACAO_CLIENTE, objectMapper.createObjectNode().put("cpf", state.cpf()));
-            falharSaga(state, reply.erro());
+            iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
             return;
         }
         state.avancarPara(CRIAR_CONTA, 6);
@@ -209,11 +204,7 @@ public class SagaService {
 
     private void processarCriacaoConta(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) {
-            // Conta falhou: compensa tudo pra trás (Usuario, Cliente e Aprovação)
-            enviar(clienteCommandProducer, state, COMPENSAR_APROVACAO, objectMapper.createObjectNode().put("cpf", state.cpf()));
-            enviar(clienteCommandProducer, state, COMPENSAR_CRIACAO_CLIENTE, objectMapper.createObjectNode().put("cpf", state.cpf()));
-            // enviar(authProducer, state, COMPENSAR_USUARIO...)
-            falharSaga(state, reply.erro());
+            iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
             return;
         }
         
@@ -242,18 +233,41 @@ public class SagaService {
         state.compensar(comandoCompensacao, state.getEtapaAtual(), erro);
         sagaStateRepository.salvar(state);
         enviar(clienteCommandProducer, state, comandoCompensacao, objectMapper.createObjectNode().put("cpf", state.cpf()));
-        falharSaga(state, erro);
     }
 
-    private void finalizarCompensacao(SagaState state, SagaReply reply) {
-        if (reply.sucesso()) {
-            state.falhar(state.erro());
-            log.info("Saga {} compensada no MS Cliente", state.sagaId());
-        } else {
-            state.falhar("Falha ao compensar aprovacao: " + reply.erro());
-            log.error("Saga {} falhou durante a compensacao", state.sagaId());
+    private void processarCompensacaoCriacaoCliente(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) {
+            finalizarCompensacao(state, reply, "criacao do cliente");
+            return;
         }
-        sagaStateRepository.salvar(state);
+
+        if ("EMAIL_DUPLICADO".equals(state.erro())) {
+            ObjectNode motivo = objectMapper.createObjectNode()
+                    .put("cpf", state.cpf())
+                    .put("motivo", "E-mail já cadastrado");
+            state.compensar(MARCAR_NAO_APROVADA, state.getEtapaAtual(), state.erro());
+            sagaStateRepository.salvar(state);
+            enviar(clienteCommandProducer, state, MARCAR_NAO_APROVADA, motivo);
+            return;
+        }
+
+        iniciarCompensacao(state, COMPENSAR_APROVACAO, state.erro());
+    }
+
+    private void finalizarCompensacao(SagaState state, SagaReply reply, String etapaCompensada) {
+        if (!reply.sucesso()) {
+            String erroOriginal = state.erro();
+            falharSaga(
+                    state,
+                    "Falha ao compensar " + etapaCompensada + ": " + reply.erro()
+                            + ". Erro original: " + erroOriginal
+            );
+            return;
+        }
+
+        String erroOriginal = state.erro();
+        log.info("Saga {} compensada com sucesso ate a etapa de {}", state.sagaId(), etapaCompensada);
+        falharSaga(state, erroOriginal);
     }
 
     private void concluirSaga(SagaState state) {

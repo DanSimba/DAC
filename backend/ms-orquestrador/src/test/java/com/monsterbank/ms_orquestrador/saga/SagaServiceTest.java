@@ -18,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -99,7 +100,7 @@ class SagaServiceTest {
     }
 
     @Test
-    void deveCriarClienteDepoisDaAprovacao() {
+    void deveListarGerentesDepoisDaAprovacao() {
         JsonNode payload = objectMapper.createObjectNode().put("cpf", "12345678901");
         sagaService.iniciar(new SagaCommand("saga-2", SagaService.APROVAR_CLIENTE, "agora", payload));
 
@@ -108,24 +109,97 @@ class SagaServiceTest {
                 new SagaReply("saga-2", "agora", "SUCESSO", null, objectMapper.createObjectNode())
         );
 
-        verify(clienteCommandProducer).enviar("saga-2", SagaService.CRIAR_CLIENTE, payload);
+        verify(gerenteCommandProducer).enviar(
+                "saga-2",
+                SagaService.LISTAR_GERENTES,
+                objectMapper.createObjectNode()
+        );
     }
 
     @Test
-    void deveCompensarAprovacaoQuandoCriacaoFalhar() {
-        JsonNode payload = objectMapper.createObjectNode().put("cpf", "12345678901");
-        sagaService.iniciar(new SagaCommand("saga-3", SagaService.APROVAR_CLIENTE, "agora", payload));
-        sagaService.processarResposta(
-                SagaService.APROVAR_SOLICITACAO,
-                new SagaReply("saga-3", "agora", "SUCESSO", null, objectMapper.createObjectNode())
-        );
+    void deveAguardarRespostaDaCompensacaoAntesDeFinalizarSaga() {
+        avancarAteCriacaoCliente("saga-3");
 
         sagaService.processarResposta(
                 SagaService.CRIAR_CLIENTE,
                 new SagaReply("saga-3", "agora", "FALHA", "erro", objectMapper.createObjectNode())
         );
 
-        verify(clienteCommandProducer).enviar("saga-3", SagaService.COMPENSAR_APROVACAO, payload);
+        assertThat(estados.get("saga-3").getStatus()).isEqualTo(SagaState.Status.COMPENSANDO);
+        verify(clienteCommandProducer).enviar(
+                "saga-3",
+                SagaService.COMPENSAR_APROVACAO,
+                objectMapper.createObjectNode().put("cpf", "12345678901")
+        );
+
+        sagaService.processarResposta(
+                SagaService.COMPENSAR_APROVACAO,
+                new SagaReply("saga-3", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
+
+        assertThat(estados.get("saga-3").getStatus()).isEqualTo(SagaState.Status.FALHA);
+        assertThat(estados.get("saga-3").erro()).isEqualTo("erro");
+    }
+
+    @Test
+    void deveCompensarCriacaoAntesDeCompensarAprovacao() {
+        avancarAteCriacaoCliente("saga-5");
+        sagaService.processarResposta(
+                SagaService.CRIAR_CLIENTE,
+                new SagaReply("saga-5", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
+
+        sagaService.processarResposta(
+                SagaService.CRIAR_USUARIO,
+                new SagaReply("saga-5", "agora", "FALHA", "AUTH_INDISPONIVEL", objectMapper.createObjectNode())
+        );
+
+        verify(clienteCommandProducer).enviar(
+                "saga-5",
+                SagaService.COMPENSAR_CRIACAO_CLIENTE,
+                objectMapper.createObjectNode().put("cpf", "12345678901")
+        );
+        assertThat(estados.get("saga-5").operacaoAtual())
+                .isEqualTo(SagaService.COMPENSAR_CRIACAO_CLIENTE);
+
+        sagaService.processarResposta(
+                SagaService.COMPENSAR_CRIACAO_CLIENTE,
+                new SagaReply("saga-5", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
+
+        verify(clienteCommandProducer).enviar(
+                "saga-5",
+                SagaService.COMPENSAR_APROVACAO,
+                objectMapper.createObjectNode().put("cpf", "12345678901")
+        );
+        assertThat(estados.get("saga-5").getStatus()).isEqualTo(SagaState.Status.COMPENSANDO);
+    }
+
+    @Test
+    void deveMarcarSolicitacaoNaoAprovadaDepoisDeRemoverClienteComEmailDuplicado() {
+        avancarAteCriacaoCliente("saga-6");
+        sagaService.processarResposta(
+                SagaService.CRIAR_CLIENTE,
+                new SagaReply("saga-6", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
+        sagaService.processarResposta(
+                SagaService.CRIAR_USUARIO,
+                new SagaReply("saga-6", "agora", "FALHA", "EMAIL_DUPLICADO", objectMapper.createObjectNode())
+        );
+
+        sagaService.processarResposta(
+                SagaService.COMPENSAR_CRIACAO_CLIENTE,
+                new SagaReply("saga-6", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
+
+        verify(clienteCommandProducer).enviar(
+                "saga-6",
+                SagaService.MARCAR_NAO_APROVADA,
+                objectMapper.createObjectNode()
+                        .put("cpf", "12345678901")
+                        .put("motivo", "E-mail já cadastrado")
+        );
+        assertThat(estados.get("saga-6").operacaoAtual()).isEqualTo(SagaService.MARCAR_NAO_APROVADA);
     }
 
     @Test
@@ -146,5 +220,34 @@ class SagaServiceTest {
         org.assertj.core.api.Assertions.assertThat(recuperado.cpf()).isEqualTo("12345678901");
         org.assertj.core.api.Assertions.assertThat(recuperado.operacaoAtual())
                 .isEqualTo(SagaService.APROVAR_SOLICITACAO);
+    }
+
+    private void avancarAteCriacaoCliente(String sagaId) {
+        JsonNode payload = objectMapper.createObjectNode().put("cpf", "12345678901");
+        sagaService.iniciar(new SagaCommand(sagaId, SagaService.APROVAR_CLIENTE, "agora", payload));
+        sagaService.processarResposta(
+                SagaService.APROVAR_SOLICITACAO,
+                new SagaReply(
+                        sagaId,
+                        "agora",
+                        "SUCESSO",
+                        null,
+                        objectMapper.createObjectNode().put("email", "cliente@teste.com")
+                )
+        );
+        sagaService.processarResposta(
+                SagaService.LISTAR_GERENTES,
+                new SagaReply(sagaId, "agora", "SUCESSO", null, objectMapper.createArrayNode())
+        );
+        sagaService.processarResposta(
+                SagaService.IDENTIFICAR_GERENTE,
+                new SagaReply(
+                        sagaId,
+                        "agora",
+                        "SUCESSO",
+                        null,
+                        objectMapper.createObjectNode().put("gerenteId", "gerente-1")
+                )
+        );
     }
 }
