@@ -50,7 +50,7 @@ services:
   db-account-read:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=ms-account
+      - POSTGRES_DB=ms-account-read
       - POSTGRES_USER=ms-account
       - POSTGRES_PASSWORD=psql
     ports:
