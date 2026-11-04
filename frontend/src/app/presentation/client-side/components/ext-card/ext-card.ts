@@ -27,6 +27,8 @@ export class ExtCard {
   operInstance = input<OperationModel>();
 
   type = computed(()=>{
+    console.log('OPERINSTANCE: ', this.operInstance());
+    console.log('transfINSTANCE: ', this.transfInstance());
     if(this.operInstance()) return this.operInstance()?.side == OperationSide.DEP? 'dep': 'sac';
     else return 'transf'
   })

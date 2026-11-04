@@ -68,6 +68,16 @@ public class AccountController {
           return ResponseEntity.ok(this.accountService.operate(op));
      }
 
+     @PostMapping("/sacar")
+     public ResponseEntity<ExtratoDTO> sacar(@RequestBody OperationDTO op){
+          return ResponseEntity.ok(this.accountService.sacar(op));
+     }
+
+     @PostMapping("/depositar")
+     public ResponseEntity<ExtratoDTO> depositar(@RequestBody OperationDTO op){
+          return ResponseEntity.ok(this.accountService.depositar(op));
+     }
+
      @PostMapping("/transfer")
      public ResponseEntity<ExtratoDTO> transfer(@RequestBody TransferenceDTO t){
           return ResponseEntity.ok(this.accountService.transfer(t));

@@ -79,6 +79,45 @@ export class AccountService {
   }
 
   //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
+
+  sacar(op: OperationModel): Observable<Account>{
+    return this.accountHttpService.sacar(op).pipe(
+        map((response) => {
+
+          console.log("EXTRATO CRIADO: ", response);
+        
+          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
+
+          this.account.update(current => ({
+            ...current,  
+            balanco: response.saldoApos //ATUALIZA BALANCO
+          }));
+
+          return this.account(); 
+        })
+      )
+  }
+
+  depositar(op: OperationModel): Observable<Account>{
+    return this.accountHttpService.depositar(op).pipe(
+        map((response) => {
+
+          console.log("EXTRATO CRIADO: ", response);
+        
+          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
+
+          this.account.update(current => ({
+            ...current,  
+            balanco: response.saldoApos //ATUALIZA BALANCO
+          }));
+
+          return this.account(); 
+        })
+      )
+  }
+
     operar(op: OperationModel): Observable<Account>{
 
       return this.accountHttpService.operar(op).pipe(
