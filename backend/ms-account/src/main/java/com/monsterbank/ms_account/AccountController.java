@@ -63,10 +63,10 @@ public class AccountController {
                );
      }
 
-     @PostMapping("/operate")
-     public ResponseEntity<ExtratoDTO> operate(@RequestBody OperationDTO op){
-          return ResponseEntity.ok(this.accountService.operate(op));
-     }
+     // @PostMapping("/operate")
+     // public ResponseEntity<ExtratoDTO> operate(@RequestBody OperationDTO op){
+     //      return ResponseEntity.ok(this.accountService.operate(op));
+     // }
 
      @PostMapping("/sacar")
      public ResponseEntity<ExtratoDTO> sacar(@RequestBody OperationDTO op){

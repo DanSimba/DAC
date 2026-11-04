@@ -201,60 +201,60 @@ public class AccountService {
             return extDto;
     }
     
-    @Transactional
-    public ExtratoDTO operate(OperationDTO op){
+    // @Transactional
+    // public ExtratoDTO operate(OperationDTO op){
 
-            //CHECAR SE OP É NULA (VALUE == 0)
-            if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
+    //         //CHECAR SE OP É NULA (VALUE == 0)
+    //         if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
 
-            //MUDAR BALANCO
-            AccountEntity acc = this.accountRepository
-            .findByNumber(op.getAccNumber())
-            .orElseThrow(() -> new RuntimeException("Conta não encontrada!!!"));
+    //         //MUDAR BALANCO
+    //         AccountEntity acc = this.accountRepository
+    //         .findByNumber(op.getAccNumber())
+    //         .orElseThrow(() -> new RuntimeException("Conta não encontrada!!!"));
 
-            BigDecimal novoBalanco = BigDecimal.ZERO;
-            if(op.getSide() == OperationSide.DEP){
+    //         BigDecimal novoBalanco = BigDecimal.ZERO;
+    //         if(op.getSide() == OperationSide.DEP){
 
-               novoBalanco = acc.getBalanco().add(op.getValue());
-               acc.setBalanco(novoBalanco);
-            } else{
-                novoBalanco = acc.getBalanco().subtract(op.getValue());
-                //compareTo retorna -1 se for menor***
-                if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
-                acc.setBalanco(novoBalanco);
-            }
+    //            novoBalanco = acc.getBalanco().add(op.getValue());
+    //            acc.setBalanco(novoBalanco);
+    //         } else{
+    //             novoBalanco = acc.getBalanco().subtract(op.getValue());
+    //             //compareTo retorna -1 se for menor***
+    //             if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
+    //             acc.setBalanco(novoBalanco);
+    //         }
 
-            this.accountRepository.save(acc);
+    //         this.accountRepository.save(acc);
             
-            //CRIA EXTRATO
-                LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+    //         //CRIA EXTRATO
+    //             LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
 
-                Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
-                    hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
-                );
+    //             Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
+    //                 hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
+    //             );
             
-            //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
-                final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
-                ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
-                    .orElseGet(() -> new ExtratoEntity(
-                        nowId,
-                        acc.getNumber(),
-                        balancoFinal
-                    ));
+    //         //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
+    //             final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
+    //             ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
+    //                 .orElseGet(() -> new ExtratoEntity(
+    //                     nowId,
+    //                     acc.getNumber(),
+    //                     balancoFinal
+    //                 ));
                 
-                OperationEntity opEntity = new OperationEntity(op);
+    //             OperationEntity opEntity = new OperationEntity(op);
 
-                ext.addOperation(opEntity);
-                ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
-                this.extratoRepository.save(ext);
+    //             ext.addOperation(opEntity);
+    //             ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+    //             this.extratoRepository.save(ext);
 
-            //garante que a lista seja buscada 
-            Hibernate.initialize(ext.getOpers());
-            Hibernate.initialize(ext.getTransfs());
+    //         //garante que a lista seja buscada 
+    //         Hibernate.initialize(ext.getOpers());
+    //         Hibernate.initialize(ext.getTransfs());
 
-            ExtratoDTO extDto = new ExtratoDTO(ext);
-            return extDto;
-    }
+    //         ExtratoDTO extDto = new ExtratoDTO(ext);
+    //         return extDto;
+    // }
     
 
     
