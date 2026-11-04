@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { timeStamp } = require('console');
 const redis = require('redis');
 const amqp = require('amqplib');
+const { stat } = require('fs');
 
 const app = express();
 const port = 8080;
@@ -46,11 +47,22 @@ async function iniciarServidor() {
     console.log("Conectando ao RabbitMQ...")
     const rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
     rabbitmqChannel = await rabbitMqConnection.createChannel();
-    console.log("Conectado ao RabbitMQ.")
+    console.log("Conectado ao RabbitMQ.");
 
-    app.get('/', (req, res) => {
-      res.send('Olá Mundo!');
+    app.listen(port, () => {
+      console.log(`Servidor rodando em http://localhost:${port}`);
     });
+  
+  } catch (error) {
+    console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
+    process.exit(1);
+  }
+
+};
+
+  app.get('/', (req, res) => {
+    res.send('Olá Mundo!');
+  });
 
 
 // Login
@@ -107,8 +119,8 @@ app.post('/login', async (req, res) => {
 
 // Valida Token
 
-app.get("validacao", (req, res) => {
-  const authHeader = req.header["authorization"];
+app.get('/validacao', (req, res) => {
+  const authHeader = req.header("authorization");
   const token = authHeader && authHeader.split(" ")[1];
 
   if(!token) return res.status(403).json({error: "Não autorizado"});
@@ -122,48 +134,91 @@ app.get("validacao", (req, res) => {
 
 });
 
-
-
-// Encaminha o cliente recebido do front para o ms-cliente
-app.post('/solicitacoes', async (req, res) => {
-  try {
-    const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
-    });
-
-    console.log("Entrei no Post para registrar uma solicitação.");
-
-    return await encaminhaResponse(response, res);
-
-  } catch (error) {
-    console.error('Erro de rede ao acessar ms-cliente:', error.message);
-    return res.status(503).json({
-      status: 503,
-      mensagem: 'Serviço indisponível.'
-    });
+//função complementar pra validação do token
+function validaJWT(req, res, next){
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')){
+    return res.status(401).json({
+      message: 'token não informado'
+    })
   }
-});
+  const token = authHeader.split(' ')[1];
+  try {
+    const usuario = jwt.verify(
+      token, 'MONSTERBANK'
+    )
+    req.usuario = usuario
+    return next()
+  } catch (error) {
+    return res.status(401).json({
+      message: 'token inválido ou expirado'
+    })
+    
+  }
 
-// Rejeitar solicitações
-// app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
-//   try {
-//     const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(req.body)});
-//             return await encaminhaResponse(response, res);
+}
 
-//         } catch (error) {
-//             console.error('Erro de rede ao acessar ms-cliente:', error.message);
-//             return res.status(503).json({
-//                 status: 503,
-//                 mensagem: 'Serviço indisponível.'
-//             });
-//         }
-//     });
-// pq caralhos tinha 2 dessa eu não sei, mas mantem essa joça aqui 
+
+    // Encaminha o cliente recebido do front para o ms-cliente
+    app.post('/solicitacoes', async (req, res) => {
+      try {
+        const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req.body)
+        });
+
+        console.log("Entrei no Post para registrar uma solicitação.");
+
+        return await encaminhaResponse(response, res);
+
+      } catch (error) {
+        console.error('Erro de rede ao acessar ms-cliente:', error.message);
+        return res.status(503).json({
+          status: 503,
+          mensagem: 'Serviço indisponível.'
+        });
+      }
+    });
+
+    // Lista as solicitações
+    app.get('/solicitacoes', async (req, res) => {
+      try {
+        const queryParams = new URLSearchParams(req.query).toString();
+        const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
+        const response = await fetch(url);
+
+        console.log("Entrei no Get para listar todas as solicitações.");
+
+        return await encaminhaResponse(response, res);
+
+      } catch (error) {
+        console.error('Erro ao listar solicitação. ', error);
+        return res.status(503).json({
+          status: 503,
+          mensagem: 'Serviço indisponível.'
+        })
+      }
+    });
+
+  // Listar solicitações por cpf
+  app.get('/solicitacoes/:cpf', async (req, res) => {
+    try {
+      const url = `${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}`;
+      const response = await fetch(url);
+
+      console.log("Entrei no Get para listar uma solicitação");
+      
+      return await encaminhaResponse(response, res);
+
+    } catch (error) {
+        console.error('Erro de rede ao acessar ms-cliente:', error.message);
+        return res.status(503).json({
+            status: 503,
+            mensagem: 'Serviço indisponível.'
+        });
+      }
+    });
 
     // Rejeitar solicitações
     app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
@@ -238,38 +293,66 @@ app.post('/solicitacoes', async (req, res) => {
     }
   });
 
-    // Lista as solicitações
-    app.get('/solicitacoes', async (req, res) => {
-      try {
-        const queryParams = new URLSearchParams(req.query).toString();
-        const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
-        const response = await fetch(url);
-
-        console.log("Entrei no Get para listar todas as solicitações.");
-
-    console.log("Entrei no Get para listar uma solicitação");
-
-    return await encaminhaResponse(response, res);
-
-  } catch (error) {
-    console.error('Erro ao listar solicitação. ', error);
-    return res.status(503).json({
-      status: 503,
-      mensagem: 'Serviço indisponível.'
-    })
-  }
-});
+  // Rota de Polling da SAGA (R9, R13, R15, R16)
+  app.get('/jobs/:jobId/status', async (req, res) => {
+    try {
+      const jobId = req.params.jobId;
+      const jobRedis = await redisClient.get(`job:${jobId}`);
+      
+      if (!jobRedis) {
+        return res.status(404).json({
+          status: 404,
+          mensagem: 'Job não encontrado ou expirado.'
+        });
+      }
+  
+      return res.status(200).json(JSON.parse(jobRedis));
+  
+    } catch (error) {
+      console.error(`Erro ao buscar status do job ${req.params.jobId}:`, error.message);
+      return res.status(500).json({
+        status: 500, 
+        mensagem: 'Erro interno no Gateway.'
+      });
+    }
+  });
 
     // para o lado de GERENTE 
-    // get gerente
+    // get gerente com quantidade de clientes por gerente
     app.get('/gerentes', async(req, res) => {
       try{
-        const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente`);
-        await encaminhaResponse(response, res);
+        const [gerenteResponse, contaResponse] = await Promise.all([
+          fetch(`${process.env.MS_GERENTE_URL}/gerente`),
+          fetch(`${process.env.MS_ACCOUNT_URL}/account`)
+        ])
+        if(!gerenteResponse.ok || !contaResponse.ok){
+          return res.status(502).json({
+            message: 'Erro ao comunicar com os ms´s'
+          })
+        }
+
+        const gerentes = await gerenteResponse.json()
+        const contas = await contaResponse.json()
+
+        const resultado = gerentes.map(gerente =>{
+          const quantClientes = contas.filter(
+            conta => Number(conta.managerId) === Number(gerente.id)
+          ).lenght;
+          return{
+            ...gerente,
+            quantClientes
+          }
+        })
+
+        resultado.sort((a,b) =>
+          a.nome.localeCompare(b.nome, 'pt-BR')
+        )
+        return res.json(resultado)
+
       }catch (error){
-        console.error('Erro a listar gerentes-> ', error);
+        console.error('Erro ao compor dados de gerentes-> ', error);
         res.status(502).json({
-          message: 'Erro ao comunicar com ms gerente'
+          message: 'Erro ao comunicar com ms gerente e ms-account'
         });
       }
     })
@@ -357,6 +440,7 @@ app.post('/solicitacoes', async (req, res) => {
       } );
     }
 
+    //lista cliente + saldo 
     app.get('/clientes', async(req, res) => {
       try{
         const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
@@ -398,12 +482,43 @@ app.post('/solicitacoes', async (req, res) => {
       }
     });
 
- app.listen(port, () => {
-      console.log(`Servidor rodando em http://localhost:${port}`);
+    //tranferencia
+    app.post('/account/transfer', async(req, res) =>{
+      try {
+        const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/transfer`,
+          {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(req.body)
+          }
+        )
+        await encaminhaResponse(response, res)
+      } catch (error) {
+        console.error('Erro ao realizar a transferencia -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        })
+      }
     });
-  } catch(error) {
-    console.error("Falha ao iniciar os serviços do API-Gateway: ", error);
-    process.exit(1);
-  }
 
-iniciarServidor()}
+    //operação 
+    app.post('/account/operate', async(req, res) =>{
+      try {
+        const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
+          {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(req.body)
+
+          }
+        )
+        await encaminhaResponse(response,res)
+      } catch (error) {
+        console.error('Erro ao realizar a operação -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        })
+      }
+    });
+
+iniciarServidor();

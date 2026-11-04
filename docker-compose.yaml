@@ -13,6 +13,12 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck: # testando verificação do rabbitmq antes de subir o api-gateway
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
     networks:
       - monsterbank-net
 
@@ -79,16 +85,25 @@ services:
     ports:
       - "8080:8080"
     environment:
+      MS_AUTH_URL: http://ms-gerente:8081
       MS_GERENTE_URL: http://ms-gerente:8084
       MS_CLIENTE_URL: http://ms-cliente:8083
       MS_ACCOUNT_URL: http://ms-account:8080
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      - ms-gerente
-      - ms-cliente
-      - redis
-      - rabbitmq
+    depends_on: # testando verificação do rabbitmq antes de subir o api-gateway
+      ms-gerente:
+        condition: service_started
+      ms-cliente:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+          condition: service_healthy
+      # - ms-gerente
+      # - ms-cliente
+      # - redis
+      # - rabbitmq
     networks:
       - monsterbank-net
 
@@ -200,6 +215,15 @@ services:
       - "8084:8084"
     depends_on:
       - db-gerente
+      - rabbitmq
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-gerente:5432/ms-gerente
+      - SPRING_DATASOURCE_USERNAME=ms-gerente
+      - SPRING_DATASOURCE_PASSWORD=psql
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     networks:
       - monsterbank-net
 

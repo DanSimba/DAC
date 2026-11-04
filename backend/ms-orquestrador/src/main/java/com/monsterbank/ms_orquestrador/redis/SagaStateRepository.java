@@ -2,12 +2,11 @@ package com.monsterbank.ms_orquestrador.redis;
 
 import java.time.Duration;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.monsterbank.ms_orquestrador.saga.SagaState;
 
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class SagaStateRepository {
                 jsonSagaState,
                 Duration.ofHours(1)
             );
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("{} --- Erro ao serializar o estado da SAGA para o Redis", SagaStateRepository.class, e);
             throw new RuntimeException("Falha na serialização do SagaState", e);
         }
@@ -51,7 +50,7 @@ public class SagaStateRepository {
 
         try {
             return objectMapper.readValue(json, SagaState.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Erro ao desserializar o estado da SAGA do Redis", e);
             throw new RuntimeException("Falha na desserialização do SagaState", e);
         }

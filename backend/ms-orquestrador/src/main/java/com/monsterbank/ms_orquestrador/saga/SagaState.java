@@ -1,70 +1,98 @@
 package com.monsterbank.ms_orquestrador.saga;
 
-import tools.jackson.databind.JsonNode;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import tools.jackson.databind.JsonNode;
 
 public class SagaState {
     public enum Status { EM_ANDAMENTO, COMPENSANDO, CONCLUIDA, FALHA }
 
-    private final String sagaId;
-
-    @JsonIgnore
-    private final String cpf;
-    
-    @JsonProperty("payload")
-    private final JsonNode payloadInicial;
-    
-    @JsonProperty("timestamp")
-    private LocalDateTime atualizadoEm;
-    
-    private String etapaAtual;
-    private Status status;
-    private String erro;
+    private String sagaId;
     private String tipo;
-    private Integer etapaAtual_teste;
+    private Integer etapaAtual;
+    private String operacaoAtual;
+    private Status status;
+    private JsonNode payload;
+    private String timestamp;
+    private String erro;
 
-    // Comentado para teste
-    // public SagaState(String sagaId, String cpf, JsonNode payloadInicial, String etapaAtual) {
-    //     this.sagaId = sagaId;
-    //     this.cpf = cpf;
-    //     this.payloadInicial = payloadInicial;
-    //     this.etapaAtual = etapaAtual;
-    //     this.status = Status.EM_ANDAMENTO;
-    //     this.atualizadoEm = LocalDateTime.now();
-    // }
+    public SagaState() {
+        // Construtor exigido pelo Jackson ao recuperar o estado do Redis.
+    }
 
-    public SagaState(String sagaId, String tipo, JsonNode payloadInicial, Integer etapaAtual) {
+    public SagaState(
+            String sagaId,
+            String tipo,
+            JsonNode payload,
+            String operacaoAtual,
+            Integer etapaAtual
+    ) {
         this.sagaId = sagaId;
         this.tipo = tipo;
-        this.cpf = payloadInicial.get("cpf").asString();
-        this.payloadInicial = payloadInicial;
-        this.etapaAtual_teste = etapaAtual;
+        this.payload = payload;
+        this.operacaoAtual = operacaoAtual;
+        this.etapaAtual = etapaAtual;
         this.status = Status.EM_ANDAMENTO;
-        this.atualizadoEm = LocalDateTime.now();
+        atualizarTimestamp();
     }
 
-    public void avancarPara(String etapa) {
-        etapaAtual = etapa;
-        atualizadoEm = LocalDateTime.now();
+    public void avancarPara(String operacao, int etapa) {
+        this.operacaoAtual = operacao;
+        this.etapaAtual = etapa;
+        this.status = Status.EM_ANDAMENTO;
+        atualizarTimestamp();
     }
 
-    public void compensar(String etapa, String causa) {
-        etapaAtual = etapa;
-        status = Status.COMPENSANDO;
-        erro = causa;
-        atualizadoEm = LocalDateTime.now();
+    public void compensar(String operacao, int etapa, String causa) {
+        this.operacaoAtual = operacao;
+        this.etapaAtual = etapa;
+        this.status = Status.COMPENSANDO;
+        this.erro = causa;
+        atualizarTimestamp();
     }
 
-    public void concluir() { status = Status.CONCLUIDA; atualizadoEm = LocalDateTime.now(); }
-    public void falhar(String causa) { status = Status.FALHA; erro = causa; atualizadoEm = LocalDateTime.now(); }
+    public void concluir() {
+        this.status = Status.CONCLUIDA;
+        atualizarTimestamp();
+    }
+
+    public void falhar(String causa) {
+        this.status = Status.FALHA;
+        this.erro = causa;
+        atualizarTimestamp();
+    }
+
+    public boolean finalizada() {
+        return status == Status.CONCLUIDA || status == Status.FALHA;
+    }
+
+    private void atualizarTimestamp() {
+        this.timestamp = LocalDateTime.now().toString();
+    }
+
+    public String cpf() {
+        JsonNode cpf = payload == null ? null : payload.get("cpf");
+        return cpf == null ? null : cpf.asString();
+    }
+
     public String sagaId() { return sagaId; }
-    public String cpf() { return cpf; }
-    public JsonNode payloadInicial() { return payloadInicial; }
-    public String etapaAtual() { return etapaAtual; }
-    public Status status() { return status; }
-    public LocalDateTime atualizadoEm() { return atualizadoEm; }
+    public String operacaoAtual() { return operacaoAtual; }
     public String erro() { return erro; }
+
+    public String getSagaId() { return sagaId; }
+    public void setSagaId(String sagaId) { this.sagaId = sagaId; }
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
+    public Integer getEtapaAtual() { return etapaAtual; }
+    public void setEtapaAtual(Integer etapaAtual) { this.etapaAtual = etapaAtual; }
+    public String getOperacaoAtual() { return operacaoAtual; }
+    public void setOperacaoAtual(String operacaoAtual) { this.operacaoAtual = operacaoAtual; }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
+    public JsonNode getPayload() { return payload; }
+    public void setPayload(JsonNode payload) { this.payload = payload; }
+    public String getTimestamp() { return timestamp; }
+    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
+    public String getErro() { return erro; }
+    public void setErro(String erro) { this.erro = erro; }
 }

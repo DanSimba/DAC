@@ -19,7 +19,7 @@ import Decimal from 'decimal.js'
 })
 export class Autocadastro {
 
-  public salarioExibicao: string = ''; // Essa variavel só é usada pra exibir o salario formatado bonitinho na tela
+  public salarioExibicao: string = ''; //variavel pra exibir o salario formatado bonitinho na tela
   public ruaBloqueada: boolean = false;
   
   public address : Address = {
@@ -45,12 +45,13 @@ export class Autocadastro {
   public mensagemSucesso: string = '';
   public mensagemErro: string = '';
 
-  constructor(private viaCepService : Viacep,
-              private clientService : ClientService,
-              private changeDetector: ChangeDetectorRef
+  constructor(
+    private viaCepService : Viacep,
+    private clientService : ClientService,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
-  // Bloqueia caracteres não numéricos nos campos de CPF, telefone e salário.
+  // Bloqueia caracteres não numéricos pros campos de CPF, telefone e salário.
   public bloquearNaoNumeros(event: KeyboardEvent): void {
     const tecla = event.key;
     const permitido = /\d/.test(tecla) || tecla === 'Backspace' || tecla === 'Delete' || tecla === 'ArrowLeft' || tecla === 'ArrowRight' || tecla === 'Tab' || tecla === 'Shift';
@@ -62,47 +63,45 @@ export class Autocadastro {
 
   // Formata o CPF para xxx.xxx.xxx-xx
   public formatarCPF(): void {
-    let cpfNumeros = this.client.cpf.replace(/\D/g, ''); // regex só permite números
+    let cpfNumeros = this.client.cpf.replace(/\D/g, '').slice(0, 11);
     // cpfNumeros é só para apoio para pegar somente os numeros
 
-    if (cpfNumeros.length > 11) {
-      cpfNumeros = cpfNumeros.slice(0, 11);
+    if (cpfNumeros.length > 9) {
+      this.client.cpf = `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3, 6)}.${cpfNumeros.slice(6, 9)}-${cpfNumeros.slice(9)}`;
+    } else if (cpfNumeros.length > 6) {
+      this.client.cpf = `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3, 6)}.${cpfNumeros.slice(6)}`;
+    } else if (cpfNumeros.length > 3) {
+      this.client.cpf = `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3)}`;
+    } else {
+      this.client.cpf = cpfNumeros;
     }
-
-    cpfNumeros = cpfNumeros.replace(/(\d{3})(\d)/, '$1.$2');
-    cpfNumeros = cpfNumeros.replace(/(\d{3})(\d)/, '$1.$2');
-    cpfNumeros = cpfNumeros.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-
-    this.client.cpf = cpfNumeros;
-
   }
 
   // Formata o telefone com DDD e traço
   public formatarTelefone(): void {
-    let telefoneNumeros = this.client.telefone.replace(/\D/g, '');
+    let telefoneNumeros = this.client.telefone.replace(/\D/g, '').slice(0, 11);
 
-    if (telefoneNumeros.length > 11) {
-      telefoneNumeros = telefoneNumeros.slice(0, 11);
+    if (telefoneNumeros.length > 7) {
+      this.client.telefone = `(${telefoneNumeros.slice(0, 2)}) ${telefoneNumeros.slice(2, 7)}-${telefoneNumeros.slice(7)}`;
+    } else if (telefoneNumeros.length > 2) {
+      this.client.telefone = `(${telefoneNumeros.slice(0, 2)}) ${telefoneNumeros.slice(2)}`;
+    } else {
+      this.client.telefone = telefoneNumeros;
     }
-
-    telefoneNumeros = telefoneNumeros.replace(/(\d{2})(\d)/, '($1) $2');
-    telefoneNumeros = telefoneNumeros.replace(/(\d{5})(\d)/, '$1-$2');
-
-    this.client.telefone = telefoneNumeros;
   }
 
   // Formata o salário para exibição e mantém o valor numérico para envio
   public formatarSalario(): void {
-    const salarioNumeros = this.salarioExibicao.replace(/\D/g, ''); // constante de apoio que pega somente os números do salário digitado
+    const salarioNumeros = this.salarioExibicao.replace(/\D/g, ''); //pega os números do salário digitado
 
     if (!salarioNumeros) {
-      this.salarioExibicao = ''; // Esse é o valor que deve ser exibido exibido formatado
-      this.client.salario = new Decimal(0); // Esse é o valor que deve ser enviado para o backend
+      this.salarioExibicao = ''; // esse é o valor que deve ser exibido exibido formatado
+      this.client.salario = new Decimal(0); //Esse é o valor que deve ser enviado para o backend
       return;
-    } 
+    }
 
     this.client.salario = new Decimal(salarioNumeros).div(100); // Mantm o valor numerico para envio ao backend, divide por 100 pra considerar os centavos
-    this.salarioExibicao = this.client.salario.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); // formata o valor para exibição na tela, pra ficar daora R$ 1.000,00
+    this.salarioExibicao = this.client.salario.toNumber().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); // formata o valor para exibição na tela, pra ficar bonito R$ 1.000,00
   }
 
   public onSubmit(): void {

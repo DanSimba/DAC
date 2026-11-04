@@ -1,10 +1,10 @@
-package com.monsterbank.ms_account.account;
+package com.monsterbank.ms_account.Account;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.Account.AccountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
@@ -61,6 +61,17 @@ public class AccountService {
                 acc.getCreatedAt()
             )
         );
+    }
+
+    public List<AccountDTO> listaContas(){
+        return accountRepository.findAll().stream().map(
+            acc -> new AccountDTO(
+                acc.getNumber(),
+                acc.getClientCpf(),
+                acc.getBalanco(),
+                acc.getManagerId(),
+                acc.getCreatedAt())
+        ).toList();
     }
 
     public AccountDTO findAccountByCpf(String cpf){
