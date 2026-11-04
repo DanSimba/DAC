@@ -1,10 +1,10 @@
-package com.monsterbank.ms_account.Account;
+package com.monsterbank.ms_account.account;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monsterbank.ms_account.Account.AccountDTOs.AccountDTO;
+import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
@@ -16,6 +16,7 @@ import com.monsterbank.ms_account.operations.TransferenceEntity;
 import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.monsterbank.ms_account.operations.operationDTOs.*;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
+import com.monsterbank.ms_account.events.EventEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -117,33 +118,24 @@ public class AccountService {
         }
     }
 
-    
     @Transactional
-    public ExtratoDTO operate(OperationDTO op){
-
-            //CHECAR SE OP É NULA (VALUE == 0)
+    public ExtratoDTO sacar(OperationDTO op){
+         //CHECAR SE OP É NULA (VALUE == 0)
             if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
 
-            //MUDAR BALANCO
+         //MUDAR BALANCO
             AccountEntity acc = this.accountRepository
             .findByNumber(op.getAccNumber())
             .orElseThrow(() -> new RuntimeException("Conta não encontrada!!!"));
 
+        //CRIA NOVO BALANCO E SETA
             BigDecimal novoBalanco = BigDecimal.ZERO;
-            if(op.getSide() == OperationSide.DEP){
-
-               novoBalanco = acc.getBalanco().add(op.getValue());
-               acc.setBalanco(novoBalanco);
-            } else{
-                novoBalanco = acc.getBalanco().subtract(op.getValue());
-                //compareTo retorna -1 se for menor***
-                if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
-                acc.setBalanco(novoBalanco);
-            }
-
-            this.accountRepository.save(acc);
-            
-            //CRIA EXTRATO
+            novoBalanco = acc.getBalanco().subtract(op.getValue());
+            //compareTo retorna -1 se for menor***
+            if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
+            acc.setBalanco(novoBalanco);
+        
+        //CRIA EXTRATO
                 LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
 
                 Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
@@ -172,6 +164,108 @@ public class AccountService {
             ExtratoDTO extDto = new ExtratoDTO(ext);
             return extDto;
     }
+
+    @Transactional
+    public ExtratoDTO depositar(OperationDTO op){
+         //CHECAR SE OP É NULA (VALUE == 0)
+            if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
+
+         //MUDAR BALANCO
+            AccountEntity acc = this.accountRepository
+            .findByNumber(op.getAccNumber())
+            .orElseThrow(() -> new RuntimeException("Conta não encontrada!!!"));
+
+        //CRIA NOVO BALANCO
+            BigDecimal novoBalanco = BigDecimal.ZERO;
+            novoBalanco = acc.getBalanco().add(op.getValue());
+            acc.setBalanco(novoBalanco);
+        
+        this.accountRepository.save(acc);
+
+        //CRIA EXTRATO
+                LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+
+                Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
+                    hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
+                );
+            
+            //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
+                final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
+                ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
+                    .orElseGet(() -> new ExtratoEntity(
+                        nowId,
+                        acc.getNumber(),
+                        balancoFinal
+                    ));
+                
+                OperationEntity opEntity = new OperationEntity(op);
+
+                ext.addOperation(opEntity);
+                ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+                this.extratoRepository.save(ext);
+
+            //garante que a lista seja buscada 
+            Hibernate.initialize(ext.getOpers());
+            Hibernate.initialize(ext.getTransfs());
+
+            ExtratoDTO extDto = new ExtratoDTO(ext);
+            return extDto;
+    }
+    
+    // @Transactional
+    // public ExtratoDTO operate(OperationDTO op){
+
+    //         //CHECAR SE OP É NULA (VALUE == 0)
+    //         if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
+
+    //         //MUDAR BALANCO
+    //         AccountEntity acc = this.accountRepository
+    //         .findByNumber(op.getAccNumber())
+    //         .orElseThrow(() -> new RuntimeException("Conta não encontrada!!!"));
+
+    //         BigDecimal novoBalanco = BigDecimal.ZERO;
+    //         if(op.getSide() == OperationSide.DEP){
+
+    //            novoBalanco = acc.getBalanco().add(op.getValue());
+    //            acc.setBalanco(novoBalanco);
+    //         } else{
+    //             novoBalanco = acc.getBalanco().subtract(op.getValue());
+    //             //compareTo retorna -1 se for menor***
+    //             if(novoBalanco.compareTo(BigDecimal.ZERO)<0)throw new SaldoInsuficienteException();
+    //             acc.setBalanco(novoBalanco);
+    //         }
+
+    //         this.accountRepository.save(acc);
+            
+    //         //CRIA EXTRATO
+    //             LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+
+    //             Integer nowId = Integer.parseInt( //NOWID É COM BASE NO HORÁRIO DE SP***
+    //                 hoje.format(DateTimeFormatter.BASIC_ISO_DATE)
+    //             );
+            
+    //         //PESQUISA PRA VER SE JÁ EXISTE, SE NÃO CRIA NOVO
+    //             final BigDecimal balancoFinal = novoBalanco; //a func de flecha obriga que o valor seja imutavel
+    //             ExtratoEntity ext =  this.extratoRepository.findByDateIdAndAccNumber(nowId, op.getAccNumber())
+    //                 .orElseGet(() -> new ExtratoEntity(
+    //                     nowId,
+    //                     acc.getNumber(),
+    //                     balancoFinal
+    //                 ));
+                
+    //             OperationEntity opEntity = new OperationEntity(op);
+
+    //             ext.addOperation(opEntity);
+    //             ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
+    //             this.extratoRepository.save(ext);
+
+    //         //garante que a lista seja buscada 
+    //         Hibernate.initialize(ext.getOpers());
+    //         Hibernate.initialize(ext.getTransfs());
+
+    //         ExtratoDTO extDto = new ExtratoDTO(ext);
+    //         return extDto;
+    // }
     
 
     

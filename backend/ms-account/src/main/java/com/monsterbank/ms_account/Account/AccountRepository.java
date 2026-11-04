@@ -1,9 +1,9 @@
-package com.monsterbank.ms_account.Account;
+package com.monsterbank.ms_account.account;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.monsterbank.ms_account.Account.AccountEntity;
+import com.monsterbank.ms_account.account.AccountEntity;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 
 import java.util.List;
