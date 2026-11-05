@@ -26,7 +26,7 @@ public class EventEntity {
     private Long id;
 
     @Column(name = "objeto_id", nullable = false)
-    private String objetoId;
+    private String objetoId; //NUMERO DA CONTA, SÓ BOTEI ESSE NOME PQ É EXATAMENTE ASSIM QUE TA NOS REQS*****
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,7 +34,7 @@ public class EventEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private JsonNode payload;
+    private JsonNode payload;  //SALDO ATUALIZADO VEM AQUI
 
     @Column(nullable = false)
     private Long versao;
