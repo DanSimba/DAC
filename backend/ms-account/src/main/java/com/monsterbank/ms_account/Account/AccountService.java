@@ -16,7 +16,7 @@ import com.monsterbank.ms_account.operations.TransferenceEntity;
 import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.monsterbank.ms_account.operations.operationDTOs.*;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
-import com.monsterbank.ms_account.events.EventEntity;
+import com.monsterbank.ms_account.events.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,10 +38,12 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final ExtratoRepository extratoRepository;
+    private final EventService eventService;
 
-    public AccountService(AccountRepository accountRepository, ExtratoRepository extratoRepository) {
+    public AccountService(AccountRepository accountRepository, ExtratoRepository extratoRepository, EventService eventService) {
         this.accountRepository = accountRepository;
         this.extratoRepository = extratoRepository;
+        this.eventService = eventService;
     }
 
     public Optional<AccountDTO> getMockAcc(){
@@ -161,6 +163,9 @@ public class AccountService {
             Hibernate.initialize(ext.getOpers());
             Hibernate.initialize(ext.getTransfs());
 
+            //CRIA EVENTO SACAR
+            this.eventService.createSaqueEvent(opEntity, acc.getNumber());
+
             ExtratoDTO extDto = new ExtratoDTO(ext);
             return extDto;
     }
@@ -203,6 +208,9 @@ public class AccountService {
                 ext.addOperation(opEntity);
                 ext.setSaldoApos(balancoFinal); //CASO ELE ACHE O EXTRATO JA EXXISTENTE, ATUALIZA O SLADO MSM ASSIM
                 this.extratoRepository.save(ext);
+
+                //CRIA O EVENTO PASSANDO A OPERAÇÃO DE ACORDO
+                this.eventService.createDepositoEvent(opEntity, acc.getNumber());
 
             //garante que a lista seja buscada 
             Hibernate.initialize(ext.getOpers());
@@ -332,6 +340,9 @@ public class AccountService {
             Hibernate.initialize(extOrigin.getTransfs());
             Hibernate.initialize(extOrigin.getOpers());
 
+            //CRIA EVENTO TRANSFERENCE_ORIGIN
+            this.eventService.createOriginTransferenceEvent(tOriginEntity, originAcc.getNumber());
+
             //CRIA NOVO EXTRATO DO DESTINATARIO
                 final BigDecimal balancoFinalDestiny = novoBalancoDestiny;
                 ExtratoEntity extDestiny =  this.extratoRepository.findByDateIdAndAccNumber(nowId, destinyAcc.getNumber())
@@ -350,6 +361,9 @@ public class AccountService {
             //garante que a lista seja buscada 
             Hibernate.initialize(extDestiny.getTransfs());
             Hibernate.initialize(extDestiny.getOpers());
+
+            //CRIA EVENTO TRANSFERENCE_DESTINY
+            this.eventService.createDestinyTransferenceEvent(tDestinyEntity, destinyAcc.getNumber());
 
             ExtratoDTO extDto = new ExtratoDTO(extOrigin);
             return extDto;
