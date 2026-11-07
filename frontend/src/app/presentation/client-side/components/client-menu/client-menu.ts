@@ -42,7 +42,7 @@ export class ClientMenu implements OnInit{
         client_cpf: '',
         number   : '',
         balanco  : 0,
-        manager_id  : 0,
+        managerId  : 0,
         createdAt: 9999,
         lastUpdt:''
     }

@@ -18,7 +18,7 @@ export class AccountService {
       client_cpf: '',
       number   : '',
       balanco  : 0,
-      manager_id  : 0,
+      managerId  : 0,
       createdAt: 9999,
       lastUpdt:''
   })
@@ -55,7 +55,7 @@ export class AccountService {
     return this.accountHttpService.findAccountByNumber(number).pipe(
       switchMap((accountResponse) => {
         this.account.set(accountResponse);
-        //console.log("CONTA PUXADA: ", accountResponse);
+        console.log("CONTA SETADA: ", this.account());
 
         //JÁ ENCADEIA O LISTEXTRATO DIRETO AQUI DENTRO
         return this.accountHttpService.listExtratos(accountResponse.number).pipe(
@@ -71,6 +71,8 @@ export class AccountService {
             }
             
             console.log("LISTA CRUA: ", extratoResponse);
+
+            this.getLastVersion();
         
             return this.account();
           })
@@ -135,7 +137,7 @@ export class AccountService {
         this.account.update(current => ({
                 ...current,  
                 balanco: response.balanco,
-                manager_id: response.managerId,
+                managerId: response.managerId,
                 lastUpdt: response.datetime
               }));
       }
