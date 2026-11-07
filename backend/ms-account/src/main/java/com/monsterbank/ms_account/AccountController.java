@@ -2,6 +2,7 @@ package com.monsterbank.ms_account;
 
 import com.monsterbank.ms_account.account.accountDTOs.CreateAccountRequest;
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
@@ -61,7 +62,7 @@ public class AccountController {
      }
 
      @GetMapping("/getLastVersion/{number}") //PEGA ULTIMO EVENTO QUE ACONTECEU (SALDO E GERENTE ATUALIZADO)
-     public ResponseEntity<EventDTO> getLastVersion(@PathVariable("number") String number){
+     public ResponseEntity<AccountLastVersion> getLastVersion(@PathVariable("number") String number){
           return ResponseEntity.ok(this.accountService.getLastVersion(number));
      }
 

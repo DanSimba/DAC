@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import com.monsterbank.ms_account.events.EventDTO;
 import com.monsterbank.ms_account.events.EventEntity;
+import com.monsterbank.ms_account.events.EventType;
+
+import com.monsterbank.ms_account.exceptions.EventoNaoEncontrado;
 
 import java.math.BigDecimal;
 
@@ -17,11 +20,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Date;
 import java.time.ZoneId;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EventService {
@@ -35,7 +39,7 @@ public class EventService {
     public void createCreateEvent(String accNumber, Long cpfGerente){
 
         //CRIA DATETIME
-            LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+            LocalDateTime hoje = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
             DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         
             String datetime = hoje.format(formatador);
@@ -46,7 +50,7 @@ public class EventService {
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("cpfGerente", cpfGerente);
             payload.put("saldo", BigDecimal.ZERO); //INICIA COM VALOR 0
-            payload.put("dataCriacao", datetime);
+            payload.put("data", datetime);
 
         //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
         EventEntity ee = new EventEntity(accNumber, EventType.CRIADO, payload, 1L);
@@ -59,7 +63,7 @@ public class EventService {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("valor", oe.getValue());
-            payload.put("dataOperacao", oe.getDatetime());
+            payload.put("data", oe.getDatetime());
 
         //ENCONTRA A VERSÃO
         Long version = eventRepository
@@ -76,7 +80,7 @@ public class EventService {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("valor", oe.getValue());
-            payload.put("dataOperacao", oe.getDatetime());
+            payload.put("data", oe.getDatetime());
 
         //ENCONTRA A VERSÃO
         Long version = eventRepository
@@ -93,7 +97,7 @@ public class EventService {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("valor", te.getValue());
-            payload.put("dataOperacao", te.getDatetime());
+            payload.put("data", te.getDatetime());
 
         //ENCONTRA A VERSÃO
         Long version = eventRepository
@@ -110,7 +114,7 @@ public class EventService {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("valor", te.getValue());
-            payload.put("dataOperacao", te.getDatetime());
+            payload.put("data", te.getDatetime());
 
         //ENCONTRA A VERSÃO
         Long version = eventRepository
@@ -122,37 +126,79 @@ public class EventService {
         this.eventRepository.save(ee);
     }
 
-    public BigDecimal getSaldoAtual(String accNumber){
+    public void createGerenteAlteradoEvent(String accNumber, Long cpfGerente){
+        //CRIA DATETIME
+            LocalDateTime hoje = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+            DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        
+            String datetime = hoje.format(formatador);
+
+
+        //CONSTRÓI O PAYLOAD
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.put("cpfGerente", cpfGerente);
+            payload.put("data", datetime);
+
+        //ENCONTRA A VERSÃO
+        Long version = eventRepository
+        .findTopByObjetoIdOrderByVersaoDesc(accNumber)
+        .map(event -> event.getVersao() + 1) //ENCONTRA A ULTIMA VERSÃO E SOMA 1  
+        .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
+
+        //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
+        EventEntity ee = new EventEntity(accNumber, EventType.GERENTE_ALTERADO, payload, version);
+        this.eventRepository.save(ee);
+    }
+
+    public BigDecimal getBalancoAtual(String accNumber){
         //ENCONTRA A LISTA
         List<EventEntity> eventos = eventRepository.findByObjetoIdOrderByVersaoAsc(accNumber);
 
-        BigDecimal saldo = BigDecimal.ZERO;
+        BigDecimal balanco = BigDecimal.ZERO;
 
         for (EventEntity evento : eventos) {
             BigDecimal valor = evento.getPayload().get("valor").decimalValue();
 
             switch (evento.getTipo()) { 
                 case DEPOSITO:
-                    saldo = saldo.add(valor);
+                    balanco = balanco.add(valor);
                     break;
                 case TRANSFERENCIA_DESTINO:
-                    saldo = saldo.add(valor);
+                    balanco = balanco.add(valor);
                     break;
                 case SAQUE:
-                    saldo = saldo.subtract(valor);
+                    balanco = balanco.subtract(valor);
                     break;
                 case TRANSFERENCIA_ORIGEM:
-                    saldo = saldo.subtract(valor);
+                    balanco = balanco.subtract(valor);
                     break;
                 default:
                     break;
             }
         }
-        return saldo;
+        return balanco;
     }
 
-    public EventDTO getLastEvent(String number){
-        EventEntity lastEvent = this.eventRepository.findTopByObjetoIdOrderByVersaoDesc(number);
+    public Long getLastGerente(String accNumber){ //RETORNA CPF DO DO GERENTE ATUAL
+         //ENCONTRA A LISTA
+        List<EventEntity> eventos = eventRepository.findByObjetoIdOrderByVersaoAsc(accNumber);
+
+        if (eventos.isEmpty())throw new EventoNaoEncontrado();
+
+        //PRIMEIRO ITEM É O CRIADO (ACHA EM PAYLOAD E CONVERTE PRA LONG)
+        Long gerCpf = eventos.get(0).getPayload().get("cpfGerente").longValue();
+
+        for (EventEntity evento : eventos) {
+           if(evento.getTipo()== EventType.GERENTE_ALTERADO) gerCpf = evento.getPayload().get("cpfGerente").longValue();
+        }
+
+        return gerCpf;
+    }
+
+    public EventDTO getLastEvent(String accNumber){
+        EventEntity lastEvent = this.eventRepository.findTopByObjetoIdOrderByVersaoDesc(accNumber)
+        .orElseThrow(() -> new EventoNaoEncontrado());
 
         EventDTO leDTO = new EventDTO(
             lastEvent.getId(),
@@ -160,7 +206,7 @@ public class EventService {
             lastEvent.getTipo(),
             lastEvent.getPayload(),
             lastEvent.getVersao(),
-            lastEvent.getDateTime()
+            lastEvent.getDatetime()
         );
 
         return leDTO;

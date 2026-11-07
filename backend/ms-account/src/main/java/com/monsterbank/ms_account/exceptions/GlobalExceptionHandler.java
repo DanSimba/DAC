@@ -80,6 +80,20 @@ public class GlobalExceptionHandler {
                         .body(error);
         }
 
+        //EXCEÇÃO EVENTO NÃO ENCONTRADO
+        @ExceptionHandler(EventoNaoEncontrado.class)
+        public ResponseEntity<ErrorResponse> handleEventoNaoEncontrado(EventoNaoEncontrado e) {
+                ErrorResponse error = new ErrorResponse(
+                        404,
+                        "ERRO_EVENTO_NAO_ENCONTRADO",
+                        e.getMessage()
+                );
+
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(error);
+        }
+
         //TRATAMENTO GENERICO
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleGeneric(

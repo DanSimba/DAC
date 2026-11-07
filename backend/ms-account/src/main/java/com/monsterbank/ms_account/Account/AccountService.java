@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
@@ -102,8 +103,21 @@ public class AccountService {
             );
     }
 
-    public EventDTO getLastVersion(String number){
-        return this.eventService.getLastEvent(number);
+    public AccountLastVersion getLastVersion(String accNumber){
+        //PEGA ULTIMO EVENTO (PRA PREENCHER DATA)
+        EventDTO le = this.eventService.getLastEvent(accNumber);
+        LocalDateTime lastUpdt = le.getDatetime();
+
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String lastUpdtString = lastUpdt.format(formatador);
+
+        BigDecimal balancoAtual = this.eventService.getBalancoAtual(accNumber);
+
+        Long lastGerente = this.eventService.getLastGerente(accNumber);
+
+        AccountLastVersion acl = new AccountLastVersion(balancoAtual, lastGerente, lastUpdtString);
+
+        return acl;
     }
 
     public AccountDTO createAccount(String cpf, Long managerId){
