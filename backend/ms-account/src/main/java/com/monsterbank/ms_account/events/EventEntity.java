@@ -40,7 +40,7 @@ public class EventEntity {
     private Long versao;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private LocalDateTime dateTime;
 
     protected EventEntity(){}
 
@@ -54,7 +54,7 @@ public class EventEntity {
         this.tipo = tipo;
         this.payload = payload;
         this.versao = versao;
-        this.timestamp = LocalDateTime.now();
+        this.dateTime = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -77,8 +77,8 @@ public class EventEntity {
         return versao;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     public void setId(Long id) {
@@ -97,8 +97,8 @@ public class EventEntity {
         this.payload = payload;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 
     public void setVersao(Long versao) {

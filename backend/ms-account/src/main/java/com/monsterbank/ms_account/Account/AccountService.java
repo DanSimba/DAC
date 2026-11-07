@@ -102,6 +102,10 @@ public class AccountService {
             );
     }
 
+    public EventDTO getLastVersion(String number){
+        return this.eventService.getLastEvent(number);
+    }
+
     public AccountDTO createAccount(String cpf, Long managerId){
         try{
             AccountEntity acc = new AccountEntity(

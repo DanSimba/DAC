@@ -1,7 +1,10 @@
 package com.monsterbank.ms_account.events;
 
+import com.monsterbank.ms_account.events.eventDTOs.*;
+
 import org.springframework.stereotype.Service;
 
+import com.monsterbank.ms_account.events.EventDTO;
 import com.monsterbank.ms_account.events.EventEntity;
 
 import java.math.BigDecimal;
@@ -146,5 +149,20 @@ public class EventService {
             }
         }
         return saldo;
+    }
+
+    public EventDTO getLastEvent(String number){
+        EventEntity lastEvent = this.eventRepository.findTopByObjetoIdOrderByVersaoDesc(number);
+
+        EventDTO leDTO = new EventDTO(
+            lastEvent.getId(),
+            lastEvent.getObjetoId(),
+            lastEvent.getTipo(),
+            lastEvent.getPayload(),
+            lastEvent.getVersao(),
+            lastEvent.getDateTime()
+        );
+
+        return leDTO;
     }
 }

@@ -11,7 +11,7 @@ public class EventDTO {
     private EventType tipo;
     private JsonNode payload;
     private Long versao;
-    private LocalDateTime timestamp;
+    private LocalDateTime dateTime;
 
     public EventDTO() {}
 
@@ -21,14 +21,14 @@ public class EventDTO {
             EventType tipo,
             JsonNode payload,
             Long versao,
-            LocalDateTime timestamp
+            LocalDateTime dateTime
     ){
         this.id = id;
         this.objetoId = objetoId;
         this.tipo = tipo;
         this.payload = payload;
         this.versao = versao;
-        this.timestamp = timestamp;
+        this.dateTime = dateTime;
     }
 
     public Long getId() {
@@ -71,11 +71,11 @@ public class EventDTO {
         this.versao = versao;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 }
