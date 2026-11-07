@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<EventEntity, Long> {
     
-    //ENCONTRA EVENTO DA VERSÃO MAIS ANTIGA ATÉ MAIS RECENTE
+    //ENCONTRA LISTA DE EVENTOS DA VERSÃO MAIS ANTIGA ATÉ MAIS RECENTE
     List<EventEntity> findByObjetoIdOrderByVersaoAsc(String objetoId);
 
     //ENCONTRA EVENTO E VAI DIRETO PRA VERSÃO MAIS RECENTE (TOP + DESC)

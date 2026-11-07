@@ -4,6 +4,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.ErroListaDeGerenteVaziaOuNula;
@@ -105,7 +107,24 @@ public class AccountService {
             );
     }
 
-    public Long findLeastBusyManager(List<Long> idsGerentesAtivos) {
+    public AccountLastVersion getLastVersion(String accNumber){
+        //PEGA ULTIMO EVENTO (PRA PREENCHER DATA)
+        EventDTO le = this.eventService.getLastEvent(accNumber);
+        LocalDateTime lastUpdt = le.getDatetime();
+
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String lastUpdtString = lastUpdt.format(formatador);
+
+        BigDecimal balancoAtual = this.eventService.getBalancoAtual(accNumber);
+
+        Long lastGerente = this.eventService.getLastGerente(accNumber);
+
+        AccountLastVersion acl = new AccountLastVersion(balancoAtual, lastGerente, lastUpdtString);
+
+        return acl;
+    }
+  
+      public Long findLeastBusyManager(List<Long> idsGerentesAtivos) {
         if (idsGerentesAtivos == null || idsGerentesAtivos.isEmpty()) {
             throw new ErroListaDeGerenteVaziaOuNula();
         }
@@ -139,6 +158,9 @@ public class AccountService {
             );
 
             this.accountRepository.save(acc);
+
+            //CRIA EVENTO CRIADO
+            this.eventService.createCreateEvent(acc.getNumber(), managerId);
 
             AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId(), acc.getCreatedAt());
             return accDto;

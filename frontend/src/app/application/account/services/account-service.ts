@@ -18,8 +18,9 @@ export class AccountService {
       client_cpf: '',
       number   : '',
       balanco  : 0,
-      manager_id  : 0,
-      createdAt: 9999
+      managerId  : 0,
+      createdAt: 9999,
+      lastUpdt:''
   })
 
   getAccount():Account{
@@ -54,7 +55,7 @@ export class AccountService {
     return this.accountHttpService.findAccountByNumber(number).pipe(
       switchMap((accountResponse) => {
         this.account.set(accountResponse);
-        //console.log("CONTA PUXADA: ", accountResponse);
+        console.log("CONTA SETADA: ", this.account());
 
         //JÁ ENCADEIA O LISTEXTRATO DIRETO AQUI DENTRO
         return this.accountHttpService.listExtratos(accountResponse.number).pipe(
@@ -70,6 +71,8 @@ export class AccountService {
             }
             
             console.log("LISTA CRUA: ", extratoResponse);
+
+            this.getLastVersion();
         
             return this.account();
           })
@@ -86,13 +89,16 @@ export class AccountService {
 
           console.log("EXTRATO CRIADO: ", response);
         
-          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
+          // this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          // this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
 
-          this.account.update(current => ({
-            ...current,  
-            balanco: response.saldoApos //ATUALIZA BALANCO
-          }));
+          // this.account.update(current => ({
+          //   ...current,  
+          //   balanco: response.saldoApos //ATUALIZA BALANCO
+          // }));
+
+          //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO
+          this.getLastVersion();
 
           return this.account(); 
         })
@@ -105,50 +111,73 @@ export class AccountService {
 
           console.log("EXTRATO CRIADO: ", response);
         
-          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
+          //LOGICA ANTIGA QUE NÃO USA EVENTOS 
+          // this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          // this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
 
-          this.account.update(current => ({
-            ...current,  
-            balanco: response.saldoApos //ATUALIZA BALANCO
-          }));
+          // this.account.update(current => ({
+          //   ...current,  
+          //   balanco: response.saldoApos //ATUALIZA BALANCO
+          // }));
+
+          //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO
+          this.getLastVersion();
 
           return this.account(); 
         })
       )
   }
 
-    operar(op: OperationModel): Observable<Account>{
+  getLastVersion(){
+    //BUSCA 
+    this.accountHttpService.getLastVersion(this.account().number).subscribe({
+      next: (response)=>{
+        console.log("RESPONSE DO GETLASTVERSION: ", response);
 
-      return this.accountHttpService.operar(op).pipe(
-        map((response) => {
+        this.account.update(current => ({
+                ...current,  
+                balanco: response.balanco,
+                managerId: response.managerId,
+                lastUpdt: response.datetime
+              }));
+      }
+    })
+  }
 
-          console.log("EXTRATO CRIADO: ", response);
+    // operar(op: OperationModel): Observable<Account>{
+
+    //   return this.accountHttpService.operar(op).pipe(
+    //     map((response) => {
+
+    //       console.log("EXTRATO CRIADO: ", response);
         
-          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
+    //       this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+    //       this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
 
-          this.account.update(current => ({
-            ...current,  
-            balanco: response.saldoApos //ATUALIZA BALANCO
-          }));
+    //       this.account.update(current => ({
+    //         ...current,  
+    //         balanco: response.saldoApos //ATUALIZA BALANCO
+    //       }));
 
-          return this.account(); 
-        })
-      )
-    }
+    //       return this.account(); 
+    //     })
+    //   )
+    // }
   
     transferir(t: TransferenceModel): Observable<Account>{
       return this.accountHttpService.transferir(t).pipe(
         map((response) => {
           console.log("EXTRATO VINDO DO BACK: ", response)
-          this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
+          // this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
+          // this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
 
-          this.account.update(current => ({
-            ...current,  
-            balanco: response.saldoApos //ATUALIZA BALANCO
-          }));
+          // this.account.update(current => ({
+          //   ...current,  
+          //   balanco: response.saldoApos //ATUALIZA BALANCO
+          // }));
+
+          //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO
+          this.getLastVersion();
 
           return this.account(); 
         })

@@ -42,8 +42,9 @@ export class ClientMenu implements OnInit{
         client_cpf: '',
         number   : '',
         balanco  : 0,
-        manager_id  : 0,
-        createdAt: 9999
+        managerId  : 0,
+        createdAt: 9999,
+        lastUpdt:''
     }
     this.accountService.setAccount(na);
     this.router.navigate([''])

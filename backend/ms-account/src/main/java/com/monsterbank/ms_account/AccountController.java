@@ -2,6 +2,7 @@ package com.monsterbank.ms_account;
 
 import com.monsterbank.ms_account.account.accountDTOs.CreateAccountRequest;
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
 import com.monsterbank.ms_account.operations.OperationEntity;
 import com.monsterbank.ms_account.operations.TransferenceEntity;
@@ -11,6 +12,8 @@ import com.monsterbank.ms_account.account.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.monsterbank.ms_account.events.*;
 
 
 import java.util.Optional;
@@ -56,6 +59,11 @@ public class AccountController {
      @GetMapping("/findByNumber/{number}")
      public ResponseEntity<AccountDTO> findAccountByNumber(@PathVariable("number") String number){
           return ResponseEntity.ok(this.accountService.findAccountByNumber(number));
+     }
+
+     @GetMapping("/getLastVersion/{number}") //PEGA ULTIMO EVENTO QUE ACONTECEU (SALDO E GERENTE ATUALIZADO)
+     public ResponseEntity<AccountLastVersion> getLastVersion(@PathVariable("number") String number){
+          return ResponseEntity.ok(this.accountService.getLastVersion(number));
      }
 
      @GetMapping("/listExtratos/{number}")

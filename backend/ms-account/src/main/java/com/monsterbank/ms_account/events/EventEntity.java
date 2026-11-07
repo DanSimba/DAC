@@ -8,6 +8,7 @@ import org.hibernate.type.SqlTypes;
 import com.monsterbank.ms_account.events.EventType;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId; //SAO PAULOOOOOOO
 
 @Entity
 @Table( //DECLARA A TABLE DNV PRA CRIAR A CHAVE COMPOSTA
@@ -40,7 +41,7 @@ public class EventEntity {
     private Long versao;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private LocalDateTime datetime;
 
     protected EventEntity(){}
 
@@ -54,7 +55,7 @@ public class EventEntity {
         this.tipo = tipo;
         this.payload = payload;
         this.versao = versao;
-        this.timestamp = LocalDateTime.now();
+        this.datetime = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
     }
 
     public Long getId() {
@@ -77,8 +78,8 @@ public class EventEntity {
         return versao;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getDatetime() {
+        return datetime;
     }
 
     public void setId(Long id) {
@@ -97,9 +98,9 @@ public class EventEntity {
         this.payload = payload;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
+   public void setDatetime(LocalDateTime datetime) {
+       this.datetime = datetime;
+   }
 
     public void setVersao(Long versao) {
         this.versao = versao;

@@ -25,7 +25,7 @@ public class AccountEntity {
     private BigDecimal balanco;
 
     @Column(name = "manager_id", nullable = false)
-    private Long managerId;
+    private Long managerId; //CPF GERENTE
 
     @Column(name = "created_at", nullable = false)
     private Integer createdAt; //PADRAO AAAAMMDD
