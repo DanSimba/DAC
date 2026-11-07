@@ -13,24 +13,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
-public class ClienteCommandProducer {
-    private static final Logger log = LoggerFactory.getLogger(ClienteCommandProducer.class);
-    private final RabbitTemplate rabbitTemplate;
-    private final SagaCommandFactory commandFactory;
+public class ClienteCommandProducer extends BaseCommandProducer {
 
-    public ClienteCommandProducer(RabbitTemplate rabbitTemplate, SagaCommandFactory commandFactory){
-        this.rabbitTemplate = rabbitTemplate;
-        this.commandFactory = commandFactory;
+    public ClienteCommandProducer(RabbitTemplate rabbitTemplate, SagaCommandFactory commandFactory) {
+        super(rabbitTemplate, commandFactory, RabbitConfig.CLIENTE_COMMAND_QUEUE);
     }
 
-    public void enviar(SagaCommand command){
-        log.info("{} --- Enviando SAGA {}", ClienteCommandProducer.class, command);
-        rabbitTemplate.convertAndSend(RabbitConfig.CLIENTE_COMMAND_QUEUE, command);
-    }
+    // private static final Logger log = LoggerFactory.getLogger(ClienteCommandProducer.class);
+    // private final RabbitTemplate rabbitTemplate;
+    // private final SagaCommandFactory commandFactory;
 
-    public void enviar(String sagaId, String tipo, JsonNode payload) {
-        log.info("{} --- Enviando SAGA {}", ClienteCommandProducer.class, sagaId);
-        enviar(commandFactory.criar(sagaId, tipo, payload));
-    }
+    // public ClienteCommandProducer(RabbitTemplate rabbitTemplate, SagaCommandFactory commandFactory){
+    //     this.rabbitTemplate = rabbitTemplate;
+    //     this.commandFactory = commandFactory;
+    // }
+
+    // public void enviar(SagaCommand command){
+    //     log.info("{} --- Enviando SAGA {}", ClienteCommandProducer.class, command);
+    //     rabbitTemplate.convertAndSend(RabbitConfig.CLIENTE_COMMAND_QUEUE, command);
+    // }
+
+    // public void enviar(String sagaId, String tipo, JsonNode payload) {
+    //     log.info("{} --- Enviando SAGA {}", ClienteCommandProducer.class, sagaId);
+    //     enviar(commandFactory.criar(sagaId, tipo, payload));
+    // }
 
 }

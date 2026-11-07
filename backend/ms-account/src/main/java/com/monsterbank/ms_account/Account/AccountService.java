@@ -1,12 +1,13 @@
-package com.monsterbank.ms_account.account;
+package com.monsterbank.ms_account.Account;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
+import com.monsterbank.ms_account.Account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
+import com.monsterbank.ms_account.exceptions.ErroListaDeGerenteVaziaOuNula;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
 import com.monsterbank.ms_account.exceptions.MalabarismoException;
 import com.monsterbank.ms_account.exceptions.NullTransactionException;
@@ -19,6 +20,7 @@ import com.monsterbank.ms_account.operations.ExtratoRepository;
 import com.monsterbank.ms_account.events.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
@@ -26,6 +28,7 @@ import java.math.BigDecimal;
 import java.nio.file.OpenOption;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -100,6 +103,31 @@ public class AccountService {
                 acc.getManagerId(),
                 acc.getCreatedAt()
             );
+    }
+
+    public Long findLeastBusyManager(List<Long> idsGerentesAtivos) {
+        if (idsGerentesAtivos == null || idsGerentesAtivos.isEmpty()) {
+            throw new ErroListaDeGerenteVaziaOuNula();
+        }
+
+        Map<Long, Long> contasPorGerente = new HashMap<>();
+        for (Long id : idsGerentesAtivos) {
+            contasPorGerente.put(id, 0L);
+        }
+
+        List<Object[]> contagemPorGerenteAtivo = accountRepository.countContasPorGerente(idsGerentesAtivos);
+
+        for (Object[] row : contagemPorGerenteAtivo) {
+            Long gerenteId = (Long) row[0];
+            Long contaId = (Long) row[1];
+            contasPorGerente.put(gerenteId, contaId);
+        }
+
+        return contasPorGerente.entrySet().stream()
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(contasPorGerente.get(0));
+
     }
 
     public AccountDTO createAccount(String cpf, Long managerId){
