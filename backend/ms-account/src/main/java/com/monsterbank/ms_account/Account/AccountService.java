@@ -112,6 +112,9 @@ public class AccountService {
 
             this.accountRepository.save(acc);
 
+            //CRIA EVENTO CRIADO
+            this.eventService.createCreateEvent(acc.getNumber(), managerId);
+
             AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId(), acc.getCreatedAt());
             return accDto;
             

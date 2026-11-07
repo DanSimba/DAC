@@ -10,6 +10,10 @@ import com.monsterbank.ms_account.operations.TransferenceEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.Date;
+import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class EventService {
@@ -18,6 +22,25 @@ public class EventService {
 
     public EventService(EventRepository er){
         this.eventRepository = er;
+    }
+
+    public void createCreateEvent(String accNumber, Long cpfGerente){
+
+        //CRIA DATETIME
+            LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+            DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        
+            String datetime = hoje.format(formatador);
+
+
+        //CONSTRÓI O PAYLOAD
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.put("cpfGerente", cpfGerente);
+            payload.put("dataCriacao", datetime);
+
+        //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
+        EventEntity ee = new EventEntity(accNumber, EventType.CRIADO, payload, 1L);
     }
 
     public void createSaqueEvent(OperationEntity oe, String accNumber){
