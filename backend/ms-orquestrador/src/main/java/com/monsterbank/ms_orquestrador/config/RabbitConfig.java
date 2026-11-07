@@ -22,6 +22,7 @@ public class RabbitConfig {
     public static final String GERENTE_LISTAR_ATIVOS_REPLY_QUEUE = "ms.gerente.listar-ativos.reply";
     public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
     public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
+    public static final String CONTA_COMMAND_QUEUE = "ms.conta.cmd";
     public static final String CONTA_CRIAR_REPLY_QUEUE = "ms.conta.criar.reply";
 
     @Bean
@@ -74,6 +75,11 @@ public class RabbitConfig {
         return new Queue(GERENTE_LISTAR_ATIVOS_REPLY_QUEUE, true);
     }
 
+    @Bean 
+    public Queue gerenteCmdQueue() {
+        return new Queue(GERENTE_COMMAND_QUEUE, true);
+    }
+
     @Bean
     public Queue contaIdentificarGerenteReplyQueue() {
         return new Queue(CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE, true);
@@ -82,6 +88,11 @@ public class RabbitConfig {
     @Bean
     public Queue authCriarUsuarioReplyQueue() {
         return new Queue(AUTH_CRIAR_USUARIO_REPLY_QUEUE, true);
+    }
+
+    @Bean 
+    public Queue contaCmdQueue() {
+        return new  Queue(CONTA_COMMAND_QUEUE, true);
     }
 
     @Bean

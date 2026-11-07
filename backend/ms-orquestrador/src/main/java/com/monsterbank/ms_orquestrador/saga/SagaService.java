@@ -3,6 +3,7 @@ package com.monsterbank.ms_orquestrador.saga;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaCommand;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
 import com.monsterbank.ms_orquestrador.messaging.producer.AuthCommandProducer;
+import com.monsterbank.ms_orquestrador.messaging.producer.BaseCommandProducer;
 import com.monsterbank.ms_orquestrador.messaging.producer.ClienteCommandProducer;
 import com.monsterbank.ms_orquestrador.messaging.producer.ContaCommandProducer;
 import com.monsterbank.ms_orquestrador.messaging.producer.EmailCommandProducer;
@@ -291,14 +292,22 @@ public class SagaService {
         } catch (Exception e) { log.error("Erro no Job Redis"); }
     }
 
-    private void enviar(Object producer, SagaState state, String tipo, JsonNode payload) {
-        log.info("{} --- Enviando SAGA {}", SagaService.class, payload);
-        if (producer instanceof ClienteCommandProducer c) c.enviar(state.sagaId(), tipo, payload);
-        else if (producer instanceof GerenteCommandProducer g) g.enviar(state.sagaId(), tipo, payload);
-        else if (producer instanceof ContaCommandProducer ct) ct.enviar(state.sagaId(), tipo, payload);
-        else if (producer instanceof AuthCommandProducer a) a.enviar(state.sagaId(), tipo, payload);
-        else if (producer instanceof EmailCommandProducer e) e.enviar(state.sagaId(), tipo, payload);
+    private void enviar(BaseCommandProducer producer, SagaState state, String tipo, JsonNode payload) {
+        log.info("{} --- Enviando SAGA tipo {} para {}", SagaService.class.getSimpleName(), tipo, producer.getClass().getSimpleName());
+        
+        producer.enviar(state.sagaId(), tipo, payload); 
     }
+
+    // Alterando para utilizar herança a fim de evitar repetição de código
+    
+    // private void enviar(Object producer, SagaState state, String tipo, JsonNode payload) {
+    //     log.info("{} --- Enviando SAGA {}", SagaService.class, payload);
+    //     if (producer instanceof ClienteCommandProducer c) c.enviar(state.sagaId(), tipo, payload);
+    //     else if (producer instanceof GerenteCommandProducer g) g.enviar(state.sagaId(), tipo, payload);
+    //     else if (producer instanceof ContaCommandProducer ct) ct.enviar(state.sagaId(), tipo, payload);
+    //     else if (producer instanceof AuthCommandProducer a) a.enviar(state.sagaId(), tipo, payload);
+    //     else if (producer instanceof EmailCommandProducer e) e.enviar(state.sagaId(), tipo, payload);
+    // }
 
     // private void enviar(SagaState state, String tipo) {
     //     JsonNode payload = objectMapper.createObjectNode().put("cpf", state.cpf());

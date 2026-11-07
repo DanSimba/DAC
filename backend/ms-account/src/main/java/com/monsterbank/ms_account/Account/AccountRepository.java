@@ -1,6 +1,8 @@
 package com.monsterbank.ms_account.account;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.monsterbank.ms_account.account.AccountEntity;
@@ -19,4 +21,7 @@ public interface AccountRepository extends JpaRepository<AccountEntity, String> 
     Optional<AccountEntity> findByClientCpf(String clientCpf);
 
     List<AccountEntity> findAll();
+
+    @Query("SELECT a.managerId, COUNT(a) FROM AccountEntity a WHERE a.managerId IN :managerIds GROUP BY a.managerId") 
+    List<Object[]> countContasPorGerente(@Param("managerIds") List<Long> managerIds);
 }

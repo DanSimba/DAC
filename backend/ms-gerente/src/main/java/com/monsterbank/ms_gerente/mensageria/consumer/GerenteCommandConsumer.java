@@ -63,7 +63,8 @@ public class GerenteCommandConsumer {
                 }
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            log.error("{} --- Erro crítico ao processar ms.gerente.cmd", GerenteCommandConsumer.class, e);
+            enviarRespostaErro(command, replyQueue, "ERRO_INTERNO_MS_GERENTE: " + e.getMessage());
         }
     }
 
@@ -77,6 +78,19 @@ public class GerenteCommandConsumer {
         );
 
         log.info("{} --- Enviando resposta: {}", GerenteCommandConsumer.class, reply);
+        responseProducer.enviar(replyQueue, reply);
+    }
+
+    private void enviarRespostaErro(SagaCommand command, GerenteReplyQueue replyQueue, String mensagemErro) {
+        SagaReply reply = new SagaReply(
+            command.sagaId(),
+            LocalDateTime.now().toString(),
+            "ERRO",
+            mensagemErro,
+            objectMapper.createObjectNode() // Manda um JSON vazio para não dar NullPointer no Orquestrador
+        );
+
+        log.info("{} --- Enviando resposta de ERRO: {}", GerenteCommandConsumer.class, reply);
         responseProducer.enviar(replyQueue, reply);
     }
 
