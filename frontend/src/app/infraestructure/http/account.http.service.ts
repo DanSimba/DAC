@@ -6,6 +6,7 @@ import { TransferenceModel } from '../../domain/operations/models/transference.m
 import { HttpClient } from '@angular/common/http';
 import { environmentDev } from '../../../enviroments/enviroment.development';
 import { ExtratoModel } from '../../domain/operations/models/extrato.model';
+import { AccountLastVersionModel } from '../../domain/account/models/account-last-version.model';
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +42,10 @@ export class AccountHttpService {
 
   operar(op: OperationModel): Observable<ExtratoModel>{
     return this.http.post<ExtratoModel>(`${this.API_URL}/operate`, op);
+  }
+
+  getLastVersion(number: string): Observable<AccountLastVersionModel>{
+    return this.http.get<AccountLastVersionModel>(`${this.API_URL}/getLastVersion/${number}`);
   }
 
   //RETORNA A ACCOUNT COM O SALDO ATUALIZADO

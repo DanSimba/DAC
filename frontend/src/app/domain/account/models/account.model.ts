@@ -4,4 +4,5 @@ export interface Account {
     balanco  : number;
     manager_id  : number;
     createdAt: number;
+    lastUpdt: string; //ULTIMO UPDT, VEM JUNTO COM ACCLASTVERSION JA FORMATADO (DATETIME)
 }

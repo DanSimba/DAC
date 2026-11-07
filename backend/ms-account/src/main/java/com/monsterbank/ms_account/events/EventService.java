@@ -158,20 +158,26 @@ public class EventService {
         BigDecimal balanco = BigDecimal.ZERO;
 
         for (EventEntity evento : eventos) {
-            BigDecimal valor = evento.getPayload().get("valor").decimalValue();
-
             switch (evento.getTipo()) { 
                 case DEPOSITO:
-                    balanco = balanco.add(valor);
+                    balanco = balanco.add( //SÓ PROCURA 'VALOR' NO PAYLOAD SE FOR UM DESSES TIPOS, EVITA PROCURAR O VALOR CASO ELE NÃO EXISTA NO PAYLOAD (TAVA DANDO NULLPOINTEREXCEPTION)
+                        evento.getPayload().get("valor").decimalValue()
+                    );
                     break;
                 case TRANSFERENCIA_DESTINO:
-                    balanco = balanco.add(valor);
+                    balanco = balanco.add(
+                        evento.getPayload().get("valor").decimalValue()
+                    );
                     break;
                 case SAQUE:
-                    balanco = balanco.subtract(valor);
+                    balanco = balanco.subtract(
+                        evento.getPayload().get("valor").decimalValue()
+                    );
                     break;
                 case TRANSFERENCIA_ORIGEM:
-                    balanco = balanco.subtract(valor);
+                    balanco = balanco.subtract(
+                        evento.getPayload().get("valor").decimalValue()
+                    );
                     break;
                 default:
                     break;
@@ -181,19 +187,30 @@ public class EventService {
     }
 
     public Long getLastGerente(String accNumber){ //RETORNA CPF DO DO GERENTE ATUAL
-         //ENCONTRA A LISTA
-        List<EventEntity> eventos = eventRepository.findByObjetoIdOrderByVersaoAsc(accNumber);
+          List<EventEntity> eventos = eventRepository.findByObjetoIdOrderByVersaoAsc(accNumber);
 
-        if (eventos.isEmpty())throw new EventoNaoEncontrado();
+          //NÃO PODE ESTAR VAZIO PQ TEM Q TER PELO MENOS O CRIADO
+            if (eventos.isEmpty()) throw new EventoNaoEncontrado();
 
-        //PRIMEIRO ITEM É O CRIADO (ACHA EM PAYLOAD E CONVERTE PRA LONG)
-        Long gerCpf = eventos.get(0).getPayload().get("cpfGerente").longValue();
+            Long gerCpf = null;
 
-        for (EventEntity evento : eventos) {
-           if(evento.getTipo()== EventType.GERENTE_ALTERADO) gerCpf = evento.getPayload().get("cpfGerente").longValue();
-        }
+            for (EventEntity evento : eventos) {
+                if (evento.getTipo() == EventType.CRIADO||evento.getTipo() == EventType.GERENTE_ALTERADO) {
 
-        return gerCpf;
+                    var payload = evento.getPayload();//pega payload
+                    var cpfNode = payload.get("cpfGerente");//pega campo cpfgerente
+
+                    String cpfTexto = cpfNode.asText();//transforma em string, pq aparentemente é mto dificil pro javinha tranformar de payload pra Long direto
+
+                    gerCpf = Long.parseLong(cpfTexto); //tranforma em Long
+
+                    //System.out.println("CPF CONVERTIDO: " + gerCpf);
+                }
+            }
+
+            if (gerCpf == null) throw new EventoNaoEncontrado();
+
+            return gerCpf;
     }
 
     public EventDTO getLastEvent(String accNumber){

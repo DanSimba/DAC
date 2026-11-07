@@ -43,7 +43,8 @@ export class ClientMenu implements OnInit{
         number   : '',
         balanco  : 0,
         manager_id  : 0,
-        createdAt: 9999
+        createdAt: 9999,
+        lastUpdt:''
     }
     this.accountService.setAccount(na);
     this.router.navigate([''])
