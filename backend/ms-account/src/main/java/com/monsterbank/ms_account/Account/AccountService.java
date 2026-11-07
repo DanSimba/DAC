@@ -1,10 +1,9 @@
-package com.monsterbank.ms_account.Account;
+package com.monsterbank.ms_account.account;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monsterbank.ms_account.Account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.ErroListaDeGerenteVaziaOuNula;
@@ -17,6 +16,7 @@ import com.monsterbank.ms_account.operations.TransferenceEntity;
 import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.monsterbank.ms_account.operations.operationDTOs.*;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
+import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.events.*;
 
 import java.util.List;

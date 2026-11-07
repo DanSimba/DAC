@@ -1,6 +1,6 @@
 package com.monsterbank.ms_account.mensageria.consumer;
 
-import com.monsterbank.ms_account.Account.AccountService;
+import com.monsterbank.ms_account.account.AccountService;
 import com.monsterbank.ms_account.exceptions.*;
 import com.monsterbank.ms_account.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_account.mensageria.dto.SagaReply;
