@@ -65,10 +65,11 @@ public class ClienteCommandConsumer {
                 }
 
                 case "cliente.criar" ->{
+                    log.info("{} --- Fila cliente.criar", ClienteCommandConsumer.class);
                     String cpf = command.payload().get("cpf").asString();
 
+                    log.info("{} --- Encaminhando a solicitação do CPF {} para a service", ClienteCommandConsumer.class, cpf);
                     clienteService.criarCliente(cpf);
-
 
                     JsonNode payload = objectMapper.createObjectNode();
 

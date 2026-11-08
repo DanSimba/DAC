@@ -172,7 +172,7 @@ public class SagaService {
         }
         log.info("{} --- SAGA status {}", SagaService.class, reply.status());
         ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
-        payload.put("gerenteId", reply.payload().get("gerenteId").asString());
+        payload.put("gerenteId", reply.payload().get("gerenteId").asLong());
         state.setPayload(payload);
         
         log.info("{} --- Avançar saga para CRIAR_CLIENTE: {}", SagaService.class, CRIAR_CLIENTE);
@@ -182,13 +182,17 @@ public class SagaService {
     }
 
     private void processarCriacaoCliente(SagaState state, SagaReply reply) {
+        log.info("{} --- Iniciando processarCriacaoCliente()", SagaService.class);
         if (!reply.sucesso()) {
+            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
             iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
             return;
         }
+        log.info("{} --- Avançar saga para CRIAR_USUARIO: {}", SagaService.class, CRIAR_USUARIO);
         state.avancarPara(CRIAR_USUARIO, 5);
         sagaStateRepository.salvar(state);
         
+        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
         String email = state.getPayload().get("dadosSolicitacao").get("email").asString();
         ObjectNode authPayload = objectMapper.createObjectNode().put("cpf", state.cpf()).put("email", email);
         enviar(authProducer, state, CRIAR_USUARIO, authPayload);
@@ -201,6 +205,8 @@ public class SagaService {
             iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
             return;
         }
+
+        log.info("{} --- Avançar saga para CRIAR_CONTA: {}", SagaService.class, CRIAR_CONTA);
         state.avancarPara(CRIAR_CONTA, 6);
         sagaStateRepository.salvar(state);
         log.info("{} --- SAGA status {}", SagaService.class, reply.status());
@@ -287,11 +293,12 @@ public class SagaService {
         log.info("{} --- Iniciando concluirSaga()", SagaService.class);
         state.concluir();
         sagaStateRepository.salvar(state);
-        log.info("{} --- Saga {} FINALIZADA COM SUCESSO!", SagaService.class, state.sagaId());
+        log.info("{} --- Finalizando SAGA... : ID: [{}]", SagaService.class, state.sagaId());
         try {
             Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "CONCLUIDO", "resultType", "resource", "dominio", "clientes", "resourceId", state.cpf(), "erro", null);
             redisTemplate.opsForValue().set("job:" + state.sagaId(), objectMapper.writeValueAsString(job));
             redisTemplate.delete("cache:cliente:" + state.cpf()); // Invalida cache do Gateway
+            log.info("{} --- SAGA [{}] FINALIZADA COM SUCESSO!", SagaService.class, state.sagaId());
         } catch (Exception e) { log.error("Erro no Job Redis"); }
     }
 

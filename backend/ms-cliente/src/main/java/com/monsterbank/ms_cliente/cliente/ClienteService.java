@@ -10,14 +10,19 @@ import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_cliente.cliente.clienteDTOs.ClienteRetorno;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Service
 public class ClienteService {
-
+    private static final Logger log = LoggerFactory.getLogger(ClienteService.class);
+    
     @Autowired
     private ClienteRepository clienteRepository;
 
@@ -55,10 +60,12 @@ public class ClienteService {
     }
 
 
-
+    @Transactional 
     public void criarCliente(String cpf){
+        log.info("{} --- Iniciando criação de cliente para o CPF: {}", ClienteService.class, cpf);
 
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
+        log.info("{} --- Solicitação de criação encontrada. solicitacao.getCpf(): {}", ClienteService.class, solicitacao.getCpf());
 
         try{
             ClienteEntity cliente = new ClienteEntity(
@@ -75,6 +82,7 @@ public class ClienteService {
                     solicitacao.getUf()
             );
 
+            log.info("{} --- Salvando criação do cliente: CPF {}", ClienteService.class, cliente.getCpf());
             clienteRepository.save(cliente);
         }catch(ErroCriacaoClienteException e){
             throw new RuntimeException("Erro ao criar cliente", e);
