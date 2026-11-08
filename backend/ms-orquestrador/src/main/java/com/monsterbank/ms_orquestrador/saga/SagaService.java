@@ -150,24 +150,32 @@ public class SagaService {
     }
 
     private void processarListagemGerentes(SagaState state, SagaReply reply) {
+        log.info("{} --- Iniciando processarListagemGerentes()", SagaService.class);
         if (!reply.sucesso()) {
+            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
             iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
             return;
         }
+        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
+        log.info("{} --- Avançar saga para IDENTIFICAR_GERENTE: {}", SagaService.class, IDENTIFICAR_GERENTE);
         state.avancarPara(IDENTIFICAR_GERENTE, 3);
         sagaStateRepository.salvar(state);
         enviar(contaProducer, state, IDENTIFICAR_GERENTE, reply.payload());
     }
 
     private void processarIdentificacaoGerente(SagaState state, SagaReply reply) {
+        log.info("{} --- Iniciando processarIdentificacaoGerente()", SagaService.class);
         if (!reply.sucesso()) {
+            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
             iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
             return;
         }
+        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
         ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
         payload.put("gerenteId", reply.payload().get("gerenteId").asString());
         state.setPayload(payload);
         
+        log.info("{} --- Avançar saga para CRIAR_CLIENTE: {}", SagaService.class, CRIAR_CLIENTE);
         state.avancarPara(CRIAR_CLIENTE, 4);
         sagaStateRepository.salvar(state);
         enviar(clienteCommandProducer, state, CRIAR_CLIENTE, state.getPayload());
@@ -187,13 +195,15 @@ public class SagaService {
     }
 
     private void processarCriacaoUsuario(SagaState state, SagaReply reply) {
+        log.info("{} --- Iniciando processarCriacaoUsuario()", SagaService.class);
         if (!reply.sucesso()) {
+            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
             iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
             return;
         }
         state.avancarPara(CRIAR_CONTA, 6);
         sagaStateRepository.salvar(state);
-        
+        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
         String senhaClara = reply.payload().get("senha").asString(); // Senha que vem do MS Auth
         ObjectNode contaPayload = objectMapper.createObjectNode()
                 .put("cpf", state.cpf())
@@ -204,11 +214,13 @@ public class SagaService {
     }
 
     private void processarCriacaoConta(SagaState state, SagaReply reply) {
+        log.info("{} --- Iniciando processarCriacaoConta()", SagaService.class);
         if (!reply.sucesso()) {
+            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
             iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
             return;
         }
-        
+        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
         // ULTIMO PASSO: Enviar Email (Fire and forget)
         String email = state.getPayload().get("dadosSolicitacao").get("email").asString();
         String senhaClara = reply.payload().get("senhaTemporariaTransacional").asString();
@@ -272,9 +284,10 @@ public class SagaService {
     }
 
     private void concluirSaga(SagaState state) {
+        log.info("{} --- Iniciando concluirSaga()", SagaService.class);
         state.concluir();
         sagaStateRepository.salvar(state);
-        log.info("Saga {} FINALIZADA COM SUCESSO!", state.sagaId());
+        log.info("{} --- Saga {} FINALIZADA COM SUCESSO!", SagaService.class, state.sagaId());
         try {
             Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "CONCLUIDO", "resultType", "resource", "dominio", "clientes", "resourceId", state.cpf(), "erro", null);
             redisTemplate.opsForValue().set("job:" + state.sagaId(), objectMapper.writeValueAsString(job));
