@@ -4,9 +4,9 @@ import com.monsterbank.ms_account.events.eventDTOs.*;
 
 import org.springframework.stereotype.Service;
 
-import com.monsterbank.ms_account.events.EventDTO;
+import com.monsterbank.ms_account.events.eventDTOs.EventDTO;
 import com.monsterbank.ms_account.events.EventEntity;
-import com.monsterbank.ms_account.events.EventType;
+import com.monsterbank.ms_account.events.enums.EventType;
 
 import com.monsterbank.ms_account.exceptions.EventoNaoEncontrado;
 

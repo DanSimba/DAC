@@ -1,6 +1,8 @@
-package com.monsterbank.ms_account.events;
+package com.monsterbank.ms_account.events.eventDTOs;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import com.monsterbank.ms_account.events.enums.EventType;
 
 import java.time.LocalDateTime;
 

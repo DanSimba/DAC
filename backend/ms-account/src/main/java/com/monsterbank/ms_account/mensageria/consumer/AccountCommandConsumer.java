@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -66,7 +67,9 @@ public class AccountCommandConsumer {
 
                     log.info("{} --- Buscando gerentes com menos contas vinculadas", AccountCommandConsumer.class);
                     Long idGerenteMenosOcupado = accountService.findLeastBusyManager(idsGerentes);
-                    JsonNode payload = objectMapper.valueToTree(idGerenteMenosOcupado);
+
+                    ObjectNode payload = objectMapper.createObjectNode();
+                    payload.put("gerenteId", idGerenteMenosOcupado);
 
                     log.info("{} --- Enviando resposta de sucesso com o id de gerente: {}", AccountCommandConsumer.class, idGerenteMenosOcupado);
                     enviarRespostaSucesso(command, replyQueue, payload);
@@ -98,8 +101,7 @@ public class AccountCommandConsumer {
 
         );
 
-        log.info("{} --- Enviando resposta: {}", AccountCommandConsumer.class, reply);
-
+        log.info("{} --- Enviando resposta: {}, Fila: {}", AccountCommandConsumer.class, reply, replyQueue);
         responseProducer.enviar(replyQueue, reply);
     }
 

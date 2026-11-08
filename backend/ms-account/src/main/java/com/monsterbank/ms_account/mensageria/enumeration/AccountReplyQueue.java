@@ -9,6 +9,10 @@ public enum AccountReplyQueue {
             "conta.aprovar-solicitacao",
             "ms.conta.aprovar-solicitacao.reply"
     ),
+    IDENTIFICAR_GERENTE(
+        "conta.identificar-gerente",
+        "ms.conta.identificar-gerente.reply"
+    ),
     CRIAR(
             "conta.criar",
             "ms.conta.criar.reply"

@@ -1,7 +1,6 @@
 package com.monsterbank.ms_cliente.solicitacao;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RecusarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoHateoasResponse;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoResponseDTO;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.ListarSolicitacoesReturn;
 
 import org.slf4j.Logger;
@@ -55,27 +55,29 @@ public class SolicitacaoController {
 
     // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @PostMapping
-    public ResponseEntity<SolicitacaoEntity> registrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto) {
+    public ResponseEntity<SolicitacaoResponseDTO> registrarSolicitacao(@RequestBody RegistrarSolicitacaoRequest dto) {
         log.info("{} --- Entrei no Post para registrar solicitação.", SolicitacaoController.class);
         SolicitacaoEntity solicitacao = solicitacaoService.registrar(dto);
 
         URI location = URI.create("/solicitacoes/" + solicitacao.getCpf());
 
-        return ResponseEntity.created(location).body(solicitacao);
+        return ResponseEntity.created(location).body(new SolicitacaoResponseDTO(solicitacao));
     }
 
     // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @PostMapping("/{cpf}/rejeicao")
-    public ResponseEntity<SolicitacaoEntity> rejeitarSolicitacao(@PathVariable String cpf, @RequestBody RecusarSolicitacaoRequest dto) {
+    public ResponseEntity<SolicitacaoResponseDTO> rejeitarSolicitacao(@PathVariable String cpf, @RequestBody RecusarSolicitacaoRequest dto) {
         log.info("{} --- Entrei no Post para rejeitar uma solicitação.", SolicitacaoController.class);
         SolicitacaoEntity solicitacao = solicitacaoService.rejeitar(cpf, dto);
 
-        return ResponseEntity.ok(solicitacao);
+        return ResponseEntity.ok(new SolicitacaoResponseDTO(solicitacao));
     }
 
+    // Removido pois a comunicação para aprovação é direto via AMQP no API-GATEWAY
+    @Deprecated
     // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @PostMapping("/{cpf}/approvacao")
-    public ResponseEntity<SolicitacaoEntity> aprovarSolicitacao(@PathVariable String cpf) {
+    public ResponseEntity<SolicitacaoResponseDTO> aprovarSolicitacao(@PathVariable String cpf) {
         log.info("{} --- Entrei no Post para aprovar uma solicitação., SolicitacaoController.class");
         return null;
     }
