@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import com.monsterbank.ms_account.events.EventType;
+import com.monsterbank.ms_account.events.enums.EventType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId; //SAO PAULOOOOOOO

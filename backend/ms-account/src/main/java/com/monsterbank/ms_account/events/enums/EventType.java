@@ -1,4 +1,4 @@
-package com.monsterbank.ms_account.events;
+package com.monsterbank.ms_account.events.enums;
 
 public enum EventType {
     CRIADO,
