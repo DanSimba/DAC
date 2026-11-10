@@ -53,6 +53,39 @@ services:
         limits:
           memory: 384M 
 
+  #db-account-write:
+  #image: postgres:15-alpine
+  #  environment:
+  #    - POSTGRES_DB=ms-account
+  #    - POSTGRES_USER=ms-account
+  #    - POSTGRES_PASSWORD=psql
+  #  ports:
+  #    - "5434:5432"
+  #  volumes:
+  #    - pgdata-conta:/var/lib/postgresql/data
+  #  networks:
+  #    - monsterbank-net
+  #  deploy:
+  #    resources:
+  #      limits:
+  #        memory: 384M 
+  #db-account-read:
+    #image: postgres:15-alpine
+  #  environment:
+  #    - POSTGRES_DB=ms-account
+  #    - POSTGRES_USER=ms-account
+  #    - POSTGRES_PASSWORD=psql
+  #  ports:
+  #    - "5434:5432"
+  #  volumes:
+  #    - pgdata-conta:/var/lib/postgresql/data
+  #  networks:
+  #    - monsterbank-net
+  #  deploy:
+  #    resources:
+  #      limits:
+  #        memory: 384M 
+
   db-cliente:
     image: postgres:15-alpine
     environment:
