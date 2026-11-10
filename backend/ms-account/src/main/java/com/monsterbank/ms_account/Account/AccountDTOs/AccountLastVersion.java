@@ -1,4 +1,4 @@
-package com.monsterbank.ms_account.Account.AccountDTOs;
+package com.monsterbank.ms_account.account.accountDTOs;
 import java.math.BigDecimal;
 
 //MONTA A ACOCUNT ATUALIZADA COM BASE NOS EVENTOS E MANDA PRO FRONT

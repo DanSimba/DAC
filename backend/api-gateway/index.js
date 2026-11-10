@@ -34,6 +34,7 @@ async function encaminhaResponse(response, res) {
 
 let redisClient;
 let rabbitmqChannel;
+let rabbitMqConnection;
 
 async function iniciarServidor() {
   try {
@@ -45,12 +46,13 @@ async function iniciarServidor() {
     console.log("Conectado ao Redis.")
 
     console.log("Conectando ao RabbitMQ...")
-    let rabbitMqConnection;
+    //let rabbitMqConnection;
     let tentativas = 10;
 
     while (tentativas > 0) {
       try {
         rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
+        rabbitmqChannel = await rabbitMqConnection.createChannel();
         break;
       } catch (err) {
         tentativas--;

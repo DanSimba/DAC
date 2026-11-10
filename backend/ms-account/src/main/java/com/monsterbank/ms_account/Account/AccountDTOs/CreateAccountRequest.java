@@ -1,4 +1,4 @@
-package com.monsterbank.ms_account.Account.AccountDTOs;
+package com.monsterbank.ms_account.account.accountDTOs;
 
 public class CreateAccountRequest {
     private String cpf;
