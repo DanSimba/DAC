@@ -5,6 +5,7 @@ import { ManagerDTO } from '../../domain/manager/models/managerDTO';
 import { SolicitacaoCadastro } from '../../domain/manager/models/solicitacao-cadastro.model';
 import { ClienteConsulta } from '../../domain/manager/models/consulta-cliente.model';
 import { RecusarClientePayload } from '../../domain/manager/models/manager-requests.model';
+import { RelatorioCliente } from '../../domain/manager/models/relatorio-cliente.model';
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +50,10 @@ export class ManagerHttpService {
   //buscar todos os clientes na pag de consultar clientes
   listarClientes(): Observable<ClienteConsulta[]>{
     return this.http.get<ClienteConsulta[]>(`${this.api_URl}/clientes`);
+  }
+
+  listarRelatorioClientes(): Observable<RelatorioCliente[]>{
+    return this.http.get<RelatorioCliente[]>(`${this.api_URl}/relatorio-clientes`);
   }
 
 }
