@@ -1,4 +1,4 @@
-package com.monsterbank.ms_account.Account;
+package com.monsterbank.ms_account.account;
 
 import jakarta.persistence.*;
 
