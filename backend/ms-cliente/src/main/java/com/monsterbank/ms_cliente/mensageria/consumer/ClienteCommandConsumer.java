@@ -20,9 +20,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 
@@ -92,7 +92,7 @@ public class ClienteCommandConsumer {
     }
 
     private JsonNode executar(SagaCommand command) {
-        String cpf = command.payload().path("cpf").asString();
+        String cpf = command.payload().path("cpf").asText();
 
         return switch (command.tipo()) {
             case "cliente.aprovar-solicitacao" -> {
@@ -108,7 +108,7 @@ public class ClienteCommandConsumer {
                 yield objectMapper.createObjectNode();
             }
             case "cliente.marcar-nao-aprovada" -> {
-                String motivo = command.payload().path("motivo").asString();
+                String motivo = command.payload().path("motivo").asText();
                 solicitacaoService.marcarSolicitacaoComoNaoAprovada(cpf, motivo);
                 yield objectMapper.createObjectNode();
             }
