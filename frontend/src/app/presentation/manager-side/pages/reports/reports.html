@@ -1,37 +1,63 @@
-<div class="flex flex-col w-full h-full py-6 justify-start items-center gap-y-6 overflow-x-clip scrollbar-none">
+<div class="flex flex-col py-6 justify-start items-center gap-y-6 pt-14">
 
-    <h1 class="text-6xl text-white font-monster">RELATÓRIO DE CLIENTES</h1>
+  <h1 class="text-5xl text-white font-monster">RELATÓRIO DE CLIENTES</h1>
 
-    <div class="flex flex-col w-[85vw] h-[70vh] rounded-xl overflow-hidden">
-
-        <div class="flex flex-row w-full px-4 py-3 gap-x-3 items-center bg-white/10 text-white font-title text-base">
-            <span class="flex-[1.3]">CPF CLIENTE</span>
-            <span class="flex-[1.6]">NOME CLIENTE</span>
-            <span class="flex-[1.8]">E-MAIL CLIENTE</span>
-            <span class="flex-1 text-right">SALÁRIO</span>
-            <span class="flex-1 text-right">SALDO DA CONTA</span>
-            <span class="flex-[0.8] text-center">Nº CONTA</span>
-            <span class="flex-[1.3]">CPF GERENTE</span>
-            <span class="flex-[1.6]">NOME GERENTE</span>
-        </div>
-
-        <div class="flex flex-col w-full overflow-y-auto scrollbar-none">
-            @for (linha of linhasOrdenadas(); track linha.numeroConta) {
-                <div class="flex flex-row w-full px-4 py-3 gap-x-3 items-center bg-black/50 border-b border-white/10 text-white font-display text-sm">
-                    <span class="flex-[1.3]">{{linha.cpfCliente}}</span>
-                    <span class="flex-[1.6]">{{linha.nomeCliente}}</span>
-                    <span class="flex-[1.8] truncate">{{linha.emailCliente}}</span>
-                    <span class="flex-1 text-right">{{linha.salario | currency:'BRL'}}</span>
-                    <span class="flex-1 text-right">{{linha.saldoConta | currency:'BRL'}}</span>
-                    <span class="flex-[0.8] text-center">{{linha.numeroConta}}</span>
-                    <span class="flex-[1.3]">{{linha.cpfGerente}}</span>
-                    <span class="flex-[1.6]">{{linha.nomeGerente}}</span>
-                </div>
-            } @empty {
-                <div class="flex w-full justify-center py-6 text-white font-display">Nenhum cliente cadastrado ainda.</div>
-            }
-        </div>
-
+  <div class="flex flex-col w-[85vw] rounded overflow-hidden bg-black/50 border border-white/10">
+    
+    <div>
+      <table class="w-full text-left text-white font-display text-sm">
+        <thead class="bg-white/10 font-title text-base">
+          <tr>
+            <th class="p-4 font-bold text-center">CPF CLIENTE</th>
+            <th class="p-4 font-bold text-center">NOME CLIENTE</th>
+            <th class="p-4 font-bold">E-MAIL CLIENTE</th>
+            <th class="p-4 font-bold text-right">SALÁRIO</th>
+            <th class="p-4 font-bold text-center whitespace-nowrap">Nº CONTA</th>
+            <th class="p-4 font-bold text-center">SALDO DA CONTA</th>
+            <th class="p-4 font-bold text-center">CPF GERENTE</th>
+            <th class="p-4 font-bold text-center">NOME GERENTE</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/10">
+          @for (linha of getRelatorioPaginado; track linha.cpfCliente) {
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-4 text-center whitespace-nowrap">{{ linha.cpfCliente }}</td>
+              <td class="p-4 font-bold">{{ linha.nomeCliente }}</td>
+              <td class="p-4">{{ linha.emailCliente }}</td>
+              <td class="p-4 text-right whitespace-nowrap">{{ linha.salario }}</td>
+              <td class="p-4 text-center whitespace-nowrap">{{ linha.numeroConta }}</td>
+              <td class="p-4 text-right font-bold whitespace-nowrap">{{ linha.saldoConta }}</td>
+              <td class="p-4 text-center whitespace-nowrap">{{ linha.cpfGerente }}</td>
+              <td class="p-4">{{ linha.nomeGerente }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="p-8 text-center text-white/50 italic">
+                Nenhum cliente cadastrado.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
+
+    <!-- Paginação-->
+    <div class="flex justify-between items-center p-4 bg-black/40 text-white font-display">
+      <button 
+        (click)="mudarPagina(paginaAtual - 1)" 
+        [disabled]="paginaAtual === 1"
+        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed font-bold">
+        Anterior
+      </button>
+      <span>Página {{ paginaAtual }} de {{ getTotalPaginas }}</span>
+      <button 
+        (click)="mudarPagina(paginaAtual + 1)" 
+        [disabled]="paginaAtual >= getTotalPaginas"
+        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed font-bold">
+        Próximo
+      </button>
+    </div>
+
+  </div>
 
 </div>
