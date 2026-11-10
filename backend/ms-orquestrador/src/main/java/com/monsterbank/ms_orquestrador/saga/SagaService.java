@@ -206,16 +206,25 @@ public class SagaService {
             return;
         }
 
+        String senhaClara = reply.payload().get("senhaTemporariaTransacional").asString(); // Senha que vem do MS Auth
+        ObjectNode payloadState = (ObjectNode) state.getPayload();
+        payloadState.put("senhaTemporariaTransacional", senhaClara);
+        state.setPayload(payloadState);
+        log.info("{} --- SAGA state: {}", SagaService.class, state.getPayload());
+
         log.info("{} --- Avançar saga para CRIAR_CONTA: {}", SagaService.class, CRIAR_CONTA);
         state.avancarPara(CRIAR_CONTA, 6);
         sagaStateRepository.salvar(state);
+
         log.info("{} --- SAGA status {}", SagaService.class, reply.status());
-        String senhaClara = reply.payload().get("senha").asString(); // Senha que vem do MS Auth
+        log.info("{} --- SAGA reply {}", SagaService.class, reply);
+        log.info("{} --- SAGA state {}", SagaService.class, state.getPayload());
         ObjectNode contaPayload = objectMapper.createObjectNode()
                 .put("cpf", state.cpf())
                 .put("gerenteId", state.getPayload().get("gerenteId").asString())
                 .put("senhaTemporariaTransacional", senhaClara);
-                
+        
+        log.info("{} --- SAGA contaPayload {}", SagaService.class, contaPayload);
         enviar(contaProducer, state, CRIAR_CONTA, contaPayload);
     }
 
@@ -226,15 +235,27 @@ public class SagaService {
             iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
             return;
         }
+        
         log.info("{} --- SAGA status {}", SagaService.class, reply.status());
+        log.info("{} --- SAGA reply {}", SagaService.class, reply);
+        log.info("{} --- SAGA state {}", SagaService.class, state.getPayload());
         // ULTIMO PASSO: Enviar Email (Fire and forget)
         String email = state.getPayload().get("dadosSolicitacao").get("email").asString();
-        String senhaClara = reply.payload().get("senhaTemporariaTransacional").asString();
-        ObjectNode emailPayload = objectMapper.createObjectNode().put("email", email).put("senha", senhaClara);
+        String senhaClara = state.getPayload().get("senhaTemporariaTransacional").asString();
         
+        log.info("{} --- SAGA email: {}", SagaService.class, email);
+        log.info("{} --- SAGA senhaClara: {}", SagaService.class, senhaClara);
+
+        ObjectNode emailPayload = objectMapper.createObjectNode()
+            .put("email", email)
+            .put("senha", senhaClara);
+        
+        log.info("{} --- SAGA emailPayload: {}", SagaService.class, emailPayload);
         enviar(emailProducer, state, ENVIAR_SENHA, emailPayload);
         concluirSaga(state);
     }
+
+    
 
     // private void processarCriacao(SagaState state, SagaReply reply) {
     //     if (reply.sucesso()) {
@@ -295,11 +316,21 @@ public class SagaService {
         sagaStateRepository.salvar(state);
         log.info("{} --- Finalizando SAGA... : ID: [{}]", SagaService.class, state.sagaId());
         try {
-            Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "CONCLUIDO", "resultType", "resource", "dominio", "clientes", "resourceId", state.cpf(), "erro", null);
+            //Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "CONCLUIDO", "resultType", "resource", "dominio", "clientes", "resourceId", state.cpf(), "erro", null);
+            ObjectNode job = objectMapper.createObjectNode()
+                .put("jobId", state.sagaId())
+                .put("status", "CONCLUIDO")
+                .put("resultType", "resource")
+                .put("dominio", "clientes")
+                .put("resourceId", state.cpf())
+                .putNull("erro");
+
+            log.info("{} --- Finalizando SAGA... : job: [{}]", SagaService.class, job);
+
             redisTemplate.opsForValue().set("job:" + state.sagaId(), objectMapper.writeValueAsString(job));
             redisTemplate.delete("cache:cliente:" + state.cpf()); // Invalida cache do Gateway
             log.info("{} --- SAGA [{}] FINALIZADA COM SUCESSO!", SagaService.class, state.sagaId());
-        } catch (Exception e) { log.error("Erro no Job Redis"); }
+        } catch (Exception e) { log.error("Erro no Job Redis", e); }
     }
 
     private void falharSaga(SagaState state, String erro) {
@@ -313,8 +344,8 @@ public class SagaService {
     }
 
     private void enviar(BaseCommandProducer producer, SagaState state, String tipo, JsonNode payload) {
-        log.info("{} --- Enviando SAGA tipo {} para {}", SagaService.class.getSimpleName(), tipo, producer.getClass().getSimpleName());
-        
+        log.info("{} --- Enviando SAGA tipo {} para {}", SagaService.class, tipo, producer.getClass().getSimpleName());
+        log.info("{} --- Enviando SAGA payload: {}", SagaService.class, payload);
         producer.enviar(state.sagaId(), tipo, payload); 
     }
 

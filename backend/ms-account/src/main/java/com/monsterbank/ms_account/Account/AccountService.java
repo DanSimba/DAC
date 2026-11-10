@@ -6,10 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
+import com.monsterbank.ms_account.account.AccountRepository;
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.ErroListaDeGerenteVaziaOuNula;
 import com.monsterbank.ms_account.exceptions.SaldoInsuficienteException;
+import com.monsterbank.ms_account.mensageria.consumer.AccountCommandConsumer;
 import com.monsterbank.ms_account.exceptions.MalabarismoException;
 import com.monsterbank.ms_account.exceptions.NullTransactionException;
 import com.monsterbank.ms_account.operations.ExtratoEntity;
@@ -19,7 +21,6 @@ import com.monsterbank.ms_account.operations.enums.OperationSide;
 import com.monsterbank.ms_account.operations.operationDTOs.*;
 import com.monsterbank.ms_account.operations.ExtratoRepository;
 import com.monsterbank.ms_account.events.eventDTOs.EventDTO;
-import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.events.*;
 
 import java.util.List;
@@ -39,8 +40,12 @@ import java.time.format.DateTimeFormatter;
 
 import org.hibernate.Hibernate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class AccountService {
+private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
     private final AccountRepository accountRepository;
     private final ExtratoRepository extratoRepository;
@@ -150,7 +155,9 @@ public class AccountService {
 
     }
 
+    @Transactional
     public AccountDTO createAccount(String cpf, Long managerId){
+        log.info("{} --- Iniciando criação de conta para o CPF: {} e ID gerente: {}", AccountService.class, cpf, managerId);
         try{
             AccountEntity acc = new AccountEntity(
                 cpf,
@@ -158,8 +165,10 @@ public class AccountService {
                 managerId
             );
 
+            log.info("{} --- Salvando conta", AccountService.class);
             this.accountRepository.save(acc);
 
+            log.info("{} --- Criando evento ", AccountService.class);
             //CRIA EVENTO CRIADO
             this.eventService.createCreateEvent(acc.getNumber(), managerId);
 
@@ -167,6 +176,7 @@ public class AccountService {
             return accDto;
             
         } catch (Exception e) {
+            log.error("{} --- Erro ao criar conta.", AccountService.class);
             throw new ErroCriacaoAccountException();
         }
     }

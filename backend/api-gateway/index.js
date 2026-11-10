@@ -34,6 +34,7 @@ async function encaminhaResponse(response, res) {
 
 let redisClient;
 let rabbitmqChannel;
+let rabbitMqConnection;
 
 async function iniciarServidor() {
   try {
@@ -45,9 +46,24 @@ async function iniciarServidor() {
     console.log("Conectado ao Redis.")
 
     console.log("Conectando ao RabbitMQ...")
-    const rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
-    rabbitmqChannel = await rabbitMqConnection.createChannel();
-    console.log("Conectado ao RabbitMQ.");
+    //let rabbitMqConnection;
+    let tentativas = 10;
+
+    while (tentativas > 0) {
+      try {
+        rabbitMqConnection = await amqp.connect(process.env.RABBITMQ_URL);
+        rabbitmqChannel = await rabbitMqConnection.createChannel();
+        break;
+      } catch (err) {
+        tentativas--;
+        console.log(`RabbitMQ indisponível, tentando novamente em 3 segundos... (${tentativas} tentativas restantes)`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    }
+
+    if (!rabbitMqConnection) {
+      throw new Error("Não foi possível conectar ao RabbitMQ após várias tentativas.");
+    }
 
     app.listen(port, () => {
       console.log(`Servidor rodando em http://localhost:${port}`);

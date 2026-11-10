@@ -1,6 +1,7 @@
 package com.monsterbank.ms_orquestrador.messaging.consumer;
 
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
+import com.monsterbank.ms_orquestrador.redis.SagaStateRepository;
 import com.monsterbank.ms_orquestrador.saga.SagaService;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
@@ -13,7 +14,8 @@ class SagaReplyConsumerTest {
     @Test
     void deveIdentificarOperacaoPelaFilaDeResposta() {
         SagaService sagaService = mock(SagaService.class);
-        SagaReplyConsumer consumer = new SagaReplyConsumer(sagaService);
+        SagaStateRepository sagaStateRepository = mock(SagaStateRepository.class);
+        SagaReplyConsumer consumer = new SagaReplyConsumer(sagaService, sagaStateRepository);
         SagaReply reply = new SagaReply(
                 "saga-1",
                 "2026-09-29T01:00:00",
