@@ -92,6 +92,10 @@ services:
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on: # testando verificação do rabbitmq antes de subir o api-gateway
+      ms-auth:
+        condition: service_started
+      ms-account:
+        condition: service_started
       ms-gerente:
         condition: service_started
       ms-cliente:
@@ -99,7 +103,9 @@ services:
       redis:
         condition: service_started
       rabbitmq:
-          condition: service_healthy
+        condition: service_healthy
+      ms-orquestrador:
+        condition: service_started
       # - ms-gerente
       # - ms-cliente
       # - redis
