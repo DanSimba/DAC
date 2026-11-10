@@ -12,6 +12,6 @@ import tools.jackson.databind.JsonNode;
 public class AuthCommandProducer extends BaseCommandProducer {
 
     public AuthCommandProducer(RabbitTemplate rabbitTemplate, SagaCommandFactory commandFactory) {
-        super(rabbitTemplate, commandFactory, null);
+        super(rabbitTemplate, commandFactory, RabbitConfig.AUTH_COMMAND_QUEUE);
     }
 }
