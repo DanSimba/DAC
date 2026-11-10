@@ -106,15 +106,18 @@ public class SolicitacaoEntity {
     }
 
     public void rejeitar(String motivo){
+        if (motivo == null || motivo.isBlank()) {
+            throw new com.monsterbank.ms_cliente.exception.MotivoInvalidoException();
+        }
         this.status = StatusSolicitacao.NAO_APROVADO;
-        this.motivo = motivo;
+        this.motivo = motivo.trim();
         this.dataProcessamento = LocalDateTime.now();
     }
 
     public void retornarParaPendente(){
         this.status = StatusSolicitacao.PENDENTE;
         this.motivo = null;
-        this.dataProcessamento = LocalDateTime.now();
+        this.dataProcessamento = null;
     }
 
     public Endereco getEndereco(){

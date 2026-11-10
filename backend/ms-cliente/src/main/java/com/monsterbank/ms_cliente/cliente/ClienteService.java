@@ -6,9 +6,9 @@ import com.monsterbank.ms_cliente.exception.ErroCriacaoClienteException;
 import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoEntity;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoRepository;
-import com.monsterbank.ms_cliente.solicitacao.SolicitacaoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,39 +23,34 @@ import java.util.List;
 public class ClienteService {
     private static final Logger log = LoggerFactory.getLogger(ClienteService.class);
     
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+    private final SolicitacaoRepository solicitacaoRepository;
+    private final ClienteModelAssembler clienteModelAssembler;
 
-    @Autowired
-    private SolicitacaoService solicitacaoService;
-
-    @Autowired 
-    private SolicitacaoRepository solicitacaoRepository;
+    public ClienteService(
+            ClienteRepository clienteRepository,
+            SolicitacaoRepository solicitacaoRepository,
+            ClienteModelAssembler clienteModelAssembler
+    ) {
+        this.clienteRepository = clienteRepository;
+        this.solicitacaoRepository = solicitacaoRepository;
+        this.clienteModelAssembler = clienteModelAssembler;
+    }
 
     public List<ClienteRetorno> listarClientes(String field, Integer page){
-        PageRequest peageable = PageRequest.of(page, 50);
+        PageRequest peageable = PageRequest.of(page, 50, Sort.by(Sort.Direction.ASC, "nome"));
         if(field == null || field.isBlank()){
             List<ClienteEntity> lista = clienteRepository.findAll(peageable).getContent();
 
             return lista.stream()
-                    .map(cliente -> new ClienteRetorno(
-                            cliente.getCpf(),
-                            cliente.getNome(),
-                            cliente.getCidade(),
-                            cliente.getUf(),
-                            getSalario(cliente.getCpf())
-                    )).toList();
+                    .map(clienteModelAssembler::toModel)
+                    .toList();
 
         }
 
         return clienteRepository.findByCpfContainingOrNomeContaining(field, field, peageable)
-                .map(cliente -> new ClienteRetorno(
-                        cliente.getCpf(),
-                        cliente.getNome(),
-                        cliente.getCidade(),
-                        cliente.getUf(),
-                        getSalario(cliente.getCpf())
-                )).toList();
+                .map(clienteModelAssembler::toModel)
+                .toList();
 
     }
 
@@ -63,6 +58,10 @@ public class ClienteService {
     @Transactional 
     public void criarCliente(String cpf){
         log.info("{} --- Iniciando criação de cliente para o CPF: {}", ClienteService.class, cpf);
+
+        if (clienteRepository.findByCpf(cpf).isPresent()) {
+            return;
+        }
 
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
         log.info("{} --- Solicitação de criação encontrada. solicitacao.getCpf(): {}", ClienteService.class, solicitacao.getCpf());
@@ -84,40 +83,27 @@ public class ClienteService {
 
             log.info("{} --- Salvando criação do cliente: CPF {}", ClienteService.class, cliente.getCpf());
             clienteRepository.save(cliente);
-        }catch(ErroCriacaoClienteException e){
-            throw new RuntimeException("Erro ao criar cliente", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new ErroCriacaoClienteException();
         }
     }
 
+    @Transactional
     public void removerCliente(String cpf){
-        ClienteEntity cliente = clienteRepository.findByCpf(cpf).orElseThrow(() -> new ClienteNaoEncontradoException());
-
-        clienteRepository.delete(cliente);
-    }
-
-
-    private String getSalario(String cpf){
-        //consulta conta
-        return "12312321";
+        clienteRepository.findByCpf(cpf).ifPresent(clienteRepository::delete);
     }
 
     public String findNameByCpf(String cpf){
         ClienteEntity cliente = clienteRepository.findByCpf(cpf)
         .orElseThrow(() -> new ClienteNaoEncontradoException());
 
-        return cliente.getCpf();
+        return cliente.getNome();
     }
     
     public ClienteRetorno findByCpf(String cpf){
         ClienteEntity cliente = clienteRepository.findByCpf(cpf)
         .orElseThrow(() -> new ClienteNaoEncontradoException());
 
-        return new ClienteRetorno(
-                        cliente.getCpf(),
-                        cliente.getNome(),
-                        cliente.getCidade(),
-                        cliente.getUf(),
-                        getSalario(cliente.getCpf())
-                );
+        return clienteModelAssembler.toModel(cliente);
     }
 }

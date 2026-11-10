@@ -1,6 +1,6 @@
 package com.monsterbank.ms_cliente.mensageria.dto;
 
-import tools.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public record SagaCommand(
         String sagaId,

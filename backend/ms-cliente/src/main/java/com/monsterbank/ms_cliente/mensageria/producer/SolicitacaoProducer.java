@@ -7,16 +7,14 @@ import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitac
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
-import java.util.Map;
 
 @Component
 public class SolicitacaoProducer {
@@ -47,7 +45,7 @@ public class SolicitacaoProducer {
             String timestampString = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString();
         
             SagaCommand command = new SagaCommand(
-                UUID.randomUUID().toString(),
+                null,
                 COMMAND_TYPE,
                 timestampString,
                 payload
