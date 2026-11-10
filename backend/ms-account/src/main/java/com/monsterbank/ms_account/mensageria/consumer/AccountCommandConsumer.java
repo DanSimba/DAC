@@ -1,6 +1,7 @@
 package com.monsterbank.ms_account.mensageria.consumer;
 
 import com.monsterbank.ms_account.account.AccountService;
+import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.exceptions.*;
 import com.monsterbank.ms_account.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_account.mensageria.dto.SagaReply;
@@ -73,6 +74,20 @@ public class AccountCommandConsumer {
 
                     log.info("{} --- Enviando resposta de sucesso com o id de gerente: {}", AccountCommandConsumer.class, idGerenteMenosOcupado);
                     enviarRespostaSucesso(command, replyQueue, payload);
+                }
+
+                case "conta.criar" -> {
+                    log.info("{} --- Fila conta.identificar-gerente", AccountCommandConsumer.class);
+
+                    String cpf = command.payload().get("cpf").asString();
+                    Long managerId = command.payload().get("gerenteId").asLong();
+
+                    AccountDTO account = accountService.createAccount(cpf, managerId);
+
+                    JsonNode payload = objectMapper.valueToTree(account);
+                    log.info("{} --- Enviando resposta de sucesso com dados da conta. Payload: {}", AccountCommandConsumer.class, payload);
+                    enviarRespostaSucesso(command, replyQueue, payload);
+
                 }
 
                 default -> {

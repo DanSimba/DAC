@@ -3,16 +3,25 @@ package com.monsterbank.ms_orquestrador.messaging.consumer;
 import com.monsterbank.ms_orquestrador.config.RabbitConfig;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
 import com.monsterbank.ms_orquestrador.saga.SagaService;
+import com.monsterbank.ms_orquestrador.saga.SagaState;
+import com.monsterbank.ms_orquestrador.redis.SagaStateRepository;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class SagaReplyConsumer {
+    private static final Logger log = LoggerFactory.getLogger(SagaReplyConsumer.class);
 
     private final SagaService sagaService;
+    private final SagaStateRepository sagaStateRepository;
 
-    public SagaReplyConsumer(SagaService sagaService) {
+    public SagaReplyConsumer(SagaService sagaService, SagaStateRepository sagaStateRepository) {
         this.sagaService = sagaService;
+        this.sagaStateRepository = sagaStateRepository;
     }
 
     @RabbitListener(queues = RabbitConfig.CLIENTE_APROVAR_SOLICITACAO_REPLY_QUEUE)
