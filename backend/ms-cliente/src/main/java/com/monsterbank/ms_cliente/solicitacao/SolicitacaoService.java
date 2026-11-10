@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class SolicitacaoService {
@@ -27,10 +26,16 @@ public class SolicitacaoService {
 
     private final SolicitacaoRepository solicitacaoRepository;
     private final SolicitacaoProducer solicitacaoProducer;
+    private final SolicitacaoModelAssembler solicitacaoModelAssembler;
 
-    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, SolicitacaoProducer solicitacaoProducer) {
+    public SolicitacaoService(
+            SolicitacaoRepository solicitacaoRepository,
+            SolicitacaoProducer solicitacaoProducer,
+            SolicitacaoModelAssembler solicitacaoModelAssembler
+    ) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.solicitacaoProducer = solicitacaoProducer;
+        this.solicitacaoModelAssembler = solicitacaoModelAssembler;
     }
 
     @Transactional
@@ -39,7 +44,6 @@ public class SolicitacaoService {
 
         validarPorCPF(dto.cpf());
         validarEmailSolicitado(dto.email());
-        validarEmailCadastrado(dto.email());
 
         BigDecimal salario;
         
@@ -57,7 +61,7 @@ public class SolicitacaoService {
         SolicitacaoEntity solicitacao = new SolicitacaoEntity(
                 dto.cpf(),
                 dto.nome(),
-                dto.email(),
+                dto.email().trim().toLowerCase(),
                 dto.telefone(),
                 salario,
                 dto.endereco().logradouro(),
@@ -85,6 +89,10 @@ public class SolicitacaoService {
 
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
 
+        if (solicitacao.getStatus() == StatusSolicitacao.APROVADO) {
+            return toSagaDto(solicitacao);
+        }
+
         if(solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
             log.error("{} --- A solicitação não está pendente: {} ", SolicitacaoService.class, solicitacao.getStatus());
             throw new SolicitacaoNaoPendenteException();
@@ -97,14 +105,7 @@ public class SolicitacaoService {
         log.info("{} --- Salvando solicitação para o CPF {}", SolicitacaoService.class, solicitacao.getCpf());
         solicitacaoRepository.save(solicitacao);
 
-        return new SolicitacaoSagaDTO(
-                solicitacao.getNome(),
-                solicitacao.getEmail(),
-                solicitacao.getCpf(),
-                solicitacao.getTelefone(),
-                solicitacao.getSalario().toString(), // tomar cuidado com excep
-                solicitacao.getEndereco()
-        );
+        return toSagaDto(solicitacao);
     }
 
     @Transactional
@@ -147,33 +148,7 @@ public class SolicitacaoService {
             lista = solicitacaoRepository.findAll(pageable).getContent();
         }
 
-        List<SolicitacaoHateoasResponse> listaHateoas = lista.stream()
-            .map(solicitacao -> {
-                String baseApi = "http://localhost:8080/solicitacoes/";
-                Map<String, Map<String, String>> links = new java.util.HashMap<>();
-                
-                links.put("self", Map.of("href", baseApi + solicitacao.getCpf()));
-
-                if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
-                    links.put("aprovacao", Map.of("href", baseApi + solicitacao.getCpf() + "/aprovacao"));
-                    links.put("rejeicao", Map.of("href", baseApi + solicitacao.getCpf() + "/rejeicao"));
-                }
-
-                return new SolicitacaoHateoasResponse(
-                    solicitacao.getCpf(),
-                    solicitacao.getNome(),
-                    solicitacao.getEmail(),
-                    solicitacao.getTelefone(),
-                    solicitacao.getSalario().toString(),
-                    solicitacao.getEndereco(),
-                    solicitacao.getStatus().toString(),
-                    solicitacao.getMotivo(),
-                    solicitacao.getDataProcessamento() != null ? solicitacao.getDataProcessamento().toString() : null,
-                    links
-                );
-            }).toList();
-        
-        return new ListarSolicitacoesReturn(listaHateoas);
+        return solicitacaoModelAssembler.toListModel(lista);
     }
 
     public SolicitacaoHateoasResponse getSolicitacaoByCpf(String cpf){
@@ -181,44 +156,22 @@ public class SolicitacaoService {
 
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
         
-        String baseApi = "http://localhost:8080/solicitacoes/";
-        Map<String, Map<String, String>> links = new java.util.HashMap<>();
-        
-        links.put("self", Map.of("href", baseApi + solicitacao.getCpf()));
-
-        if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
-            links.put("aprovacao", Map.of("href", baseApi + solicitacao.getCpf() + "/aprovacao"));
-            links.put("rejeicao", Map.of("href", baseApi + solicitacao.getCpf() + "/rejeicao"));
-        }
-
-        return new SolicitacaoHateoasResponse(
-            solicitacao.getCpf(),
-            solicitacao.getNome(),
-            solicitacao.getEmail(),
-            solicitacao.getTelefone(),
-            solicitacao.getSalario().toString(),
-            solicitacao.getEndereco(),
-            solicitacao.getStatus().toString(),
-            solicitacao.getMotivo(),
-            solicitacao.getDataProcessamento() != null ? solicitacao.getDataProcessamento().toString() : null,
-            links
-        );
+        return solicitacaoModelAssembler.toModel(solicitacao);
     }
 
     private void validarPorCPF(String cpf){
+        if (!CpfUtils.validar(cpf)) {
+            throw new CpfInvalidoException();
+        }
         if(solicitacaoRepository.findByCpf(cpf).isPresent()){
             throw new CpfUtilizadoException();
         }
     }
     
     private void validarEmailSolicitado(String email){
-        if(solicitacaoRepository.findByEmail(email).isPresent()){
+        if(solicitacaoRepository.findByEmailIgnoreCase(email.trim()).isPresent()){
             throw new EmailSolicitadoException();
         }
-    }
-
-    private void validarEmailCadastrado(String email){
-        //chama AUTH
     }
 
 
@@ -226,19 +179,36 @@ public class SolicitacaoService {
 
     @Transactional
     public void retornarSolicitacaoParaPendente(String cpf){
-        // SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
-        
+
+        if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
+            return;
+        }
+
         solicitacao.retornarParaPendente();
         solicitacaoRepository.save(solicitacao);
     }
 
     @Transactional
     public void marcarSolicitacaoComoNaoAprovada(String cpf, String motivo){
-        // SolicitacaoEntity solicitacao = getSolicitacaoByCpf(cpf);
         SolicitacaoEntity solicitacao = solicitacaoRepository.findByCpf(cpf).orElseThrow(() -> new SolicitacaoNaoEncontradaException());
-        
+
+        if (solicitacao.getStatus() == StatusSolicitacao.NAO_APROVADO && motivo.equals(solicitacao.getMotivo())) {
+            return;
+        }
+
         solicitacao.rejeitar(motivo);
         solicitacaoRepository.save(solicitacao);
+    }
+
+    private SolicitacaoSagaDTO toSagaDto(SolicitacaoEntity solicitacao) {
+        return new SolicitacaoSagaDTO(
+                solicitacao.getNome(),
+                solicitacao.getEmail(),
+                solicitacao.getCpf(),
+                solicitacao.getTelefone(),
+                solicitacao.getSalario().toString(),
+                solicitacao.getEndereco()
+        );
     }
 }

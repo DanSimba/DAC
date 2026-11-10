@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface SolicitacaoRepository extends JpaRepository<SolicitacaoEntity, String> {
 
     Optional<SolicitacaoEntity> findByCpf(String cpf);
-    Optional<SolicitacaoEntity> findByEmail(String email);
+    Optional<SolicitacaoEntity> findByEmailIgnoreCase(String email);
     Page<SolicitacaoEntity> findByStatus(StatusSolicitacao status, Pageable pageable);
 }

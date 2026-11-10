@@ -4,9 +4,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e){
+        String mensagem = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getField() + ": " + Objects.requireNonNullElse(error.getDefaultMessage(), "inválido"))
+                .orElse("Requisição inválida");
+        ErrorResponse erro = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), mensagem);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+    }
 
     @ExceptionHandler(CpfUtilizadoException.class)
     public ResponseEntity<ErrorResponse> handleCpfSolicitado(CpfUtilizadoException e){

@@ -17,11 +17,6 @@ public class OrquestradorResponseProducer {
 
 
     public void enviar(ClienteReplyQueue replyQueue, SagaReply reply){
-
-        rabbitTemplate.convertAndSend(
-                replyQueue.queueName(),
-                reply
-        );
-
+        rabbitTemplate.convertAndSend(replyQueue.queueName(), reply);
     }
 }
