@@ -35,7 +35,7 @@ public class RabbitConfig {
     public static final String CONTA_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.conta.compensar-criacao.reply";
     public static final String CONTA_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.conta.comando-desconhecido.reply";
 
-    public static final String ENVIAR_SENHA = "email.enviar-senha";
+    public static final String EMAIL_COMMAND_QUEUE = "ms.email.cmd";
 
     @Bean
     public Queue sagaCmdQueue(){
@@ -143,8 +143,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue emailEnviarSenhaQueue() {
-        return new Queue(ENVIAR_SENHA, true);
+    public Queue emailCmdQueue() {
+        return new Queue(EMAIL_COMMAND_QUEUE, true);
     }
 
     @Bean

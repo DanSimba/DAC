@@ -20,9 +20,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String rementente;
 
-    public String sendEmailText(String dest, String assunto, String message){
+    public void sendEmailText(String dest, String assunto, String message){
         try{
-            log.info("Iniciando envio de e-mail.");
+            log.info("{} --- Iniciando envio de e-mail.", EmailService.class);
 
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setFrom(rementente);
@@ -31,29 +31,35 @@ public class EmailService {
             simpleMailMessage.setText(message);
             javaMailSender.send(simpleMailMessage);
 
-            log.info("Enviando e-mail destinatario: {}", dest);
-            log.info("Enviando e-mail assunto: {}", assunto);
-            log.info("Enviando e-mail mensagem: {}", message);
-            return "Enviado";
+            log.info("{} --- Enviando e-mail destinatario: {}", EmailService.class, dest);
+            log.info("{} --- Enviando e-mail assunto: {}", EmailService.class, assunto);
+            log.info("{} --- Enviando e-mail mensagem: {}", EmailService.class, message);
         } catch(Exception e){
-            log.error("Erro ao enviar email: {}", e);
-            return "Erro ao enviar email";
+            log.error("{} --- Erro ao enviar email: {}", EmailService.class, e);
+            throw new RuntimeException("Falha ao enviar e-mail", e);
         }
     };
 
     public void sendPassword(String dest, String password){
+        log.info("{} --- Iniciando sendPassword()", EmailService.class);
+
         String assunto = "Senha da conta";
-        String mensagem = "A senha da sua conta é: "+password;
+        String mensagem = "A senha da sua conta é: " + password;
+
+        log.info("{} --- Assunto: {}", EmailService.class, assunto);
+        log.info("{} --- Mensagem: {}", EmailService.class, mensagem);
         sendEmailText(dest, assunto, mensagem);
     }
 
     public void sendManagerChange(String dest, String managerName){
+        log.info("{} --- Iniciando sendManagerChange()", EmailService.class);
         String assunto = "Novo gerente";
         String mensagem = "O gerente da sua conta é: "+managerName;
         sendEmailText(dest, assunto, mensagem);
     }
 
     public void sendManagerExclude(String dest, String managerName){
+        log.info("{} --- Iniciando sendManagerExclude()", EmailService.class);
         String assunto = "Gerente removido";
         String mensagem = "O gerente da sua conta "+managerName+" foi removido";
         sendEmailText(dest, assunto, mensagem);

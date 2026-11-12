@@ -24,28 +24,42 @@ public class EmailCommandConsumer {
 
     @RabbitListener(queues = "ms.email.cmd")
     public void receber(SagaCommand command) {
-        EmailReplyQueue replyQueue = EmailReplyQueue.fromCommandType(command.tipo()).orElse(EmailReplyQueue.COMANDO_DESCONHECIDO);
+        //EmailReplyQueue replyQueue = EmailReplyQueue.fromCommandType(command.tipo()).orElse(EmailReplyQueue.COMANDO_DESCONHECIDO);
 
-        log.info("Recebimento da command {}", command);
+        log.info("{} --- Iniciando consumo do ms.email.cmd", EmailReplyQueue.class);
+        log.info("{} --- command: {}", EmailReplyQueue.class, command);
 
         try {
-            switch (replyQueue) {
-                case REJEITAR_SOLICITACAO:
-                    log.info("Executando comando REJEITAR_SOLICITACAO para SagaID: {}", command.sagaId());
+            switch (command.tipo()) {
+                case "email.rejeitar-solicitacao" -> {
+                    log.info("{} --- Fila email.rejeitar-solicitacao", EmailReplyQueue.class);
 
                     String email = command.payload().get("email").asString();
                     String assunto = command.payload().get("assunto").asString();
                     String mensagem = command.payload().get("mensagem").asString();
 
-                    log.info("Enviando email: {}", email);
-                    log.info("Enviando assunto: {}", assunto);
-                    log.info("Enviando mensagem: {}", mensagem);
+                    log.info("{} --- Email: {}", EmailCommandConsumer.class, email);
+                    log.info("{} --- Assunto: {}", EmailCommandConsumer.class, assunto);
+                    log.info("{} --- Mensagem: {}", EmailCommandConsumer.class, mensagem);
 
                     emailService.sendEmailText(email, assunto, mensagem);
-                    break;
+                }
+
+                case "email.enviar-senha" -> {
+                    log.info("{} --- Fila email.enviar-senha", EmailReplyQueue.class);
+
+                    String email = command.payload().get("email").asString();
+                    String senha = command.payload().get("senha").asString();
+
+                    log.info("{} --- Email: {}", EmailCommandConsumer.class, email);
+                    log.info("{} --- Senha: {}", EmailCommandConsumer.class, senha);
+
+                    emailService.sendPassword(email, senha);
+                }
             
-                default:
-                    break;
+                default -> {
+                    log.warn("{} --- Nenhuma fila encontrada. ", EmailCommandConsumer.class);
+                }
             }
         } catch (Exception e) {
             log.error("Erro ao executar comando {}", command.tipo(), e);

@@ -234,6 +234,19 @@ services:
         limits:
           memory: 512M 
 
+  ms-email:
+    build:
+      context: ./backend/ms-email
+    mem_limit: 512m
+    mem_reservation: 384m
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60 -XX:+UseSerialGC
+    networks:
+      - monsterbank-net
+
   front-end:
     build: ./frontend
     ports:

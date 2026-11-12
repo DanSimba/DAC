@@ -117,17 +117,6 @@ public class SagaService {
         }
     }
 
-    // private void processarAprovacao(SagaState state, SagaReply reply) {
-    //     if (!reply.sucesso()) {
-    //         state.falhar(reply.erro());
-    //         sagaStateRepository.salvar(state);
-    //         return;
-    //     }
-    //     state.avancarPara(CRIAR_CLIENTE, 2);
-    //     sagaStateRepository.salvar(state);
-    //     enviar(state, CRIAR_CLIENTE);
-    // }
-
     private void processarAprovacao(SagaState state, SagaReply reply) {
         log.info("{} --- Iniciando processarAprovacao()", SagaService.class);
         if (!reply.sucesso()) {
@@ -255,20 +244,6 @@ public class SagaService {
         concluirSaga(state);
     }
 
-    
-
-    // private void processarCriacao(SagaState state, SagaReply reply) {
-    //     if (reply.sucesso()) {
-    //         state.concluir();
-    //         sagaStateRepository.salvar(state);
-    //         log.info("Saga {} concluiu a parte do MS Cliente", state.sagaId());
-    //         return;
-    //     }
-    //     state.compensar(COMPENSAR_APROVACAO, 3, reply.erro());
-    //     sagaStateRepository.salvar(state);
-    //     enviar(state, COMPENSAR_APROVACAO);
-    // }
-
     private void iniciarCompensacao(SagaState state, String comandoCompensacao, String erro) {
         log.info("{} --- Iniciando compensação SAGA ID: [{}]", SagaService.class, state.getSagaId());
         log.info("{} --- Erro: {}", SagaService.class, erro);
@@ -322,7 +297,6 @@ public class SagaService {
         sagaStateRepository.salvar(state);
         log.info("{} --- Finalizando SAGA... : ID: [{}]", SagaService.class, state.sagaId());
         try {
-            //Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "CONCLUIDO", "resultType", "resource", "dominio", "clientes", "resourceId", state.cpf(), "erro", null);
             ObjectNode job = objectMapper.createObjectNode()
                 .put("jobId", state.sagaId())
                 .put("status", "CONCLUIDO")
@@ -354,22 +328,6 @@ public class SagaService {
         log.info("{} --- Enviando SAGA payload: {}", SagaService.class, payload);
         producer.enviar(state.sagaId(), tipo, payload); 
     }
-
-    // Alterando para utilizar herança a fim de evitar repetição de código
-    
-    // private void enviar(Object producer, SagaState state, String tipo, JsonNode payload) {
-    //     log.info("{} --- Enviando SAGA {}", SagaService.class, payload);
-    //     if (producer instanceof ClienteCommandProducer c) c.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof GerenteCommandProducer g) g.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof ContaCommandProducer ct) ct.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof AuthCommandProducer a) a.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof EmailCommandProducer e) e.enviar(state.sagaId(), tipo, payload);
-    // }
-
-    // private void enviar(SagaState state, String tipo) {
-    //     JsonNode payload = objectMapper.createObjectNode().put("cpf", state.cpf());
-    //     clienteCommandProducer.enviar(state.sagaId(), tipo, payload);
-    // }
 
     private void validarInicio(SagaCommand command) {
         if (command == null || !APROVAR_CLIENTE.equals(command.tipo()))
