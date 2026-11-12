@@ -73,4 +73,35 @@ public class SagaReplyConsumer {
     public void receberCriacaoConta(SagaReply reply) {
         sagaService.processarResposta("conta.criar", reply);
     }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_APROVAR_SOLICITACAO_REPLY_QUEUE)
+    public void receberAprovarSolicitacaoConta(SagaReply reply) {
+        sagaService.processarResposta("conta.aprovar-solicitacao", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE)
+    public void receberIdentificarGerente(SagaReply reply) {
+        sagaService.processarResposta("conta.identificar-gerente", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_COMPENSAR_APROVACAO_REPLY_QUEUE)
+    public void receberCompensacaoAprovacaoConta(SagaReply reply) {
+        sagaService.processarResposta("conta.compensar-aprovacao", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_MARCAR_NAO_APROVADA_REPLY_QUEUE)
+    public void receberMarcarNaoAprovadaConta(SagaReply reply) {
+        sagaService.processarResposta("conta.marcar-nao-aprovada", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_COMPENSAR_CRIACAO_REPLY_QUEUE)
+    public void receberCompensacaoCriacaoConta(SagaReply reply) {
+        sagaService.processarResposta("conta.compensar-criacao", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_COMANDO_DESCONHECIDO_REPLY_QUEUE)
+    public void receberComandoDesconhecidoConta(SagaReply reply) {
+        // Opcional: Como o tipo é nulo no Enum, passamos uma string de fallback pro SagaService
+        sagaService.processarResposta("conta.comando-desconhecido", reply);
+    }
 }

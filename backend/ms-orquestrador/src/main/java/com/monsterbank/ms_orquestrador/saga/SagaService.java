@@ -270,6 +270,8 @@ public class SagaService {
     // }
 
     private void iniciarCompensacao(SagaState state, String comandoCompensacao, String erro) {
+        log.info("{} --- Iniciando compensação SAGA ID: [{}]", SagaService.class, state.getSagaId());
+        log.info("{} --- Erro: {}", SagaService.class, erro);
         state.compensar(comandoCompensacao, state.getEtapaAtual(), erro);
         sagaStateRepository.salvar(state);
         enviar(clienteCommandProducer, state, comandoCompensacao, objectMapper.createObjectNode().put("cpf", state.cpf()));
@@ -277,11 +279,13 @@ public class SagaService {
 
     private void processarCompensacaoCriacaoCliente(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) {
+            log.warn("{} --- SAGA COM ERRO. Status: {}", SagaService.class, reply.erro());
             finalizarCompensacao(state, reply, "criacao do cliente");
             return;
         }
 
         if ("EMAIL_DUPLICADO".equals(state.erro())) {
+            log.warn("{} --- SAGA COM ERRO. EMAIL_DUPLICADO: {}", SagaService.class, reply.erro());
             ObjectNode motivo = objectMapper.createObjectNode()
                     .put("cpf", state.cpf())
                     .put("motivo", "E-mail já cadastrado");
@@ -296,12 +300,14 @@ public class SagaService {
 
     private void finalizarCompensacao(SagaState state, SagaReply reply, String etapaCompensada) {
         if (!reply.sucesso()) {
+            log.warn("{} --- SAGA COM ERRO. Status: {}", SagaService.class, reply.erro());
             String erroOriginal = state.erro();
             falharSaga(
                     state,
                     "Falha ao compensar " + etapaCompensada + ": " + reply.erro()
                             + ". Erro original: " + erroOriginal
             );
+            log.info("{} --- Erro: {}", SagaService.class, erroOriginal);
             return;
         }
 

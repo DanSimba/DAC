@@ -95,11 +95,18 @@ public class AccountCommandConsumer {
                     enviarRespostaErro(command, replyQueue, null);
                 }
             }
-        } catch(Exception e){
-            //Fazer as exceptions
-        }   
+        } catch (ErroCriacaoAccountException | ErroListaDeGerenteVaziaOuNula e) {
+            log.warn("{} --- Erro de negócio ao processar comando [{}]: {}", AccountCommandConsumer.class, command.tipo(), e.getMessage());
+            enviarRespostaErro(command, replyQueue, e.getMessage());
 
+        } catch (MalabarismoException e) {
+            log.warn("{} --- MalabarismoException disparada no comando [{}]: {}", AccountCommandConsumer.class, command.tipo(), e.getMessage());
+            enviarRespostaErro(command, replyQueue, e.getMessage());
 
+        } catch (Exception e) {
+            log.error("{} --- Erro catastrófico não mapeado no comando [{}]. Detalhes: ", AccountCommandConsumer.class, command.tipo(), e);
+            enviarRespostaErro(command, replyQueue, "Erro interno inesperado no serviço de contas (ms-account).");
+        }  
     }
 
     private void enviarRespostaSucesso(

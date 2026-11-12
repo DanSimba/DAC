@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import com.monsterbank.ms_gerente.exception.NenhumGerenteDisponivelException;
 import com.monsterbank.ms_gerente.gerente.GerenteDTO;
 import com.monsterbank.ms_gerente.gerente.GerenteService;
 import com.monsterbank.ms_gerente.mensageria.dto.SagaCommand;
@@ -62,6 +64,9 @@ public class GerenteCommandConsumer {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", GerenteCommandConsumer.class);
                 }
             }
+        } catch (NenhumGerenteDisponivelException e) {
+            log.error("{} --- Erro no ms-gerente: {}", GerenteCommandConsumer.class, e.getMessage());
+            enviarRespostaErro(command, replyQueue, e.getMessage());
         } catch (Exception e) {
             log.error("{} --- Erro crítico ao processar ms.gerente.cmd", GerenteCommandConsumer.class, e);
             enviarRespostaErro(command, replyQueue, "ERRO_INTERNO_MS_GERENTE: " + e.getMessage());
