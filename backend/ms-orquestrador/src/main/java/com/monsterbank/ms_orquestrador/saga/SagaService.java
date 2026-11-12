@@ -117,17 +117,6 @@ public class SagaService {
         }
     }
 
-    // private void processarAprovacao(SagaState state, SagaReply reply) {
-    //     if (!reply.sucesso()) {
-    //         state.falhar(reply.erro());
-    //         sagaStateRepository.salvar(state);
-    //         return;
-    //     }
-    //     state.avancarPara(CRIAR_CLIENTE, 2);
-    //     sagaStateRepository.salvar(state);
-    //     enviar(state, CRIAR_CLIENTE);
-    // }
-
     private void processarAprovacao(SagaState state, SagaReply reply) {
         log.info("{} --- Iniciando processarAprovacao()", SagaService.class);
         if (!reply.sucesso()) {
@@ -255,21 +244,9 @@ public class SagaService {
         concluirSaga(state);
     }
 
-    
-
-    // private void processarCriacao(SagaState state, SagaReply reply) {
-    //     if (reply.sucesso()) {
-    //         state.concluir();
-    //         sagaStateRepository.salvar(state);
-    //         log.info("Saga {} concluiu a parte do MS Cliente", state.sagaId());
-    //         return;
-    //     }
-    //     state.compensar(COMPENSAR_APROVACAO, 3, reply.erro());
-    //     sagaStateRepository.salvar(state);
-    //     enviar(state, COMPENSAR_APROVACAO);
-    // }
-
     private void iniciarCompensacao(SagaState state, String comandoCompensacao, String erro) {
+        log.info("{} --- Iniciando compensação SAGA ID: [{}]", SagaService.class, state.getSagaId());
+        log.info("{} --- Erro: {}", SagaService.class, erro);
         state.compensar(comandoCompensacao, state.getEtapaAtual(), erro);
         sagaStateRepository.salvar(state);
         enviar(clienteCommandProducer, state, comandoCompensacao, objectMapper.createObjectNode().put("cpf", state.cpf()));
@@ -277,11 +254,13 @@ public class SagaService {
 
     private void processarCompensacaoCriacaoCliente(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) {
+            log.warn("{} --- SAGA COM ERRO. Status: {}", SagaService.class, reply.erro());
             finalizarCompensacao(state, reply, "criacao do cliente");
             return;
         }
 
         if ("EMAIL_DUPLICADO".equals(state.erro())) {
+            log.warn("{} --- SAGA COM ERRO. EMAIL_DUPLICADO: {}", SagaService.class, reply.erro());
             ObjectNode motivo = objectMapper.createObjectNode()
                     .put("cpf", state.cpf())
                     .put("motivo", "E-mail já cadastrado");
@@ -296,12 +275,14 @@ public class SagaService {
 
     private void finalizarCompensacao(SagaState state, SagaReply reply, String etapaCompensada) {
         if (!reply.sucesso()) {
+            log.warn("{} --- SAGA COM ERRO. Status: {}", SagaService.class, reply.erro());
             String erroOriginal = state.erro();
             falharSaga(
                     state,
                     "Falha ao compensar " + etapaCompensada + ": " + reply.erro()
                             + ". Erro original: " + erroOriginal
             );
+            log.info("{} --- Erro: {}", SagaService.class, erroOriginal);
             return;
         }
 
@@ -316,7 +297,6 @@ public class SagaService {
         sagaStateRepository.salvar(state);
         log.info("{} --- Finalizando SAGA... : ID: [{}]", SagaService.class, state.sagaId());
         try {
-            //Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "CONCLUIDO", "resultType", "resource", "dominio", "clientes", "resourceId", state.cpf(), "erro", null);
             ObjectNode job = objectMapper.createObjectNode()
                 .put("jobId", state.sagaId())
                 .put("status", "CONCLUIDO")
@@ -348,22 +328,6 @@ public class SagaService {
         log.info("{} --- Enviando SAGA payload: {}", SagaService.class, payload);
         producer.enviar(state.sagaId(), tipo, payload); 
     }
-
-    // Alterando para utilizar herança a fim de evitar repetição de código
-    
-    // private void enviar(Object producer, SagaState state, String tipo, JsonNode payload) {
-    //     log.info("{} --- Enviando SAGA {}", SagaService.class, payload);
-    //     if (producer instanceof ClienteCommandProducer c) c.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof GerenteCommandProducer g) g.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof ContaCommandProducer ct) ct.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof AuthCommandProducer a) a.enviar(state.sagaId(), tipo, payload);
-    //     else if (producer instanceof EmailCommandProducer e) e.enviar(state.sagaId(), tipo, payload);
-    // }
-
-    // private void enviar(SagaState state, String tipo) {
-    //     JsonNode payload = objectMapper.createObjectNode().put("cpf", state.cpf());
-    //     clienteCommandProducer.enviar(state.sagaId(), tipo, payload);
-    // }
 
     private void validarInicio(SagaCommand command) {
         if (command == null || !APROVAR_CLIENTE.equals(command.tipo()))

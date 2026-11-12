@@ -32,7 +32,7 @@ public class SolicitacaoProducer {
         String COMMAND_TYPE = EmailCommandQueue.REJEITAR_SOLICITACAO.commandType();
         String QUEUE_NAME = EmailCommandQueue.REJEITAR_SOLICITACAO.queueName();
 
-        log.info("{} --- Iniciando envio da solicitacao para o ms-email. Fila: {} - commandType: {}", SolicitacaoProducer.class, QUEUE_NAME, COMMAND_TYPE);
+        log.info("{} --- Iniciando envio da solicitacao para o ms-email. Command: {} - Fila: {} ", SolicitacaoProducer.class, COMMAND_TYPE, QUEUE_NAME);
 
         try {
             java.util.Map<String, String> dadosEmail = java.util.Map.of(
@@ -46,17 +46,17 @@ public class SolicitacaoProducer {
         
             SagaCommand command = new SagaCommand(
                 null,
-                COMMAND_TYPE,
+                QUEUE_NAME,
                 timestampString,
                 payload
             );
 
-            rabbitTemplate.convertAndSend(QUEUE_NAME, command);
+            rabbitTemplate.convertAndSend(COMMAND_TYPE, command);
             log.info("{} --- Enviando command: {}", SolicitacaoProducer.class, command);
+            log.info("{} --- Enviando para fila: {}", SolicitacaoProducer.class, COMMAND_TYPE);
             log.info("{} --- Enviando para fila: {}", SolicitacaoProducer.class, QUEUE_NAME);
-            log.info("{} --- Enviando commandType: {}", SolicitacaoProducer.class, COMMAND_TYPE);
         } catch (Exception e) {
-            log.error("{} --- Erro ao enviar comando de e-mail para a fila {}", SolicitacaoProducer.class, QUEUE_NAME, e);
+            log.error("{} --- Erro ao enviar comando de e-mail para a fila {}", SolicitacaoProducer.class, COMMAND_TYPE, e);
         }
     }
 }

@@ -21,12 +21,12 @@ public abstract class BaseCommandProducer {
     }
 
     public void enviar(SagaCommand command) {
-        log.info("{} --- Enviando SAGA para fila [{}]: {}", getClass().getSimpleName(), filaDestino, command);
+        log.info("{} --- Enviando SAGA para fila [{}]: {}", getClass(), filaDestino, command);
         rabbitTemplate.convertAndSend(filaDestino, command);
     }
 
     public void enviar(String sagaId, String tipo, JsonNode payload) {
-        log.info("{} --- Enviando SAGA [{}]", getClass().getSimpleName(), sagaId);
+        log.info("{} --- Enviando SAGA [{}]", getClass(), sagaId);
         enviar(commandFactory.criar(sagaId, tipo, payload));
     }
 }

@@ -2,6 +2,7 @@ package com.monsterbank.ms_email.utils;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.support.converter.JacksonJavaTypeMapper;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,13 @@ public class RabbitConfig {
     @Bean
     public Queue emailCmdQueue(){
         return new Queue("ms.email.cmd", true);
+    }
+
+    @Bean
+    public JacksonJsonMessageConverter jsonMessageConverter() {
+        JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
+        converter.setTypePrecedence(JacksonJavaTypeMapper.TypePrecedence.INFERRED);
+        return converter;
     }
 
     @Bean

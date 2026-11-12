@@ -10,6 +10,6 @@ import com.monsterbank.ms_orquestrador.messaging.factory.SagaCommandFactory;
 public class EmailCommandProducer extends BaseCommandProducer {
 
     public EmailCommandProducer(RabbitTemplate rabbitTemplate, SagaCommandFactory commandFactory) {
-        super(rabbitTemplate, commandFactory, RabbitConfig.ENVIAR_SENHA);
+        super(rabbitTemplate, commandFactory, RabbitConfig.EMAIL_COMMAND_QUEUE);
     }
 }

@@ -5,8 +5,12 @@ import java.util.Optional;
 
 public enum EmailReplyQueue {
     REJEITAR_SOLICITACAO(
-        "gerente.avaliar-solicitacao",
-        "ms.gerente.avaliar-solicitacao.reply"
+        "email.rejeitar-solicitacao",
+        "ms.email.rejeitar-solicitacao.reply"
+    ),
+    APROVAR_SOLICITACAO(
+        "email.aprovar-solicitacao",
+        "ms.email.aprovar-solicitacao.reply"
     ),
     COMANDO_DESCONHECIDO(
             null,

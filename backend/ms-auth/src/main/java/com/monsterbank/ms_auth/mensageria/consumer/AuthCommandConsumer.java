@@ -13,6 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import com.monsterbank.ms_auth.auth.AuthService;
 import com.monsterbank.ms_auth.enumeration.AuthReplyQueue;
+import com.monsterbank.ms_auth.exception.EmailJaCadastradoException;
 import com.monsterbank.ms_auth.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_auth.mensageria.dto.SagaReply;
 import com.monsterbank.ms_auth.mensageria.publisher.OrquestradorResponseProducer;
@@ -66,8 +67,12 @@ public class AuthCommandConsumer {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", AuthCommandConsumer.class);
                 }
             }
+        } catch (EmailJaCadastradoException e) {
+            log.warn("{} --- Erro de negócio no ms-auth: {}", AuthCommandConsumer.class, e.getMessage());
+            enviarRespostaErro(command, replyQueue, e.getMessage());
         } catch (Exception e) {
-            // TODO: handle exception
+            log.error("{} --- Erro interno catastrófico no ms-auth", AuthCommandConsumer.class, e);
+            enviarRespostaErro(command, replyQueue, "Erro interno ao processar credenciais no ms-auth");
         }
     }
 

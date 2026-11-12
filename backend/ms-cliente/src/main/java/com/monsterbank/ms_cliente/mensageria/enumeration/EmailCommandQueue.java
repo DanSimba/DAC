@@ -3,8 +3,12 @@ package com.monsterbank.ms_cliente.mensageria.enumeration;
 public enum EmailCommandQueue {
     
     REJEITAR_SOLICITACAO(
-        "email.rejeitar-solicitacao",
-        "ms.email.cmd"
+        "ms.email.cmd",
+        "email.rejeitar-solicitacao"
+    ),
+    COMANDO_DESCONHECIDO(
+            null,
+            "ms.cliente.comando-desconhecido.reply"
     );
 
     private final String commandType;

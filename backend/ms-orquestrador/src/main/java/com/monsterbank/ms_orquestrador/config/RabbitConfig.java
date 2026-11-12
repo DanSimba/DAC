@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     public static final String SAGA_COMMAND_QUEUE = "saga.cmd";
+    
     public static final String CLIENTE_COMMAND_QUEUE = "ms.cliente.cmd";
     public static final String CLIENTE_APROVAR_SOLICITACAO_REPLY_QUEUE = "ms.cliente.aprovar-solicitacao.reply";
     public static final String CLIENTE_CRIAR_REPLY_QUEUE = "ms.cliente.criar.reply";
@@ -18,14 +19,23 @@ public class RabbitConfig {
     public static final String CLIENTE_MARCAR_NAO_APROVADA_REPLY_QUEUE = "ms.cliente.marcar-nao-aprovada.reply";
     public static final String CLIENTE_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.cliente.compensar-criacao.reply";
     public static final String CLIENTE_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.cliente.comando-desconhecido.reply";
+
     public static final String GERENTE_COMMAND_QUEUE = "ms.gerente.cmd";
     public static final String GERENTE_LISTAR_ATIVOS_REPLY_QUEUE = "ms.gerente.listar-ativos.reply";
-    public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
+
     public static final String AUTH_COMMAND_QUEUE = "ms.auth.cmd";
     public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
+    
+    public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
     public static final String CONTA_COMMAND_QUEUE = "ms.conta.cmd";
     public static final String CONTA_CRIAR_REPLY_QUEUE = "ms.conta.criar.reply";
-    public static final String ENVIAR_SENHA = "email.enviar-senha";
+    public static final String CONTA_APROVAR_SOLICITACAO_REPLY_QUEUE = "ms.conta.aprovar-solicitacao.reply";
+    public static final String CONTA_COMPENSAR_APROVACAO_REPLY_QUEUE = "ms.conta.compensar-aprovacao.reply";
+    public static final String CONTA_MARCAR_NAO_APROVADA_REPLY_QUEUE = "ms.conta.marcar-nao-aprovada.reply";
+    public static final String CONTA_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.conta.compensar-criacao.reply";
+    public static final String CONTA_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.conta.comando-desconhecido.reply";
+
+    public static final String EMAIL_COMMAND_QUEUE = "ms.email.cmd";
 
     @Bean
     public Queue sagaCmdQueue(){
@@ -108,8 +118,33 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue emailEnviarSenhaQueue() {
-        return new Queue(ENVIAR_SENHA, true);
+    public Queue contaAprovarSolicitacaoReplyQueue() {
+        return new Queue(CONTA_APROVAR_SOLICITACAO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaCompensarAprovacaoReplyQueue() {
+        return new Queue(CONTA_COMPENSAR_APROVACAO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaMarcarNaoAprovadaReplyQueue() {
+        return new Queue(CONTA_MARCAR_NAO_APROVADA_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaCompensarCriacaoReplyQueue() {
+        return new Queue(CONTA_COMPENSAR_CRIACAO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaComandoDesconhecidoReplyQueue() {
+        return new Queue(CONTA_COMANDO_DESCONHECIDO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue emailCmdQueue() {
+        return new Queue(EMAIL_COMMAND_QUEUE, true);
     }
 
     @Bean
