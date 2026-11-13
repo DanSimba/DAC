@@ -40,17 +40,13 @@ export class AccountHttpService {
     return this.http.post<void>(`${this.API_URL}/depositar`, op);
   }
 
-  operar(op: OperationModel): Observable<ExtratoModel>{
-    return this.http.post<ExtratoModel>(`${this.API_URL}/operate`, op);
-  }
-
   getLastVersion(number: string): Observable<AccountLastVersionModel>{
     return this.http.get<AccountLastVersionModel>(`${this.API_URL}/getLastVersion/${number}`);
   }
 
   //RETORNA A ACCOUNT COM O SALDO ATUALIZADO
   //SE NÃO ENCONTRAR O DESTINATÁRIO, DEVE RETORNAR ERROR 
-  transferir(t: TransferenceModel): Observable<ExtratoModel>{
-    return this.http.post<ExtratoModel>(`${this.API_URL}/transfer`, t);
+  transferir(t: TransferenceModel): Observable<void>{
+    return this.http.post<void>(`${this.API_URL}/transfer`, t);
   }
 }

@@ -143,18 +143,9 @@ export class AccountService {
     // }
   
     transferir(t: TransferenceModel): Observable<Account>{
-      return this.accountHttpService.transferir(t).pipe(
-        map((response) => {
-          console.log("EXTRATO VINDO DO BACK: ", response)
-          // this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          // this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
-
-          // this.account.update(current => ({
-          //   ...current,  
-          //   balanco: response.saldoApos //ATUALIZA BALANCO
-          // }));
-
-          //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO
+       return this.accountHttpService.transferir(t).pipe(
+        map(() => {
+          //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO (remonta td)
           this.getLastVersion();
 
           return this.account(); 

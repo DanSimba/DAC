@@ -335,7 +335,7 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
     
     @Transactional
-    public ExtratoDTO transfer(TransferenceDTO t){
+    public void transfer(TransferenceDTO t){
 
         //CHECAR SE A TRANSF É NULA (VALUE == 0)
         if(t.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
@@ -421,9 +421,6 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
             //CRIA EVENTO TRANSFERENCE_DESTINY
             this.eventService.createDestinyTransferenceEvent(tDestinyEntity, destinyAcc.getNumber());
-
-            ExtratoDTO extDto = new ExtratoDTO(extOrigin);
-            return extDto;
     }
 
     @Transactional(readOnly = true)

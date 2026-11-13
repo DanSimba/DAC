@@ -100,6 +100,8 @@ public class AccountController {
 
      @PostMapping("/transfer")
      public ResponseEntity<ExtratoDTO> transfer(@RequestBody TransferenceDTO t){
-          return ResponseEntity.ok(this.accountService.transfer(t));
+          this.accountService.transfer(t);
+          //PRIMEIRO FAZ A TRANSF QUE E DPS RETORNA VOID, O RESPONSEENTITY NÃO PODE ESPERAR VOID
+          return ResponseEntity.ok().build();
      }
 }
