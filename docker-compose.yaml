@@ -69,22 +69,22 @@ services:
   #    resources:
   #      limits:
   #        memory: 384M 
-  #db-account-read:
-    #image: postgres:15-alpine
-  #  environment:
-  #    - POSTGRES_DB=ms-account
-  #    - POSTGRES_USER=ms-account
-  #    - POSTGRES_PASSWORD=psql
-  #  ports:
-  #    - "5434:5432"
-  #  volumes:
-  #    - pgdata-conta:/var/lib/postgresql/data
-  #  networks:
-  #    - monsterbank-net
-  #  deploy:
-  #    resources:
-  #      limits:
-  #        memory: 384M 
+  db-account-read:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ms-account-read
+      - POSTGRES_USER=ms-account
+      - POSTGRES_PASSWORD=psql
+    ports:
+      - "5437:5432"
+    volumes:
+      - pgdata-conta-read:/var/lib/postgresql/data
+    networks:
+      - monsterbank-net
+    deploy:
+      resources:
+        limits:
+          memory: 384M 
 
   db-cliente:
     image: postgres:15-alpine
@@ -216,6 +216,7 @@ services:
       dockerfile: ms-account.dockerfile
     depends_on:
       - db-account
+      - db-account-read
       - rabbitmq
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/ms-account
@@ -295,6 +296,7 @@ volumes:
   mgdata-auth:
   pgdata-cliente:
   pgdata-conta:
+  pgdata-conta-read:
 
 networks:
   monsterbank-net:
