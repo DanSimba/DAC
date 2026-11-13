@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,4 +73,9 @@ public class GerenteService {
         gerente.setAtivo(false);
         gerenteRepository.save(gerente);
     }
+
+    public GerenteDTO buscaPorCpf(String cpf) {
+        GerenteEntity gerente = gerenteRepository.findByCpf(cpf)
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+        return paraDTO(gerente);    }
 }

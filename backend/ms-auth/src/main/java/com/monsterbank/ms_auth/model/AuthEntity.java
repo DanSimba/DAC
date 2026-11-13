@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.monsterbank.ms_auth.enumeration.UserType;
+
 @Document(collection = "usuarios")
 public class AuthEntity {
 
@@ -15,12 +17,12 @@ public class AuthEntity {
 
     private String cpf;
     private String senha;
-    private String tipo;
+    private UserType tipo;
     private boolean ativo;
 
     public AuthEntity() {}
 
-    public AuthEntity(String login, String cpf, String senha, String tipo) {
+    public AuthEntity(String login, String cpf, String senha, UserType tipo) {
         this.login = login;
         this.cpf = cpf;
         this.senha = senha;
@@ -32,7 +34,7 @@ public class AuthEntity {
     public String getLogin() { return login; }
     public String getCpf() { return cpf; }
     public String getSenha() { return senha; }
-    public String getTipo() { return tipo; }
+    public UserType getTipo() { return tipo; }
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
 }
