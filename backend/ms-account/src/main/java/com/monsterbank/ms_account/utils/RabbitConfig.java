@@ -48,6 +48,12 @@ public class RabbitConfig {
         return new Queue(AccountReplyQueue.COMANDO_DESCONHECIDO.queueName(), true);
     }
 
+    //fila que vai pro banco read
+    @Bean
+    public Queue accountEventsQueue() {
+        return new Queue("ms.conta.eventos", true);
+    }
+
     @Bean
     public JacksonJsonMessageConverter jsonMessageConverter() {
         return new JacksonJsonMessageConverter();

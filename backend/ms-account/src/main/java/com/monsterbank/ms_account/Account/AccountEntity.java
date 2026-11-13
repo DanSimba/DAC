@@ -82,4 +82,16 @@ public class AccountEntity {
     public void setCreatedAt(Integer createdAt) {
         this.createdAt = createdAt;
     }
+
+    public void setClientCpf(String clientCpf) {
+        this.clientCpf = clientCpf;
+    }
+
+    public void setManagerId(Long managerId) {
+        this.managerId = managerId;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
 }
