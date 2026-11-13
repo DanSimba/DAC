@@ -8,6 +8,7 @@ import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { ExtratoService } from '../../../../application/extrato/services/extrato-service';
 import { AccountService } from '../../../../application/account/services/account-service';
+import { response } from 'express';
 
 @Component({
   selector: 'app-extrato',
@@ -45,23 +46,26 @@ export class Extrato implements OnInit, OnDestroy{
 
   ngOnInit(): void {
 
-        //console.log("CONTA PUXADA: ", response);
-        //console.log("LISTA QUE TA NO COMP: ", this.extList())
-    
-        const now = new Date();
-        //ganbiarra pra tranformar Date no formato que o input aceita
-        const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        this.accountService.listExtratos().subscribe({
+          next: (response)=>{
+            //console.log("CONTA PUXADA: ", response);
+            //console.log("LISTA QUE TA NO COMP: ", this.extList())
+        
+            const now = new Date();
+            //ganbiarra pra tranformar Date no formato que o input aceita
+            const nowString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
-        //MINIMO DE TEMPO
-        const minString = `${now.getFullYear()-1}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-        console.log("now: ", nowString)
-        //console.log("MIN: ", minString)
-        this.minDate.set(minString);
-        this.maxDate.set(nowString); //não pode olhar além de hoje
-        this.setDate(nowString);
-
-        //popula mes atual
-        this.extratoService.createMonthExt(now.getMonth() + 1, now.getFullYear(), this.account());
+            //MINIMO DE TEMPO
+            const minString = `${now.getFullYear()-1}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+            console.log("now: ", nowString)
+            //console.log("MIN: ", minString)
+            this.minDate.set(minString);
+            this.maxDate.set(nowString); //não pode olhar além de hoje
+            this.setDate(nowString);
+            //popula ultimos 30
+            this.extratoService.createMonthExt(now.getMonth() + 1, now.getFullYear(), response);
+          }
+        })
   }
 
   ngOnDestroy(): void {

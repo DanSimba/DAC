@@ -5,7 +5,6 @@ import { TransferenceModel } from '../../../domain/operations/models/transferenc
 import { map, Observable, switchMap, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
-import { response } from 'express';
 
 @Injectable({
   providedIn: 'root',
@@ -81,22 +80,11 @@ export class AccountService {
     );
   }
 
-  //IDEIA DE REFATORAÇÃO: AO OPERAR E TRANFSERIR RETORNA A LISTA DE EXTRATO COMPLETA DEVOLTA
-
+  //PEGA NADA, MAS ESPERA O 200 PRA ATUALIZAR A CONTA E RETORNAR A ACC ATUALIZADA
   sacar(op: OperationModel): Observable<Account>{
     return this.accountHttpService.sacar(op).pipe(
-        map((response) => {
-
-          console.log("EXTRATO CRIADO: ", response);
-        
-          // this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          // this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
-
-          // this.account.update(current => ({
-          //   ...current,  
-          //   balanco: response.saldoApos //ATUALIZA BALANCO
-          // }));
-
+        map(() => {
+      
           //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO
           this.getLastVersion();
 
@@ -105,20 +93,10 @@ export class AccountService {
       )
   }
 
+  //PEGA NADA, MAS ESPERA O 200 PRA ATUALIZAR A CONTA E RETORNAR A ACC ATUALIZADA
   depositar(op: OperationModel): Observable<Account>{
     return this.accountHttpService.depositar(op).pipe(
-        map((response) => {
-
-          console.log("EXTRATO CRIADO: ", response);
-        
-          //LOGICA ANTIGA QUE NÃO USA EVENTOS 
-          // this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-          // this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
-
-          // this.account.update(current => ({
-          //   ...current,  
-          //   balanco: response.saldoApos //ATUALIZA BALANCO
-          // }));
+        map(() => {
 
           //LÓGICA NOVA QUE BUSCA SALDO PELO EVENTO
           this.getLastVersion();
@@ -184,24 +162,19 @@ export class AccountService {
       )
     }
 
-  listExtratos(){ //já caotura, atualiza o balanco e coloca tudo na extList
-    this.accountHttpService.listExtratos(this.account().number).subscribe({
-      next:(response)=>{
-        this.extratoService.setExtList(response);
-        this.extratoService.setRealList(response);
-        if(response.length>0){
-          this.account.update(current => ({
-            ...current,  
-            balanco: response[response.length-1].saldoApos //ATUALIZA BALANCO
-          }));
-        }
+  listExtratos(): Observable<Account>{ //já caotura, atualiza o balanco e coloca tudo na extList
+    return this.accountHttpService.listExtratos(this.account().number).pipe(
+          map((extratoResponse) => {
+            this.extratoService.setExtList(extratoResponse);
+            this.extratoService.setRealList(extratoResponse);
+            
+            console.log("LISTA CRUA: ", extratoResponse);
+
+            this.getLastVersion();
         
-        //console.log('ACCOUNT QUE VAI PRA CREATEMONTH: ', this.account())
-        //POPULA A LISTA DE EXTRATO COM OS DIAS VAZIOS
-        //this.extratoService.createMonthExt(this.account()); //TROCADO PRA O COMP EXTRATO
-        console.log("lista de exts: ", response);
-      }
-    })
+            return this.account();
+          })
+        );
   }
   
     //RESOLVI FZR UMA FUNÇÃO PRA PEGAR A DATA E HORA DO JEITO QUE O RAZER GOSTA AUTOMATICAMENTE

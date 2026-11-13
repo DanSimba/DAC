@@ -32,12 +32,12 @@ export class AccountHttpService {
   }
 
   //FAZ A OPERAÇÃO CERTA E AI RETORNA A CONTA COM O VALOR ATUALIZADO
-  sacar(op: OperationModel): Observable<ExtratoModel>{
-    return this.http.post<ExtratoModel>(`${this.API_URL}/sacar`, op);
+  sacar(op: OperationModel): Observable<void>{
+    return this.http.post<void>(`${this.API_URL}/sacar`, op);
   }
 
-  depositar(op: OperationModel): Observable<ExtratoModel>{
-    return this.http.post<ExtratoModel>(`${this.API_URL}/depositar`, op);
+  depositar(op: OperationModel): Observable<void>{
+    return this.http.post<void>(`${this.API_URL}/depositar`, op);
   }
 
   operar(op: OperationModel): Observable<ExtratoModel>{

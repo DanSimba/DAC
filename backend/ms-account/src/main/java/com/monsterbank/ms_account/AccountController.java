@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.monsterbank.ms_account.events.*;
 
-
 import java.util.Optional;
 
 import java.util.List;
@@ -86,13 +85,17 @@ public class AccountController {
      // }
 
      @PostMapping("/sacar")
-     public ResponseEntity<ExtratoDTO> sacar(@RequestBody OperationDTO op){
-          return ResponseEntity.ok(this.accountService.sacar(op));
+     public ResponseEntity<Void> sacar(@RequestBody OperationDTO op){
+          this.accountService.sacar(op);
+          //PRIMEIRO FAZ A OPERAÇÃO QUE E DPS RETORNA VOID, O RESPONSEENTITY NÃO PODE ESPERAR VOID
+          return ResponseEntity.ok().build();
      }
 
      @PostMapping("/depositar")
-     public ResponseEntity<ExtratoDTO> depositar(@RequestBody OperationDTO op){
-          return ResponseEntity.ok(this.accountService.depositar(op));
+     public ResponseEntity<Void> depositar(@RequestBody OperationDTO op){
+          this.accountService.depositar(op);
+          //PRIMEIRO FAZ A OPERAÇÃO QUE E DPS RETORNA VOID, O RESPONSEENTITY NÃO PODE ESPERAR VOID
+          return ResponseEntity.ok().build();
      }
 
      @PostMapping("/transfer")
