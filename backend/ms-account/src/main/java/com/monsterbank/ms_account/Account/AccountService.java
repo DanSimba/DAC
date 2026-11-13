@@ -182,7 +182,7 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
     }
 
     @Transactional
-    public ExtratoDTO sacar(OperationDTO op){
+    public void sacar(OperationDTO op){
          //CHECAR SE OP É NULA (VALUE == 0)
             if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
 
@@ -227,12 +227,11 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
             //CRIA EVENTO SACAR
             this.eventService.createSaqueEvent(opEntity, acc.getNumber());
 
-            ExtratoDTO extDto = new ExtratoDTO(ext);
-            return extDto;
+
     }
 
     @Transactional
-    public ExtratoDTO depositar(OperationDTO op){
+    public void depositar(OperationDTO op){
          //CHECAR SE OP É NULA (VALUE == 0)
             if(op.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
 
@@ -276,9 +275,6 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
             //garante que a lista seja buscada 
             Hibernate.initialize(ext.getOpers());
             Hibernate.initialize(ext.getTransfs());
-
-            ExtratoDTO extDto = new ExtratoDTO(ext);
-            return extDto;
     }
     
     // @Transactional
@@ -339,7 +335,7 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
     
     @Transactional
-    public ExtratoDTO transfer(TransferenceDTO t){
+    public void transfer(TransferenceDTO t){
 
         //CHECAR SE A TRANSF É NULA (VALUE == 0)
         if(t.getValue().compareTo(BigDecimal.ZERO)==0)throw new NullTransactionException();
@@ -425,9 +421,6 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
             //CRIA EVENTO TRANSFERENCE_DESTINY
             this.eventService.createDestinyTransferenceEvent(tDestinyEntity, destinyAcc.getNumber());
-
-            ExtratoDTO extDto = new ExtratoDTO(extOrigin);
-            return extDto;
     }
 
     @Transactional(readOnly = true)
