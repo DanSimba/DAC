@@ -45,6 +45,11 @@ public class GerenteController {
     public ResponseEntity<GerenteDTO> buscaId(@PathVariable Long id) {
         return ResponseEntity.ok(gerenteService.buscaId(id));
     }
+
+    @GetMapping("/{cpf}")
+    public ResponseEntity<GerenteDTO> buscaPorCpf(@PathVariable String cpf) {
+        return ResponseEntity.ok(gerenteService.buscaPorCpf(cpf));
+    }
     
     @PostMapping 
     public ResponseEntity<GerenteDTO> criar(@RequestBody GerenteDTO gerenteDTO) {

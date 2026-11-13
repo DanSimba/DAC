@@ -93,11 +93,11 @@ public class ClienteService {
         clienteRepository.findByCpf(cpf).ifPresent(clienteRepository::delete);
     }
 
-    public String findNameByCpf(String cpf){
+    public ClienteRetorno findNameByCpf(String cpf){
         ClienteEntity cliente = clienteRepository.findByCpf(cpf)
         .orElseThrow(() -> new ClienteNaoEncontradoException());
 
-        return cliente.getNome();
+        return clienteModelAssembler.toModel(cliente);
     }
     
     public ClienteRetorno findByCpf(String cpf){
