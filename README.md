@@ -132,13 +132,13 @@ Quer invocar essa monstruosidade na sua máquina?
 Primeiro, clone o repositório:
 
 ```bash
-git clone URL_DO_REPOSITORIO
+git clone https://github.com/DanSimba/DAC.git
 ```
 
 Entre na pasta:
 
 ```bash
-cd NOME_DO_PROJETO
+cd DAC
 ```
 
 Configure suas variáveis de ambiente utilizando o arquivo `.env.example`.
