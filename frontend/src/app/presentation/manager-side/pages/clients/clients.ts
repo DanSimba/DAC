@@ -1,4 +1,4 @@
-import { Component, OnInit, inject} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClienteConsulta } from '../../../../domain/manager/models/consulta-cliente.model';
 import { ManagerHttpService } from '../../../../infraestructure/http/manager.http.service';
@@ -122,6 +122,7 @@ export class Clients implements OnInit {
   */
 
   private managerService = inject(ManagerHttpService);
+  private cdr = inject(ChangeDetectorRef);
 
   public clientes: ClienteConsulta[] = [];
 
@@ -138,6 +139,7 @@ export class Clients implements OnInit {
     this.managerService.listarClientes().subscribe({
       next: (clientes) => {
         this.clientes = clientes;
+        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.error('Erro ao listar clientes:', erro);
