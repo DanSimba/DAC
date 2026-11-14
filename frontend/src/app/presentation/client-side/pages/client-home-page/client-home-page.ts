@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +12,7 @@ import { AccountService } from '../../../../application/account/services/account
   templateUrl: './client-home-page.html',
   styleUrl: './client-home-page.css',
 })
-export class ClientHomePage {
+export class ClientHomePage implements OnInit{
   clientService = inject(ClientService)
 
   client = signal<Client>(this.clientService.getClient());
@@ -20,4 +20,9 @@ export class ClientHomePage {
   account = computed(():Account =>{
     return this.accountService.getAccount();
   })
+
+  //TODA VEZ QUE PASSA POR ESSA TELA, PUXA O SALDO ATUALIZADO DNV
+  ngOnInit(): void {
+    this.accountService.getLastVersion();
+  }
 }

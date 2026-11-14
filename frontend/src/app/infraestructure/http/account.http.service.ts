@@ -15,10 +15,6 @@ export class AccountHttpService {
   http = inject(HttpClient);
   private readonly API_URL = `${environmentDev.apiUrlAccount}/account`;
 
-  getMockAcc(): Observable<Account>{
-    return this.http.get<Account>(`${this.API_URL}/getMockAcc`);
-  }
-
   findAccountByCpf(cpf:string): Observable<Account>{
     return this.http.get<Account>(`${this.API_URL}/findByCpf/${cpf}`);
   }
@@ -31,7 +27,8 @@ export class AccountHttpService {
     return this.http.get<ExtratoModel[]>(`${this.API_URL}/listExtratos/${number}`);
   }
 
-  //FAZ A OPERAÇÃO CERTA E AI RETORNA A CONTA COM O VALOR ATUALIZADO
+  //FAZ A OPERAÇÃO E NÃO RETORNA A ACC, O FRONT PRECISA PEDIR DENOVO E EXTRATO COM GETLASTVERSION
+  //NOS REQS DIZ QUE NÃO TEM PROBLEMA TER ESSE PEQUENO ATRASO ATÉ ATUALIZAR O BALANCO 
   sacar(op: OperationModel): Observable<void>{
     return this.http.post<void>(`${this.API_URL}/sacar`, op);
   }
