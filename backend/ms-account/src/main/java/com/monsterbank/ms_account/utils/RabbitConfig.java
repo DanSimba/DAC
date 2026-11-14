@@ -7,10 +7,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 
 import com.monsterbank.ms_account.mensageria.enumeration.AccountReplyQueue;
 
 @Configuration
+@EnableRabbit
 public class RabbitConfig {
 
     @Bean

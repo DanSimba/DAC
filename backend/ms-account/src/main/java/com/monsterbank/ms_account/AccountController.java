@@ -17,6 +17,10 @@ import com.monsterbank.ms_account.events.*;
 
 import java.util.Optional;
 
+import com.monsterbank.ms_account.query.services.*;
+
+import com.monsterbank.ms_account.query.entities.*;
+
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,9 +32,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AccountController {
 
      private AccountService accountService;
+     private ReadService readService;
 
-     public  AccountController(AccountService as){
+     public  AccountController(AccountService as, ReadService rs){
           this.accountService = as;
+          this.readService = rs;
      }
 
      @GetMapping("/health")
@@ -50,20 +56,15 @@ public class AccountController {
           return ResponseEntity.ok(this.accountService.listaContas());
      }
 
-     @GetMapping("/findByCpf/{cpf}")
-     public ResponseEntity<AccountDTO> findAccountByCpf(@PathVariable("cpf") String cpf){
-          return ResponseEntity.ok(this.accountService.findAccountByCpf(cpf));
-     }
+     //@GetMapping("/findByNumber/{number}")
+     //public ResponseEntity<AccountDTO> findAccountByNumber(@PathVariable("number") String number){
+     //     return ResponseEntity.ok(this.accountService.findAccountByNumber(number));
+     //}
 
-     @GetMapping("/findByNumber/{number}")
-     public ResponseEntity<AccountDTO> findAccountByNumber(@PathVariable("number") String number){
-          return ResponseEntity.ok(this.accountService.findAccountByNumber(number));
-     }
-
-     @GetMapping("/getLastVersion/{number}") //PEGA ULTIMO EVENTO QUE ACONTECEU (SALDO E GERENTE ATUALIZADO)
-     public ResponseEntity<AccountLastVersion> getLastVersion(@PathVariable("number") String number){
-          return ResponseEntity.ok(this.accountService.getLastVersion(number));
-     }
+     //@GetMapping("/getLastVersion/{number}") //PEGA ULTIMO EVENTO QUE ACONTECEU (SALDO E GERENTE ATUALIZADO)
+     //public ResponseEntity<AccountLastVersion> getLastVersion(@PathVariable("number") String number){
+     //     return ResponseEntity.ok(this.accountService.getLastVersion(number));
+     //}
 
      @GetMapping("/listExtratos/{number}")
      public ResponseEntity <List<ExtratoDTO>> listExtratos(@PathVariable("number") String number){
@@ -78,11 +79,6 @@ public class AccountController {
                     )
                );
      }
-
-     // @PostMapping("/operate")
-     // public ResponseEntity<ExtratoDTO> operate(@RequestBody OperationDTO op){
-     //      return ResponseEntity.ok(this.accountService.operate(op));
-     // }
 
      @PostMapping("/sacar")
      public ResponseEntity<Void> sacar(@RequestBody OperationDTO op){
@@ -103,5 +99,21 @@ public class AccountController {
           this.accountService.transfer(t);
           //PRIMEIRO FAZ A TRANSF QUE E DPS RETORNA VOID, O RESPONSEENTITY NÃO PODE ESPERAR VOID
           return ResponseEntity.ok().build();
+     }
+
+     //PEGA DO BANCO READ
+     @GetMapping("/findByNumber/{number}")
+     public ResponseEntity<AccountDTO> findEventsByAccount(@PathVariable("number") String accNumber) {
+          return ResponseEntity.ok(this.readService.findAccountByNumber(accNumber));
+     }
+
+     @GetMapping("/getLastVersion/{number}") //PEGA ULTIMO EVENTO QUE ACONTECEU (SALDO E GERENTE ATUALIZADO)
+     public ResponseEntity<AccountLastVersion> getLastVersion(@PathVariable("number") String number){
+          return ResponseEntity.ok(this.readService.getLastVersion(number));
+     }
+
+     @GetMapping("/findByCpf/{cpf}")
+     public ResponseEntity<AccountDTO> findAccountByCpf(@PathVariable("cpf") String cpf){
+          return ResponseEntity.ok(this.readService.findAccountByCpf(cpf));
      }
 }

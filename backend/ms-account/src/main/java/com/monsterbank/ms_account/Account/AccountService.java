@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
 import com.monsterbank.ms_account.account.AccountRepository;
+
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.ErroListaDeGerenteVaziaOuNula;

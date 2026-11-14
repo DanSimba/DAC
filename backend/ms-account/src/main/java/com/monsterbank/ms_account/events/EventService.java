@@ -27,13 +27,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
+
 @Service
 public class EventService {
 
     private final EventRepository eventRepository;
 
-    public EventService(EventRepository er){
+    //PUBLICADOR NA FILA DE EVENTOS
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public EventService(EventRepository er, ApplicationEventPublisher applicationEventPublisher){
         this.eventRepository = er;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void createCreateEvent(String accNumber, Long cpfGerente){
@@ -54,7 +60,7 @@ public class EventService {
 
         //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
         EventEntity ee = new EventEntity(accNumber, EventType.CRIADO, payload, 1L);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createSaqueEvent(OperationEntity oe, String accNumber){
@@ -72,7 +78,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.SAQUE, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createDepositoEvent(OperationEntity oe, String accNumber){
@@ -89,7 +95,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.DEPOSITO, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createOriginTransferenceEvent(TransferenceEntity te, String accNumber){
@@ -106,7 +112,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.TRANSFERENCIA_ORIGEM, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createDestinyTransferenceEvent(TransferenceEntity te, String accNumber){
@@ -123,7 +129,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.TRANSFERENCIA_DESTINO, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createGerenteAlteradoEvent(String accNumber, Long cpfGerente){
@@ -148,7 +154,7 @@ public class EventService {
 
         //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
         EventEntity ee = new EventEntity(accNumber, EventType.GERENTE_ALTERADO, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public BigDecimal getBalancoAtual(String accNumber){
@@ -227,5 +233,23 @@ public class EventService {
         );
 
         return leDTO;
+    }
+
+    //PUBLICAR
+    private void saveAndPublish(EventEntity ee) {
+        //SALAVA PRIMEIRO NO DB-ACC
+        EventEntity saved = eventRepository.save(ee);
+
+        EventDTO dto = new EventDTO(
+            saved.getId(),
+            saved.getObjetoId(),
+            saved.getTipo(),
+            saved.getPayload(),
+            saved.getVersao(),
+            saved.getDatetime()
+        );
+
+        //PUBLICA O DTO PRA FILA DO READ
+        applicationEventPublisher.publishEvent(dto);
     }
 }
