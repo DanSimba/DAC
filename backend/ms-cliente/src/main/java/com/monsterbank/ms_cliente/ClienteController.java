@@ -38,7 +38,7 @@ public class ClienteController {
 
     //RETORNA SÓ A STRING NOME
     @GetMapping("/findNameByCpf/{cpf}")
-     public ResponseEntity<String> findNameByCpf(@PathVariable("cpf") String cpf){
+     public ResponseEntity<ClienteRetorno> findNameByCpf(@PathVariable("cpf") String cpf){
           return ResponseEntity.ok(this.clienteService.findNameByCpf(cpf));
      }
 

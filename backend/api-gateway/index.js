@@ -82,56 +82,104 @@ async function iniciarServidor() {
 
 
 // Login
+  app.post('/auth/login', async (req, res) => {
+    console.log("Iniciando login...");
+    const { email, senha } = req.body;
+    console.log("req.body ", req.body);
+    console.log("Email: " + email + " Senha: " + senha);
 
-app.post('/login', async (req, res) => {
-  const { email, senha } = req.body;
-
-  if (!email || !senha) {
-    return res.status(400).json({
-      status: 400,
-      mensagem: 'E-mail e senha são obrigatórios.'
-    });
-  }
-
-  try {
-    const authResponse = await fetch(`${process.env.MS_AUTH_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha })
-    });
-
-    const data = await authResponse.json();
-
-    if (!authResponse.ok) {
-      return res.status(authResponse.status).json(data);
+    if (!email || !senha) {
+      console.error("E-mail e senha são obrigatórios");
+      return res.status(400).json({
+        status: 400,
+        mensagem: 'E-mail e senha são obrigatórios.'
+      });
     }
 
-    const usuarioInfo = data.usuario || data;
+    try {
+      console.log("Iniciando fetch POST para ms-auth");
+      const urlAlvo = `${process.env.MS_AUTH_URL}/auth/login`;
+      console.log(`Iniciando fetch POST para URL exata: ${urlAlvo}`)
 
-    const token = jwt.sign(
-      {
-        email: usuarioInfo.email,
-        tipo: usuarioInfo.tipo
-      },
-      "MONSTERBANK",
-      { expiresIn: "120m" }
-    );
+      const authResponse = await fetch(urlAlvo, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
 
-    return res.status(200).json({
-      status: 200,
-      mensagem: 'Autorizado.',
-      token,
-      dados: data
-    });
+      const responseText = await authResponse.text();
+      console.log(`Status HTTP do ms-auth: ${authResponse.status}`);
+      console.log(`Corpo da resposta do Java: '${responseText}'`);
+      
+      let data = {};
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error("A resposta não é um JSON válido.");
+        }
+      }
+      
+      if (!authResponse.ok) {
+        console.error("Erro no authResponse: ", data);
+        return res.status(authResponse.status).json(data);
+      }
 
-  } catch (error) {
-    console.error('Erro no login:', error.message);
-    return res.status(500).json({
-      status: 500,
-      mensagem: 'Erro com o login.'
-    });
-  }
-});
+      const usuarioInfo = data.usuario || data;
+      console.log("usuarioInfo: ", usuarioInfo);
+      
+      let usuarioObj = { cpf: usuarioInfo.cpf, tipo: usuarioInfo.tipo };
+
+      if (usuarioInfo.tipo === 'CLIENTE') {
+        const clienteResponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes/findNameByCpf/${usuarioInfo.cpf}`);
+        if (clienteResponse.ok) {
+          const clienteData = await clienteResponse.json();
+          usuarioObj.nome = clienteData.nome;
+        }
+      } else if (usuarioInfo.tipo === 'GERENTE') {
+        const gerenteResponse = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${usuarioInfo.cpf}`);
+        if (gerenteResponse.ok) {
+          const gerenteData = await gerenteResponse.json();
+          usuarioObj.nome = gerenteData.nome;
+        }
+      }
+
+      const jti = crypto.randomUUID();
+      console.log("jti: ", jti);
+
+      const token = jwt.sign(
+        {
+          cpf: usuarioInfo.cpf,
+          tipo: usuarioInfo.tipo
+        },
+        "MONSTERBANK",
+        {
+          expiresIn: "8h",
+          jwtid: jti
+        }
+      );
+      console.log("Token: ", token);
+
+      const ttlSessao = 1800;
+      await redisClient.set(`sessao:${jti}`, usuarioInfo.tipo, { EX: ttlSessao });
+      await redisClient.set(`sessao:cpf:${usuarioInfo.cpf}`, jti, { EX: ttlSessao });
+
+      return res.status(200).json({
+        auth: true,
+        token: token,
+        tipo: usuarioInfo.tipo,
+        usuario: usuarioObj
+      });
+
+    } catch (error) {
+      console.error('Erro no login:', error.message);
+      console.error('Causa raiz da falha:', error.cause);
+      return res.status(500).json({
+        status: 500,
+        mensagem: 'Erro ao comunicar com o ms-auth.'
+      });
+    }
+  });
 
 // Valida Token
 
@@ -151,28 +199,68 @@ app.get('/validacao', (req, res) => {
 });
 
 //função complementar pra validação do token
-function validaJWT(req, res, next){
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')){
-    return res.status(401).json({
-      message: 'token não informado'
-    })
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const usuario = jwt.verify(
-      token, 'MONSTERBANK'
-    )
-    req.usuario = usuario
-    return next()
-  } catch (error) {
-    return res.status(401).json({
-      message: 'token inválido ou expirado'
-    })
+// function validaJWT(req, res, next){
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader || !authHeader.startsWith('Bearer ')){
+//     return res.status(401).json({
+//       message: 'token não informado'
+//     })
+//   }
+//   const token = authHeader.split(' ')[1];
+//   try {
+//     const usuario = jwt.verify(
+//       token, 'MONSTERBANK'
+//     )
+//     req.usuario = usuario
+//     return next()
+//   } catch (error) {
+//     return res.status(401).json({
+//       message: 'token inválido ou expirado'
+//     })
     
-  }
+//   }
 
-}
+// }
+    // TESTES
+    function verificaToken(req, res, next) {
+      console.log('Entrei para verificar token');
+
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.error('Erro: Token não informado');
+        return res.status(401).json({ message : 'Token não informado' });
+      }
+
+      const token = authHeader.split(' ')[1];
+      console.log('Token: ', token);
+
+      try {
+        const usuario = jwt.verify(token, 'MONSTERBANK');
+        req.usuario = usuario;
+        console.log('Token existente e válido');
+        return next();
+      } catch (error) {
+        console.error('Erro: Token inválido ou expirado');
+        return res.status(401).json({ message : 'Token inválido ou expirado' });
+      }
+    }
+
+    function verificaPerfil(perfil) {
+      return (req, res, next) => {
+        console.log('Entrei para verificar tipo de usuário');
+        if (!req.usuario || !req.usuario.tipo) {
+          console.error('Erro: Perfil não identificado');
+          return res.status(403).json({ message : 'Acesso negado: Perfil não identificado' });
+        }
+
+        if (req.usuario.tipo.toUpperCase() !== perfilExigido.toUpperCase()) {
+          console.error('Erro: Sem permissão');
+          return res.status(403).json({ message: 'Acesso negado: Você não tem permissão para esta ação' });
+        }
+        console.log('Tipo de usuário válido e com permissão');
+        return next();
+      }
+    }
 
 
     // Encaminha o cliente recebido do front para o ms-cliente
@@ -198,7 +286,7 @@ function validaJWT(req, res, next){
     });
 
     // Lista as solicitações
-    app.get('/solicitacoes', async (req, res) => {
+    app.get('/solicitacoes', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
       try {
         const queryParams = new URLSearchParams(req.query).toString();
         const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
@@ -218,7 +306,7 @@ function validaJWT(req, res, next){
     });
 
   // Listar solicitações por cpf
-  app.get('/solicitacoes/:cpf', async (req, res) => {
+  app.get('/solicitacoes/:cpf', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
     try {
       const url = `${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}`;
       const response = await fetch(url);
@@ -237,7 +325,7 @@ function validaJWT(req, res, next){
     });
 
     // Rejeitar solicitações
-    app.post('/solicitacoes/:cpf/rejeicao', async (req, res) => {
+    app.post('/solicitacoes/:cpf/rejeicao', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
       try {
         const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
             method: 'POST',
@@ -259,7 +347,7 @@ function validaJWT(req, res, next){
     });
 
 
-  // Aprovar solicitações
+  // Aprovar solicitações - verificaToken, verificaPerfil('GERENTE')
   app.post('/solicitacoes/:cpf/aprovacao', async (req, res) => {
     try {
       console.log("Entrei no Post para aprovar uma solicitação.");
@@ -377,6 +465,18 @@ function validaJWT(req, res, next){
     app.get('/gerentes/:id', async(req, res) =>{
       try{
         const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.id}`);
+        await encaminhaResponse(response, res);
+      }catch(error){
+        console.error('Erro ao buscar gerente x->  ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com o ms gerente'
+        });
+      }
+    })
+
+    app.get('/gerentes/:cpf', async(req, res) =>{
+      try{
+        const response = await fetch(`${process.env.MS_GERENTE_URL}/gerente/${req.params.cpf}`);
         await encaminhaResponse(response, res);
       }catch(error){
         console.error('Erro ao buscar gerente x->  ', error);

@@ -3,7 +3,7 @@ package com.monsterbank.ms_cliente.solicitacao;
 import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +39,6 @@ public class SolicitacaoController {
         this.solicitacaoModelAssembler = solicitacaoModelAssembler;
     }
 
-    // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @GetMapping
     public ResponseEntity<ListarSolicitacoesReturn> buscarSolicitacoes(
             @RequestParam(required = false) StatusSolicitacao status, 
@@ -51,7 +50,6 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacoes);
     }
 
-    // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @GetMapping("/{cpf}")
     public ResponseEntity<SolicitacaoHateoasResponse> buscaSolicitacaoPorCpf(@PathVariable String cpf){
         log.info("{} --- Entrei no Get de busca de uma solicitação.", SolicitacaoController.class);
@@ -61,7 +59,6 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacao);
     }
 
-    // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @PostMapping
     public ResponseEntity<SolicitacaoResponseDTO> registrarSolicitacao(@Valid @RequestBody RegistrarSolicitacaoRequest dto) {
         log.info("{} --- Entrei no Post para registrar solicitação.", SolicitacaoController.class);
@@ -72,7 +69,6 @@ public class SolicitacaoController {
         return ResponseEntity.created(location).body(solicitacaoModelAssembler.toResponseModel(solicitacao));
     }
 
-    // @PreAuthorize("hasRole('GERENTE')") -> Proteção da chamada
     @PostMapping("/{cpf}/rejeicao")
     public ResponseEntity<SolicitacaoResponseDTO> rejeitarSolicitacao(@PathVariable String cpf, @Valid @RequestBody RecusarSolicitacaoRequest dto) {
         log.info("{} --- Entrei no Post para rejeitar uma solicitação.", SolicitacaoController.class);
