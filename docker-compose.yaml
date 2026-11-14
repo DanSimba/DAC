@@ -119,7 +119,7 @@ services:
       - "8080:8080"
     environment:
       MS_AUTH_URL: http://ms-auth:8081
-      MS_ACCOUNT_URL: http://ms-account:8082
+      MS_ACCOUNT_URL: http://ms-account:8080
       MS_CLIENTE_URL: http://ms-cliente:8083
       MS_GERENTE_URL: http://ms-gerente:8084
       REDIS_URL: redis://redis:6379

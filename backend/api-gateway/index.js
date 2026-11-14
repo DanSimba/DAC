@@ -598,6 +598,62 @@ app.get('/validacao', (req, res) => {
       }
     });
 
+
+    //relatório
+    app.get('/relatorio-clientes', async(req, res) => {
+      try{
+        //clientes
+        const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
+        if (!clienteresponse.ok){
+          return res.status(502).json({
+            message: 'Erro ao comunicar com ms-cliente'
+          });
+        }
+        const clientes = await clienteresponse.json();
+
+        //gerentes
+        const gerenteresponse = await fetch(`${process.env.MS_GERENTE_URL}/gerente`);
+        if (!gerenteresponse.ok){
+          return res.status(502).json({
+            message: 'Erro ao comunicar com ms-gerente'
+          });
+        }
+        const gerentes = await gerenteresponse.json();
+
+        const resultado = [];
+
+        for (const cliente of clientes) {
+          const contaresponse = await fetch(`${process.env.MS_ACCOUNT_URL}/account/findByCpf/${encodeURIComponent(cliente.cpf)}`);
+
+          if (contaresponse.ok) {
+            const conta = await contaresponse.json();
+
+            const gerente = gerentes.find(g => String(g.cpf) === String(conta.managerId) || Number(g.id) === Number(conta.managerId));
+          
+            resultado.push ({
+              cpfCliente: cliente.cpf,
+              nomeCliente: cliente.nome,
+              emailCliente: cliente.email,
+              salario: formataSaldo(cliente.salario),
+              numeroConta: conta.number,
+              saldoConta: formataSaldo(conta.balanco),
+              cpfGerente: gerente.cpf,
+              nomeGerente: gerente.nome,
+            });
+
+          }
+        }
+
+        return res.json(resultado);
+
+      }catch (error){
+        console.error('Erro no relatório de clientes-> ', error);
+        res.status(502).json({
+          message: 'Erro ao compor os dados do relatório'
+        });
+      }
+    });
+
     //tranferencia
     app.post('/account/transfer', async(req, res) =>{
       try {

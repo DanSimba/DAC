@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SolicitacaoCadastro } from '../../../../domain/manager/models/solicitacao-cadastro.model';
 import { ManagerHttpService } from '../../../../infraestructure/http/manager.http.service';
@@ -132,6 +132,7 @@ export class ManagerHomePage implements OnInit {
   */
 
   private managerService = inject(ManagerHttpService);
+  private cdr = inject(ChangeDetectorRef);
 
   public solicitacoes: SolicitacaoCadastro[] = [];
 
@@ -159,6 +160,7 @@ export class ManagerHomePage implements OnInit {
     this.managerService.listarSolicitacoes().subscribe({
       next: (resposta: any) =>
         { this.solicitacoes = resposta.solicitacoes || resposta;
+          this.cdr.detectChanges();
       },
       error: (erro) => {
         console.error('Erro ao carregar solicitações:', erro);

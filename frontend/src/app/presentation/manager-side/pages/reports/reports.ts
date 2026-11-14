@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RelatorioCliente } from '../../../../domain/manager/models/relatorio-cliente.model';
 import { ManagerHttpService } from '../../../../infraestructure/http/manager.http.service';
 
@@ -57,6 +57,7 @@ export class Reports implements OnInit {
   */
 
   private managerService = inject(ManagerHttpService);
+  private cdr = inject(ChangeDetectorRef);
 
   public relatorio: RelatorioCliente[] = [];
 
@@ -71,6 +72,7 @@ export class Reports implements OnInit {
     this.managerService.listarRelatorioClientes().subscribe({
       next: (dados) => {
         this.relatorio = dados;
+        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.error('Erro ao carregar relatório de clientes:', erro);
