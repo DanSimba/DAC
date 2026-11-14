@@ -7,10 +7,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 
 import com.monsterbank.ms_account.mensageria.enumeration.AccountReplyQueue;
 
 @Configuration
+@EnableRabbit
 public class RabbitConfig {
 
     @Bean
@@ -46,6 +48,12 @@ public class RabbitConfig {
     @Bean
     public Queue comandoDesconhecidoReplyQueue(){
         return new Queue(AccountReplyQueue.COMANDO_DESCONHECIDO.queueName(), true);
+    }
+
+    //fila que vai pro banco read
+    @Bean
+    public Queue accountEventsQueue() {
+        return new Queue("ms.conta.eventos", true);
     }
 
     @Bean

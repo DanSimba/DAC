@@ -4,6 +4,10 @@
 --ARRANCA DADOS E COLOCA DE NOVO
 TRUNCATE TABLE account, extrato, operation, transference, eventos; 
 
+--VERSÃO READ
+--TRUNCATE TABLE account, eventos; 
+--REMOVER INSERTS DE EXTRATO TBM**
+
 --ALTER TABLE account DROP COLUMN name_origin;
 --ALTER TABLE transference ADD cpf_destiny VARCHAR(255);
 

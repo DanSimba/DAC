@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { Location } from '@angular/common';
+import { DecimalPipe, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ExtratoModel } from '../../../../domain/operations/models/extrato.model';
 import { ExtCard } from '../../components/ext-card/ext-card';
@@ -12,7 +12,7 @@ import { response } from 'express';
 
 @Component({
   selector: 'app-extrato',
-  imports: [MatIconModule, ExtCard],
+  imports: [MatIconModule, ExtCard, DecimalPipe],
   templateUrl: './extrato.html',
   styleUrl: './extrato.css',
 })

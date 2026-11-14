@@ -27,13 +27,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
+
 @Service
 public class EventService {
 
     private final EventRepository eventRepository;
 
-    public EventService(EventRepository er){
+    //PUBLICADOR NA FILA DE EVENTOS
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public EventService(EventRepository er, ApplicationEventPublisher applicationEventPublisher){
         this.eventRepository = er;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void createCreateEvent(String accNumber, Long cpfGerente){
@@ -54,7 +60,7 @@ public class EventService {
 
         //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
         EventEntity ee = new EventEntity(accNumber, EventType.CRIADO, payload, 1L);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createSaqueEvent(OperationEntity oe, String accNumber){
@@ -72,7 +78,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.SAQUE, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createDepositoEvent(OperationEntity oe, String accNumber){
@@ -89,7 +95,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.DEPOSITO, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createOriginTransferenceEvent(TransferenceEntity te, String accNumber){
@@ -106,7 +112,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.TRANSFERENCIA_ORIGEM, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createDestinyTransferenceEvent(TransferenceEntity te, String accNumber){
@@ -123,7 +129,7 @@ public class EventService {
         .orElse(1L); //SE NÃO TIVER NENHUMA COMEÇA NO 1
 
         EventEntity ee = new EventEntity(accNumber, EventType.TRANSFERENCIA_DESTINO, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
     public void createGerenteAlteradoEvent(String accNumber, Long cpfGerente){
@@ -148,84 +154,26 @@ public class EventService {
 
         //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
         EventEntity ee = new EventEntity(accNumber, EventType.GERENTE_ALTERADO, payload, version);
-        this.eventRepository.save(ee);
+        this.saveAndPublish(ee);
     }
 
-    public BigDecimal getBalancoAtual(String accNumber){
-        //ENCONTRA A LISTA
-        List<EventEntity> eventos = eventRepository.findByObjetoIdOrderByVersaoAsc(accNumber);
+    //TODAS AS FUNÇÕES DE PEGAR (LER) EVENTOS FORAM MOVIDOS PRO READ SERVICE DO BANCO READ, AQUI SÓ CRIA, SALVA E PUBLICA
 
-        BigDecimal balanco = BigDecimal.ZERO;
+    //PUBLICAR
+    private void saveAndPublish(EventEntity ee) {
+        //SALAVA PRIMEIRO NO DB-ACC
+        EventEntity saved = eventRepository.save(ee);
 
-        for (EventEntity evento : eventos) {
-            switch (evento.getTipo()) { 
-                case DEPOSITO:
-                    balanco = balanco.add( //SÓ PROCURA 'VALOR' NO PAYLOAD SE FOR UM DESSES TIPOS, EVITA PROCURAR O VALOR CASO ELE NÃO EXISTA NO PAYLOAD (TAVA DANDO NULLPOINTEREXCEPTION)
-                        evento.getPayload().get("valor").decimalValue()
-                    );
-                    break;
-                case TRANSFERENCIA_DESTINO:
-                    balanco = balanco.add(
-                        evento.getPayload().get("valor").decimalValue()
-                    );
-                    break;
-                case SAQUE:
-                    balanco = balanco.subtract(
-                        evento.getPayload().get("valor").decimalValue()
-                    );
-                    break;
-                case TRANSFERENCIA_ORIGEM:
-                    balanco = balanco.subtract(
-                        evento.getPayload().get("valor").decimalValue()
-                    );
-                    break;
-                default:
-                    break;
-            }
-        }
-        return balanco;
-    }
-
-    public Long getLastGerente(String accNumber){ //RETORNA CPF DO DO GERENTE ATUAL
-          List<EventEntity> eventos = eventRepository.findByObjetoIdOrderByVersaoAsc(accNumber);
-
-          //NÃO PODE ESTAR VAZIO PQ TEM Q TER PELO MENOS O CRIADO
-            if (eventos.isEmpty()) throw new EventoNaoEncontrado();
-
-            Long gerCpf = null;
-
-            for (EventEntity evento : eventos) {
-                if (evento.getTipo() == EventType.CRIADO||evento.getTipo() == EventType.GERENTE_ALTERADO) {
-
-                    var payload = evento.getPayload();//pega payload
-                    var cpfNode = payload.get("cpfGerente");//pega campo cpfgerente
-
-                    String cpfTexto = cpfNode.asText();//transforma em string, pq aparentemente é mto dificil pro javinha tranformar de payload pra Long direto
-
-                    gerCpf = Long.parseLong(cpfTexto); //tranforma em Long
-
-                    //System.out.println("CPF CONVERTIDO: " + gerCpf);
-                }
-            }
-
-            if (gerCpf == null) throw new EventoNaoEncontrado();
-
-            return gerCpf;
-    }
-
-    public EventDTO getLastEvent(String accNumber){
-        EventEntity lastEvent = this.eventRepository.findTopByObjetoIdOrderByVersaoDesc(accNumber)
-        .orElseThrow(() -> new EventoNaoEncontrado());
-
-        EventDTO leDTO = new EventDTO(
-            lastEvent.getId(),
-            lastEvent.getObjetoId(),
-            lastEvent.getTipo(),
-            lastEvent.getPayload(),
-            lastEvent.getVersao(),
-            lastEvent.getDatetime()
+        EventDTO dto = new EventDTO(
+            saved.getId(),
+            saved.getObjetoId(),
+            saved.getTipo(),
+            saved.getPayload(),
+            saved.getVersao(),
+            saved.getDatetime()
         );
 
-        return leDTO;
+        //PUBLICA O DTO PRA FILA DO READ
+        applicationEventPublisher.publishEvent(dto);
     }
 }

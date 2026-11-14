@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.monsterbank.ms_account.account.accountDTOs.AccountDTO;
 import com.monsterbank.ms_account.account.accountDTOs.AccountLastVersion;
 import com.monsterbank.ms_account.account.AccountRepository;
+
 import com.monsterbank.ms_account.exceptions.ErroContaNaoEncontradaException;
 import com.monsterbank.ms_account.exceptions.ErroCriacaoAccountException;
 import com.monsterbank.ms_account.exceptions.ErroListaDeGerenteVaziaOuNula;
@@ -55,79 +56,6 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
         this.accountRepository = accountRepository;
         this.extratoRepository = extratoRepository;
         this.eventService = eventService;
-    }
-
-    public Optional<AccountDTO> getMockAcc(){
-        //BigDecimal bal = new BigDecimal("1100.45");
-        //AccountDTO acc = new AccountDTO(
-        //        "999",
-        //        "11122233399",
-        //        bal,
-        //        100L
-        //    );
-        return this.accountRepository.findByNumber("001").map(
-            acc -> new AccountDTO(
-                acc.getNumber(),
-                acc.getClientCpf(),
-                acc.getBalanco(),
-                acc.getManagerId(),
-                acc.getCreatedAt()
-            )
-        );
-    }
-
-    public List<AccountDTO> listaContas(){
-        return accountRepository.findAll().stream().map(
-            acc -> new AccountDTO(
-                acc.getNumber(),
-                acc.getClientCpf(),
-                acc.getBalanco(),
-                acc.getManagerId(),
-                acc.getCreatedAt())
-        ).toList();
-    }
-
-    public AccountDTO findAccountByCpf(String cpf){
-        AccountEntity acc = this.accountRepository.findByClientCpf(cpf)
-                .orElseThrow(() -> new ErroContaNaoEncontradaException());
-       
-        return new AccountDTO(
-                acc.getNumber(),
-                acc.getClientCpf(),
-                acc.getBalanco(),
-                acc.getManagerId(),
-                acc.getCreatedAt()
-            );
-    }
-
-    public AccountDTO findAccountByNumber(String number){
-        AccountEntity acc = this.accountRepository.findByNumber(number)
-                .orElseThrow(() -> new ErroContaNaoEncontradaException());
-       
-        return new AccountDTO(
-                acc.getNumber(),
-                acc.getClientCpf(),
-                acc.getBalanco(),
-                acc.getManagerId(),
-                acc.getCreatedAt()
-            );
-    }
-
-    public AccountLastVersion getLastVersion(String accNumber){
-        //PEGA ULTIMO EVENTO (PRA PREENCHER DATA)
-        EventDTO le = this.eventService.getLastEvent(accNumber);
-        LocalDateTime lastUpdt = le.getDatetime();
-
-        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        String lastUpdtString = lastUpdt.format(formatador);
-
-        BigDecimal balancoAtual = this.eventService.getBalancoAtual(accNumber);
-
-        Long lastGerente = this.eventService.getLastGerente(accNumber);
-
-        AccountLastVersion acl = new AccountLastVersion(balancoAtual, lastGerente, lastUpdtString);
-
-        return acl;
     }
   
       public Long findLeastBusyManager(List<Long> idsGerentesAtivos) {
