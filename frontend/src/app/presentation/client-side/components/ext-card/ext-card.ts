@@ -8,10 +8,11 @@ import { Client } from '../../../../domain/client/models/client.model';
 import { Account } from '../../../../domain/account/models/account.model';
 import { AccountService } from '../../../../application/account/services/account-service';
 import { OperationSide } from '../../../../enumeration/operation-side';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-ext-card',
-  imports: [MatIconModule],
+  imports: [MatIconModule, DecimalPipe],
   templateUrl: './ext-card.html',
   styleUrl: './ext-card.css',
 })
@@ -31,5 +32,10 @@ export class ExtCard {
     console.log('transfINSTANCE: ', this.transfInstance());
     if(this.operInstance()) return this.operInstance()?.side == OperationSide.DEP? 'dep': 'sac';
     else return 'transf'
+  })
+
+  val = computed(()=>{
+    if(this.operInstance()) return String(this.operInstance()?.value).padStart(2, '0')
+      else return String(this.transfInstance()?.value).padStart(2, '0')
   })
 }

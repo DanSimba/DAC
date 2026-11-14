@@ -85,6 +85,8 @@ export class Transference{
             this.dest.set('');
             this.value.set(null);
             this.sent.set(false);
+
+            this.showPopUp('Operação efetuada com sucesso!!!', 'success');
           }, 3000);
         }, 
         error: (err) => {

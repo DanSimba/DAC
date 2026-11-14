@@ -32,7 +32,8 @@
                     </p>
                 </div>
                 <p class="text-red-700">
-                    Valor: {{transfInstance()?.value}}R$
+                    <!-- PIPE: PELO MENOS UM DÍGITO ANTES DO PONTO E EXATAMENTE 2 APÓS -->
+                    Valor: {{transfInstance()?.value | number:'1.2-2' }}R$
                 </p>
             } @else {
                 <div class="flex flex-row w-70 justify-between">
@@ -44,7 +45,7 @@
                     </p>
                 </div>
                 <p class="text-blue-700">
-                    Valor: {{transfInstance()?.value}}R$
+                    Valor: {{transfInstance()?.value | number:'1.2-2'}}R$
                 </p>
             }
             <p>
@@ -52,14 +53,14 @@
             </p>
          } @else if(type() === 'dep'){
             <p class="text-blue-700">
-                 Valor: {{operInstance()?.value}}R$
+                 Valor: {{operInstance()?.value | number:'1.2-2'}}R$
             </p>
             <p>
                  Data: {{operInstance()?.datetime}}
             </p>
          }@else{
             <p class="text-red-700">
-                 Valor: {{operInstance()?.value}}R$
+                 Valor: {{operInstance()?.value | number:'1.2-2'}}R$
             </p>
             <p>
                  Data: {{operInstance()?.datetime}}
