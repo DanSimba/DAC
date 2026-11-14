@@ -19,6 +19,7 @@ export class Managers implements OnInit{
   
   formAberto = signal<boolean>(false);
   editandoID = signal<number | null>(null);
+  public mensagemErro: string = '';
 
   private formVazio(): ManagerDTO{
     return {nome: '', cpf:'', email:'', telefone:''};
@@ -32,9 +33,54 @@ export class Managers implements OnInit{
     })
   }
 
+  // peguei do autocadastro se funcionar lá deve funcionar aqui
+  public bloquearNaoNumeros(event: KeyboardEvent): void { 
+    const tecla = event.key;
+    const permitido = /\d/.test(tecla) || tecla === 'Backspace' || tecla === 'Delete' || tecla === 'ArrowLeft' || tecla === 'ArrowRight' || tecla === 'Tab' || tecla === 'Shift';
+
+    if (!permitido) {
+      event.preventDefault();
+    }
+  }
+
+  public bloquearNumeros(event: KeyboardEvent): void {
+    const tecla = event.key;
+    if (/\d/.test(tecla)) {
+      event.preventDefault();
+    }
+  }
+
+  public formatarCPF(): void { // tambem peguei igual do autocadastro deve funcionar
+    let cpfNumeros = this.form.cpf.replace(/\D/g, '').slice(0, 11);
+    // cpfNumeros é só para apoio para pegar somente os numeros
+
+    if (cpfNumeros.length > 9) {
+      this.form.cpf = `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3, 6)}.${cpfNumeros.slice(6, 9)}-${cpfNumeros.slice(9)}`;
+    } else if (cpfNumeros.length > 6) {
+      this.form.cpf = `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3, 6)}.${cpfNumeros.slice(6)}`;
+    } else if (cpfNumeros.length > 3) {
+      this.form.cpf = `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3)}`;
+    } else {
+      this.form.cpf = cpfNumeros;
+    }
+  }
+
+  public formatarTelefone(): void { // dale autocadastro dnv
+    let telefoneNumeros = this.form.telefone.replace(/\D/g, '').slice(0, 11);
+
+    if (telefoneNumeros.length > 7) {
+      this.form.telefone = `(${telefoneNumeros.slice(0, 2)}) ${telefoneNumeros.slice(2, 7)}-${telefoneNumeros.slice(7)}`;
+    } else if (telefoneNumeros.length > 2) {
+      this.form.telefone = `(${telefoneNumeros.slice(0, 2)}) ${telefoneNumeros.slice(2)}`;
+    } else {
+      this.form.telefone = telefoneNumeros;
+    }
+  }
+
   abrirVazio(): void{
     this.editandoID.set(null);
     this.form = this.formVazio();
+    this.mensagemErro= '';
     this.formAberto.set(true);
   }
 
@@ -46,10 +92,12 @@ export class Managers implements OnInit{
       email: manager.email,
       telefone: manager.telefone,
     }
+    this.mensagemErro= '';
     this.formAberto.set(true);
   }
 
   fecharForm(): void{
+    this.mensagemErro = '';
     this.formAberto.set(false);
   }
 
@@ -66,20 +114,28 @@ export class Managers implements OnInit{
 
   salvar() {
     if(!this.form.nome || !this.form.cpf || !this.form.email){
+      this.mensagemErro = 'Preencha todos os campos obrigatórios (*).';
       // a validação mais porca q vc já viu
       return;
     }
 
+    this.mensagemErro = '';
+    this.form.cpf = this.form.cpf.replace(/\D/g, '');
+    this.form.telefone = this.form.telefone.replace(/\D/g, '');
     const id = this.editandoID();
     if(id){
       this.managerService.atualizarGerente(id, this.form).subscribe({
-        next: () => {console.log('momento do popup de sucesso'); this.fecharForm},
-        error: (err) => console.log('problemas na att de gerente', err),
+        next: () => {console.log('momento do popup de sucesso'); this.fecharForm()},
+        error: (err) => {console.log('problemas na att de gerente', err);
+        this.mensagemErro = 'Erro ao atualizar gerente';
+        },
       });
     }else{
       this.managerService.criarGerente(this.form).subscribe({
-        next: () => {console.log('sucesso na criação de gerente'); this.fecharForm},
-        error: (err) => console.log('nem criar tá craindo fi', err),
+        next: () => {console.log('sucesso na criação de gerente'); this.fecharForm()},
+        error: (err) => {console.log('nem criar tá craindo fi', err);
+        this.mensagemErro = 'Erro ao criar gerente';
+        },
       });
     }
 
