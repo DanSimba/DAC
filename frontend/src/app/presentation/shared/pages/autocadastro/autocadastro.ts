@@ -124,7 +124,7 @@ export class Autocadastro {
     const payload: CreateClientPayload = {
       nome: this.client.nome,
       email: this.client.email,
-      telefone: this.client.telefone,
+      telefone: this.client.telefone.replace(/\D/g, ''),
       endereco: this.client.endereco,
       cpf: this.client.cpf.replace(/\D/g, ''), // só deixa os números
       salario: this.client.salario.toFixed(2) // converte para string com 2 casas decimais
@@ -195,7 +195,7 @@ export class Autocadastro {
           this.mensagemSucesso = '';
         } else {
           this.mensagemErro = '';
-          this.address.cep = result.cep;
+          this.address.cep = result.cep.replace(/\D/g, '');
           this.address.logradouro = result.logradouro;
           this.ruaBloqueada = result.logradouro !== '';
           this.address.cidade = result.localidade;

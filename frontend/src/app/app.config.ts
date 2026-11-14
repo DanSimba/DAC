@@ -4,7 +4,8 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideEnvironmentNgxMask } from 'ngx-mask';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './infraestructure/http/authInterceptor.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes), 
     provideClientHydration(withEventReplay()),
     provideEnvironmentNgxMask(),
-    provideHttpClient(withFetch())
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor]))
   ]
 };

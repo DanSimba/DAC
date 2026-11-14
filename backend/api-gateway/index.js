@@ -23,11 +23,14 @@ app.use(express.json());
 async function encaminhaResponse(response, res) {
   const texto = await response.text();
   if (!texto) {
+    console.log("Status: ", res.status(response.status).end());
     return res.status(response.status).end();
   }
   try {
+    console.log("Texto: ", res.status(response.status).json(JSON.parse(texto)));
     return res.status(response.status).json(JSON.parse(texto));
   } catch {
+    console.error("Texto: ", res.status(response.status).send(texto));
     return res.status(response.status).send(texto);
   }
 }
@@ -288,11 +291,10 @@ app.get('/validacao', (req, res) => {
     // Lista as solicitações
     app.get('/solicitacoes', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
       try {
+        console.log("Entrei no Get para listar todas as solicitações.");
         const queryParams = new URLSearchParams(req.query).toString();
         const url = `${process.env.MS_CLIENTE_URL}/solicitacoes${queryParams ? '?' + queryParams : ''}`;
         const response = await fetch(url);
-
-        console.log("Entrei no Get para listar todas as solicitações.");
 
         return await encaminhaResponse(response, res);
 
@@ -308,10 +310,9 @@ app.get('/validacao', (req, res) => {
   // Listar solicitações por cpf
   app.get('/solicitacoes/:cpf', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
     try {
+      console.log("Entrei no Get para listar uma solicitação");
       const url = `${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}`;
       const response = await fetch(url);
-
-      console.log("Entrei no Get para listar uma solicitação");
       
       return await encaminhaResponse(response, res);
 
@@ -327,13 +328,12 @@ app.get('/validacao', (req, res) => {
     // Rejeitar solicitações
     app.post('/solicitacoes/:cpf/rejeicao', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
       try {
+        console.log("Entrei no Post para rejeitar uma solicitação.");
         const response = await fetch(`${process.env.MS_CLIENTE_URL}/solicitacoes/${req.params.cpf}/rejeicao`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
         });
-
-        console.log("Entrei no Post para rejeitar uma solicitação.");
 
         return await encaminhaResponse(response, res);
 
@@ -347,8 +347,8 @@ app.get('/validacao', (req, res) => {
     });
 
 
-  // Aprovar solicitações - verificaToken, verificaPerfil('GERENTE')
-  app.post('/solicitacoes/:cpf/aprovacao', async (req, res) => {
+  // Aprovar solicitações
+  app.post('/solicitacoes/:cpf/aprovacao', verificaToken, verificaPerfil('GERENTE'), async (req, res) => {
     try {
       console.log("Entrei no Post para aprovar uma solicitação.");
 

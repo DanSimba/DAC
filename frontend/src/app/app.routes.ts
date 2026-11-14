@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { HomePage } from './presentation/shared/pages/home-page/home-page';
 import { ClientSidePage } from './presentation/client-side/pages/client-side-page/client-side-page';
 import { ManagerSidePage } from './presentation/manager-side/pages/manager-side-page/manager-side-page';
-import { clientAuthGuard } from './domain/client/guards/client-auth-guard';
+import { clientAuthGuard, managerAuthGuard } from './domain/auth/guards/auth-guard';
 
 export const routes: Routes = [
     {//home deslogado
@@ -44,6 +44,7 @@ export const routes: Routes = [
         path:'manager',
         component:ManagerSidePage,
         title:'ah é',
+        canActivate: [managerAuthGuard],
         children:[
             {
                 path:'',
