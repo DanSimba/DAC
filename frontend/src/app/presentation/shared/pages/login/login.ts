@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -14,6 +14,8 @@ import { AuthResponse } from '../../../../domain/auth/models/auth-response.model
 })
 
 export class Login {
+
+  private cdr = inject(ChangeDetectorRef);
 
   public credentials: LoginRequest = {
     login: '',
@@ -47,8 +49,9 @@ export class Login {
     // Faz a solicitação de login ao back-end usando o AuthHttpService
     this.authService.login(this.credentials).subscribe({
       next: (response: AuthResponse) => {
-        this.mensagemSucesso = 'Login realizado com sucesso! Redirecionando...';
+        this.mensagemSucesso = 'Login realizado com sucesso. Redirecionando...';
         this.mensagemErro = '';
+        this.cdr.detectChanges();
 
         // Salva o token JWT e as informações da sessão no localStorage
         localStorage.setItem('token', response.token); // Salva o token JWT
@@ -70,13 +73,14 @@ export class Login {
 
         // Se retornar 401 as credenciais estão erradas
         if (error.status === 401) {
-          this.mensagemErro = error.error?.message || 'Login inválido!';
+          this.mensagemErro = error.error?.message || 'Login inválido.';
           // Se retornar 0 o back não está respondendo 
         } else if (error.status === 0) {
           this.mensagemErro = 'Não foi possível conectar ao servidor.';
         } else {
           this.mensagemErro = 'Ocorreu um erro ao tentar efetuar o login. Tente novamente.';
         }
+        this.cdr.detectChanges();
       },
       
     });

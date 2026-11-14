@@ -253,7 +253,7 @@ app.get('/validacao', (req, res) => {
           return res.status(403).json({ message : 'Acesso negado: Perfil não identificado' });
         }
 
-        if (req.usuario.tipo.toUpperCase() !== perfilExigido.toUpperCase()) {
+        if (req.usuario.tipo.toUpperCase() !== perfil.toUpperCase()) {
           console.error('Erro: Sem permissão');
           return res.status(403).json({ message: 'Acesso negado: Você não tem permissão para esta ação' });
         }

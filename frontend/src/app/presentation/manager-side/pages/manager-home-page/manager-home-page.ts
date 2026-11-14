@@ -165,6 +165,7 @@ export class ManagerHomePage implements OnInit {
       error: (erro) => {
         console.error('Erro ao carregar solicitações:', erro);
         this.mensagemErro = 'Falha ao carregar solicitações. Tente novamente.';
+        this.cdr.detectChanges();
       }
     });
   }
