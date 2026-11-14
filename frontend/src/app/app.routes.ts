@@ -8,7 +8,7 @@ export const routes: Routes = [
     {//home deslogado
         path: '',
         component: HomePage,
-        title: 'BANCO DA MONSTER HIGH????',
+        title: 'BANCO DA MONSTER HIGH',
         children:[
             {
                 path:'',
