@@ -39,6 +39,18 @@ public class ReadService {
     }
 
     //PARTE DA ACC--------------------------------------------------fgbvbhfvhbffrjnfvjn
+
+    public List<AccountDTO> listaContas(){
+        return accountRepository.findAll().stream().map(
+            acc -> new AccountDTO(
+                acc.getNumber(),
+                acc.getClientCpf(),
+                acc.getBalanco(),
+                acc.getManagerId(),
+                acc.getCreatedAt())
+        ).toList();
+    }
+
     public AccountDTO findAccountByNumber(String accNumber) {
         AccountReadEntity acc = accountRepository.findById(accNumber)
                 .orElseThrow(() -> new ErroContaNaoEncontradaException());
@@ -70,15 +82,6 @@ public class ReadService {
     }
 
     //PARTE DOS EVENTOS-----------------------------idhwcbedcbupdkhcb kpwdnk
-
-    //public List<EventReadEntity> findEventsByAccount(String objetoId) {
-    //    return eventRepository.findByObjetoIdOrderByVersaoAsc(objetoId);
-    //}
-
-    //public EventReadEntity findLastEvent(String objetoId) {
-    //    return eventRepository.findTopByObjetoIdOrderByVersaoDesc(objetoId)
-    //        .orElseThrow(() -> new EventoNaoEncontrado());
-    //}
 
     public EventReadEntity saveEvent(EventReadEntity event) {
         return eventRepository.save(event);

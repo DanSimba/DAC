@@ -45,27 +45,6 @@ public class AccountController {
           return ResponseEntity.ok().build();
      }
 
-     //vou deixar aqui só por encargo de conciencia por enquanto
-     @GetMapping("/getMockAcc")
-     public ResponseEntity<Optional<AccountDTO>> getMockAcc(){
-          return ResponseEntity.ok(this.accountService.getMockAcc());
-     }
-
-     @GetMapping 
-     public ResponseEntity<List<AccountDTO>> listContas(){
-          return ResponseEntity.ok(this.accountService.listaContas());
-     }
-
-     //@GetMapping("/findByNumber/{number}")
-     //public ResponseEntity<AccountDTO> findAccountByNumber(@PathVariable("number") String number){
-     //     return ResponseEntity.ok(this.accountService.findAccountByNumber(number));
-     //}
-
-     //@GetMapping("/getLastVersion/{number}") //PEGA ULTIMO EVENTO QUE ACONTECEU (SALDO E GERENTE ATUALIZADO)
-     //public ResponseEntity<AccountLastVersion> getLastVersion(@PathVariable("number") String number){
-     //     return ResponseEntity.ok(this.accountService.getLastVersion(number));
-     //}
-
      @GetMapping("/listExtratos/{number}")
      public ResponseEntity <List<ExtratoDTO>> listExtratos(@PathVariable("number") String number){
           return ResponseEntity.ok(this.accountService.listExtratos(number));
@@ -115,5 +94,10 @@ public class AccountController {
      @GetMapping("/findByCpf/{cpf}")
      public ResponseEntity<AccountDTO> findAccountByCpf(@PathVariable("cpf") String cpf){
           return ResponseEntity.ok(this.readService.findAccountByCpf(cpf));
+     }
+
+     @GetMapping 
+     public ResponseEntity<List<AccountDTO>> listContas(){
+          return ResponseEntity.ok(this.readService.listaContas());
      }
 }
