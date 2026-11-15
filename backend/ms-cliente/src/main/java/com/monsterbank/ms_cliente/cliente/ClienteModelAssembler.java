@@ -30,7 +30,7 @@ public class ClienteModelAssembler implements RepresentationModelAssembler<Clien
         model.add(
                 linkTo(methodOn(ClienteController.class).findByCpf(cliente.getCpf())).withSelfRel(),
                 linkTo(methodOn(ClienteController.class).findNameByCpf(cliente.getCpf())).withRel("nome"),
-                linkTo(methodOn(ClienteController.class).listarClientes(null, 0)).withRel("clientes")
+                linkTo(methodOn(ClienteController.class).listarClientes(null)).withRel("clientes")
         );
 
         return model;
