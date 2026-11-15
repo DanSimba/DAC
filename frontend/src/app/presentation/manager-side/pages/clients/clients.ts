@@ -29,6 +29,7 @@ export class Clients implements OnInit {
     this.managerService.listarClientes().subscribe({
       next: (clientes) => {
         this.clientes = clientes;
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
       error: (erro) => {
