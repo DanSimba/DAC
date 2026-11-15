@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { LoginRequest } from '../../domain/auth/models/login-request.model';
 import { AuthResponse, UsuarioAutenticado } from '../../domain/auth/models/auth-response.model';
 import { UserType } from '../../enumeration/user-type';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,7 @@ export class AuthHttpService {
   // Injeta o HttpClient para fazer requisições HTTP 
   private http = inject(HttpClient);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   // o front deve se comunicar com o back só pela pelo apigeteway na porta 3000
   private readonly API_URL = 'http://localhost:8080';
@@ -54,14 +56,17 @@ export class AuthHttpService {
   }
 
   public getToken(): string | null {
+    if (!isPlatformBrowser(this.platformId)) { return null; }
     return localStorage.getItem('token');
   }
 
   public getTipo(): UserType | string | null {
+    if (!isPlatformBrowser(this.platformId)) { return null; }
     return localStorage.getItem('tipo');
   }
 
   public getUsuario(): UsuarioAutenticado | null {
+    if (!isPlatformBrowser(this.platformId)) { return null; }
     const raw = localStorage.getItem('usuario');
     return raw ? (JSON.parse(raw) as UsuarioAutenticado) : null;
   }

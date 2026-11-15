@@ -99,7 +99,13 @@ export class AccountService {
 
   getLastVersion(){
     //BUSCA 
-    this.accountHttpService.getLastVersion(this.account().number).subscribe({
+    const accountNumber = this.account().number;
+    if (!accountNumber) { 
+      console.log("Número da conta vazio.")
+      return; 
+    }
+
+    this.accountHttpService.getLastVersion(accountNumber).subscribe({
       next: (response)=>{
         console.log("RESPONSE DO GETLASTVERSION: ", response);
 

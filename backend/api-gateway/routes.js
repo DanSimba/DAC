@@ -223,6 +223,7 @@ export function createRoutes({
   //conta
   router.get('/account/findByCpf/:cpf', ...somenteCliente, contaService.buscarPorCpf);
   router.get('/account/findByNumber/:number', ...somenteCliente, contaService.buscarPorNumero);
+  router.get('/account/getLastVersion/:number', ...somenteCliente, contaService.buscarUltimaVersao);
   router.post('/account/transfer', ...somenteCliente, contaService.transferir);
   router.post('/account/operate', ...somenteCliente, contaService.operar);
 
