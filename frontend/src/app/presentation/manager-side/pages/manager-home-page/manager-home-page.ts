@@ -188,12 +188,16 @@ export class ManagerHomePage implements OnInit {
     
     this.managerService.aprovarSolicitacao(cpfLimpo).subscribe({
       next: () => {
+        solicitacao.status = 'APROVADO';
+        solicitacao.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
         this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
-        this.carregarSolicitacoes(); 
+        //this.carregarSolicitacoes();
         this.ajustarPaginaAposRemocao();
+        this.cdr.detectChanges();
       },
       error: (erro) => {
         this.mensagemErro = 'Ocorreu um erro ao aprovar o cliente.';
+        this.cdr.detectChanges(); 
       }
     });
     // */
@@ -219,8 +223,8 @@ export class ManagerHomePage implements OnInit {
 
 
     // /*  
-    const payload = { motivo: this.motivo }; 
 
+      const payload = { motivo: this.motivo }; 
       const cpfLimpo = this.solicitacaoSelecionada.cpf.replace(/\D/g, '');
 
       this.managerService.recusarSolicitacao(cpfLimpo, payload).subscribe({
@@ -229,9 +233,11 @@ export class ManagerHomePage implements OnInit {
           this.fecharModal();
           this.carregarSolicitacoes();
           this.ajustarPaginaAposRemocao();
+          this.cdr.detectChanges();
         },
         error: (erro) => {
           this.motivoErro = 'Ocorreu um erro ao recusar o cliente.';
+          this.cdr.detectChanges();
         }
       });
       // */
