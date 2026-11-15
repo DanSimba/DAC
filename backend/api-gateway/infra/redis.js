@@ -1,60 +1,73 @@
 import { createClient } from 'redis';
 
-export function createRedis({ url, logger = console } = {}) {
-  let client;
-  let connectionPromise;
+const CONNECTION_ATTEMPTS = 10;
+const RETRY_DELAY = 3000;
 
-  function getClient() {
-    if (!client?.isReady) {
-      throw new Error('Redis não está conectado.');
-    }
+export class Redis {
+  #client;
+  #connectionPromise;
 
-    return client;
+  async initialize() {
+    return this.getClient();
   }
 
-  async function connect() {
-    if (client?.isReady) {
-      return client;
+  async getClient() {
+    if (this.#client?.isReady || this.#client?.isOpen) {
+      return this.#client;
     }
 
-    if (connectionPromise) {
-      return connectionPromise;
+    if (this.#connectionPromise) {
+      return this.#connectionPromise;
     }
+
+    const url = process.env.REDIS_URL;
 
     if (!url) {
-      throw new Error('URL do Redis não informada.');
+      throw new Error('REDIS_URL não informada.');
     }
 
-    if (!client) {
-      client = createClient({ url });
-      client.on('error', error => logger.error('Erro no Redis:', error));
-    }
+    if (!this.#client) {
+      this.#client = createClient({
+        url,
+        socket: {
+          reconnectStrategy: retries => {
+            if (retries >= CONNECTION_ATTEMPTS) {
+              return false;
+            }
 
-    connectionPromise = client.connect()
-      .then(() => client)
-      .finally(() => {
-        connectionPromise = undefined;
+            return RETRY_DELAY;
+          }
+        }
       });
 
-    return connectionPromise;
-  }
-
-  async function disconnect() {
-    if (!client) {
-      return;
+      this.#client.on('error', error => {
+        console.error('Erro no Redis:', error);
+      });
     }
 
-    if (client.isOpen) {
-      await client.quit();
-    }
+    this.#connectionPromise = this.#client.connect()
+      .then(() => this.#client)
+      .finally(() => {
+        this.#connectionPromise = undefined;
+      });
 
-    client = undefined;
-    connectionPromise = undefined;
+    return this.#connectionPromise;
   }
 
-  return {
-    connect,
-    disconnect,
-    getClient
-  };
+  async close() {
+    if (this.#connectionPromise) {
+      await this.#connectionPromise.catch(() => undefined);
+    }
+
+    if (this.#client?.isOpen) {
+      await this.#client.quit().catch(() => {
+        this.#client.destroy();
+      });
+    }
+
+    this.#client = undefined;
+    this.#connectionPromise = undefined;
+  }
 }
+
+export const redis = new Redis();

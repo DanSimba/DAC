@@ -1,68 +1,73 @@
 import amqp from 'amqplib';
 
-export function createRabbitMQ({
-  url,
-  connectionAttempts = 10,
-  retryDelay = 3000,
-  logger = console
-} = {}) {
-  let connection;
-  let channel;
-  let connectionPromise;
+const CONNECTION_ATTEMPTS = 10;
+const RETRY_DELAY = 3000;
 
-  function wait(milliseconds) {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
+export class RabbitMQ {
+  #connection;
+  #channel;
+  #connectionPromise;
+  #closing = false;
+
+  async initialize() {
+    this.#closing = false;
+    return this.getChannel();
   }
 
-  function getConnection() {
-    if (!connection) {
-      throw new Error('RabbitMQ não está conectado.');
+  async getChannel() {
+    if (this.#channel) {
+      return this.#channel;
     }
 
-    return connection;
-  }
-
-  function getChannel() {
-    if (!channel) {
-      throw new Error('Canal do RabbitMQ não está disponível.');
+    if (this.#connectionPromise) {
+      return this.#connectionPromise;
     }
 
-    return channel;
+    this.#connectionPromise = this.#connectWithRetry().finally(() => {
+      this.#connectionPromise = undefined;
+    });
+
+    return this.#connectionPromise;
   }
 
-  async function openConnection() {
+  async close() {
+    this.#closing = true;
+
+    if (this.#connectionPromise) {
+      await this.#connectionPromise.catch(() => undefined);
+    }
+
+    const channel = this.#channel;
+    const connection = this.#connection;
+
+    this.#channel = undefined;
+    this.#connection = undefined;
+
+    await channel?.close().catch(() => undefined);
+    await connection?.close().catch(() => undefined);
+  }
+
+  async #connectWithRetry() {
+    const url = process.env.RABBITMQ_URL;
+
+    if (!url) {
+      throw new Error('RABBITMQ_URL não informada.');
+    }
+
     let lastError;
 
-    for (let attempt = 1; attempt <= connectionAttempts; attempt += 1) {
+    for (let attempt = 1; attempt <= CONNECTION_ATTEMPTS; attempt += 1) {
       try {
-        const newConnection = await amqp.connect(url);
-        const newChannel = await newConnection.createChannel();
-
-        connection = newConnection;
-        channel = newChannel;
-
-        newConnection.on('error', error => logger.error('Erro na conexão com RabbitMQ:', error));
-        newConnection.on('close', () => {
-          if (connection === newConnection) {
-            connection = undefined;
-            channel = undefined;
-          }
-        });
-
-        newChannel.on('error', error => logger.error('Erro no canal do RabbitMQ:', error));
-        newChannel.on('close', () => {
-          if (channel === newChannel) {
-            channel = undefined;
-          }
-        });
-
-        return newChannel;
+        return await this.#connect(url);
       } catch (error) {
         lastError = error;
 
-        if (attempt < connectionAttempts) {
-          logger.warn(`RabbitMQ indisponível. Nova tentativa em ${retryDelay} ms.`);
-          await wait(retryDelay);
+        if (attempt < CONNECTION_ATTEMPTS) {
+          console.warn(
+            `RabbitMQ indisponível. Tentativa ${attempt}/${CONNECTION_ATTEMPTS}.`
+          );
+
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         }
       }
     }
@@ -70,47 +75,53 @@ export function createRabbitMQ({
     throw lastError;
   }
 
-  async function connect() {
-    if (channel) {
+  async #connect(url) {
+    const connection = await amqp.connect(url);
+
+    try {
+      const channel = await connection.createChannel();
+
+      connection.on('error', error => {
+        console.error('Erro na conexão com RabbitMQ:', error);
+      });
+
+      connection.on('close', () => {
+        this.#handleDisconnect(connection, channel);
+      });
+
+      channel.on('error', error => {
+        console.error('Erro no canal do RabbitMQ:', error);
+      });
+
+      channel.on('close', () => {
+        this.#handleDisconnect(connection, channel);
+      });
+
+      this.#connection = connection;
+      this.#channel = channel;
+
       return channel;
-    }
-
-    if (connectionPromise) {
-      return connectionPromise;
-    }
-
-    if (!url) {
-      throw new Error('URL do RabbitMQ não informada.');
-    }
-
-    connectionPromise = openConnection().finally(() => {
-      connectionPromise = undefined;
-    });
-
-    return connectionPromise;
-  }
-
-  async function disconnect() {
-    const currentChannel = channel;
-    const currentConnection = connection;
-
-    channel = undefined;
-    connection = undefined;
-    connectionPromise = undefined;
-
-    if (currentChannel) {
-      await currentChannel.close();
-    }
-
-    if (currentConnection) {
-      await currentConnection.close();
+    } catch (error) {
+      await connection.close().catch(() => undefined);
+      throw error;
     }
   }
 
-  return {
-    connect,
-    disconnect,
-    getConnection,
-    getChannel
-  };
+  #handleDisconnect(connection, channel) {
+    if (this.#connection !== connection && this.#channel !== channel) {
+      return;
+    }
+
+    this.#connection = undefined;
+    this.#channel = undefined;
+
+    if (!this.#closing) {
+      connection.close().catch(() => undefined);
+      this.getChannel().catch(error => {
+        console.error('Não foi possível reconectar ao RabbitMQ:', error);
+      });
+    }
+  }
 }
+
+export const rabbitMQ = new RabbitMQ();
