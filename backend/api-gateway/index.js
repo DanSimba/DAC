@@ -798,23 +798,63 @@ app.get('/validacao', (req, res) => {
     });
 
     //operação 
-    app.post('/account/operate', async(req, res) =>{
+    // app.post('/account/operate', async(req, res) =>{
+    //   try {
+    //     const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
+    //       {
+    //         method: 'POST',
+    //         headers: {'Content-Type':'application/json'},
+    //         body: JSON.stringify(req.body)
+
+    //       }
+    //     )
+    //     await encaminhaResponse(response,res)
+    //   } catch (error) {
+    //     console.error('Erro ao realizar a operação -> ', error);
+    //     res.status(502).json({
+    //       message: 'Erro ao comunicar com ms-account'
+    //     })
+    //   }
+    // });
+
+    app.post('/account/sacar', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
       try {
-        const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/sacar`,
           {
             method: 'POST',
-            headers: {'Content-Type':'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
-
           }
-        )
-        await encaminhaResponse(response,res)
+        );
+
+        await encaminhaResponse(response, res);
       } catch (error) {
-        console.error('Erro ao realizar a operação -> ', error);
+        console.error('Erro ao realizar saque -> ', error);
         res.status(502).json({
           message: 'Erro ao comunicar com ms-account'
-        })
+        });
       }
     });
+
+  app.post('/account/depositar', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+    try {
+      const response = await fetch(
+        `${process.env.MS_ACCOUNT_URL}/account/depositar`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req.body)
+        }
+      );
+
+      await encaminhaResponse(response, res);
+    } catch (error) {
+      console.error('Erro ao realizar depósito -> ', error);
+      res.status(502).json({
+        message: 'Erro ao comunicar com ms-account'
+      });
+    }
+  });
 
 iniciarServidor();
