@@ -23,14 +23,14 @@ app.use(express.json());
 async function encaminhaResponse(response, res) {
   const texto = await response.text();
   if (!texto) {
-    console.log("Status: ", res.status(response.status).end());
+    console.log("Status: ", response.status);
     return res.status(response.status).end();
   }
   try {
-    console.log("Texto: ", res.status(response.status).json(JSON.parse(texto)));
+    console.log("Texto: ", texto);
     return res.status(response.status).json(JSON.parse(texto));
   } catch {
-    console.error("Texto: ", res.status(response.status).send(texto));
+    console.error("Texto: ", texto);
     return res.status(response.status).send(texto);
   }
 }
@@ -571,11 +571,7 @@ app.get('/validacao', (req, res) => {
           clientes.map(async (cliente) => {
             const contaresponse = await fetch(`${process.env.MS_ACCOUNT_URL}/account/findByCpf/${encodeURIComponent(cliente.cpf)}`);
 
-            if (!contaresponse.ok){
-              throw new Error(`Erro ao consultar o cliente  ${cliente.cpf}`);
-            }
-
-            const conta = await contaresponse.json();
+            const conta = contaresponse.ok ? await contaresponse.json() : { balanco: 0 };
 
             return {
               cpf: cliente.cpf,
@@ -597,7 +593,6 @@ app.get('/validacao', (req, res) => {
         });
       }
     });
-
 
     //relatório
     app.get('/relatorio-clientes', async(req, res) => {
@@ -625,23 +620,21 @@ app.get('/validacao', (req, res) => {
         for (const cliente of clientes) {
           const contaresponse = await fetch(`${process.env.MS_ACCOUNT_URL}/account/findByCpf/${encodeURIComponent(cliente.cpf)}`);
 
-          if (contaresponse.ok) {
-            const conta = await contaresponse.json();
-
-            const gerente = gerentes.find(g => String(g.cpf) === String(conta.managerId) || Number(g.id) === Number(conta.managerId));
           
-            resultado.push ({
-              cpfCliente: cliente.cpf,
-              nomeCliente: cliente.nome,
-              emailCliente: cliente.email,
-              salario: formataSaldo(cliente.salario),
-              numeroConta: conta.number,
-              saldoConta: formataSaldo(conta.balanco),
-              cpfGerente: gerente.cpf,
-              nomeGerente: gerente.nome,
-            });
-
-          }
+          const conta = contaresponse.ok ? await contaresponse.json() : { number: '-', balanco: 0, managerId: null };
+            
+          const gerente = gerentes.find(g => String(g.cpf) === String(conta.managerId) || Number(g.id) === Number(conta.managerId)) || gerentes[0] || { cpf: '-', nome: '-' };
+          
+          resultado.push ({
+            cpfCliente: cliente.cpf,
+            nomeCliente: cliente.nome,
+            emailCliente: cliente.email,
+            salario: formataSaldo(cliente.salario),
+            numeroConta: conta.number,
+            saldoConta: formataSaldo(conta.balanco),
+            cpfGerente: gerente.cpf,
+            nomeGerente: gerente.nome,
+          });
         }
 
         return res.json(resultado);

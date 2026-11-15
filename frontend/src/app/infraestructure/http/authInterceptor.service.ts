@@ -13,7 +13,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     if (token && !isRotaPublica) {
         requestClonada = req.clone({
             setHeaders: {
-                'x-access-token' : token
+                'Authorization' : `Bearer ${token}`
             }
         });
     }

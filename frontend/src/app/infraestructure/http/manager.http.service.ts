@@ -14,16 +14,6 @@ export class ManagerHttpService {
   http = inject(HttpClient);
   private readonly api_URl = 'http://localhost:8080'; //a qualquer momento vira a oficial
 
-  private obterHeaders(): HttpHeaders {
-    let token = '';
-    if (typeof localStorage !== 'undefined') {
-      token = localStorage.getItem('token') || '';
-    }
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   listarGerentes(): Observable<ManagerDTO[]>{
     return this.http.get<ManagerDTO[]>(`${this.api_URl}/gerentes`);
   }
@@ -46,22 +36,16 @@ export class ManagerHttpService {
 
   // Solicitação de cadastro da home do gerente
   listarSolicitacoes(): Observable<SolicitacaoCadastro[]>{
-    return this.http.get<SolicitacaoCadastro[]>(`${this.api_URl}/solicitacoes`, { 
-      headers: this.obterHeaders()
-    });
+    return this.http.get<SolicitacaoCadastro[]>(`${this.api_URl}/solicitacoes`);
 
   }
 
   aprovarSolicitacao(cpf: string): Observable<void>{
-    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovacao`, null, {
-      headers: this.obterHeaders()
-    });
+    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovacao`, null);
   }
 
   recusarSolicitacao(cpf: string, payload: RecusarClientePayload): Observable<void>{
-    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/rejeicao`, payload, {
-      headers: this.obterHeaders()
-    });
+    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/rejeicao`, payload);
   }
 
   //buscar todos os clientes na pag de consultar clientes
