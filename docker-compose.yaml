@@ -155,9 +155,12 @@ services:
       - db-auth
       - rabbitmq
 
-    environment:
-      SPRING_MONGODB_URI: mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin
+    mem_limit: 512m
+    mem_reservation: 384m
 
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
+      SPRING_MONGODB_URI: mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
@@ -174,12 +177,15 @@ services:
     build:
       context: ./backend/ms-cliente
       #dockerfile: ms-cliente.dockerfile
+    mem_limit: 512m
+    mem_reservation: 384m
 
     depends_on:
       - db-cliente
       - rabbitmq
 
     environment:
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-cliente:5432/ms-cliente
       SPRING_DATASOURCE_USERNAME: ms-cliente
       SPRING_DATASOURCE_PASSWORD: psql
@@ -197,10 +203,15 @@ services:
 
   ms-orquestrador:
     build: ./backend/ms-orquestrador
+    
+    mem_limit: 512m
+    mem_reservation: 384m
+    
     depends_on:
       - rabbitmq
       - redis
     environment:
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
@@ -219,6 +230,7 @@ services:
       - db-account-read
       - rabbitmq
     environment:
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/ms-account
       SPRING_DATASOURCE_USERNAME: ms-account
       SPRING_DATASOURCE_PASSWORD: psql
@@ -238,8 +250,10 @@ services:
   ms-email:
     build:
       context: ./backend/ms-email
+      
     mem_limit: 512m
     mem_reservation: 384m
+    
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -264,12 +278,17 @@ services:
 
   ms-gerente:
     build: ./backend/ms-gerente
+
+    mem_limit: 512m
+    mem_reservation: 384m
+
     ports:
       - "8084:8084"
     depends_on:
       - db-gerente
       - rabbitmq
     environment:
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60 -XX:+UseSerialGC  
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-gerente:5432/ms-gerente
       - SPRING_DATASOURCE_USERNAME=ms-gerente
       - SPRING_DATASOURCE_PASSWORD=psql
