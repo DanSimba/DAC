@@ -524,7 +524,7 @@ app.get('/validacao', (req, res) => {
         const resultado = gerentes.map(gerente =>{
           const quantClientes = contas.filter(
             conta => Number(conta.managerId) === Number(gerente.id)
-          ).lenght;
+          ).length;
           return{
             ...gerente,
             quantClientes
@@ -729,6 +729,51 @@ app.get('/validacao', (req, res) => {
         console.error('Erro no relatório de clientes-> ', error);
         res.status(502).json({
           message: 'Erro ao compor os dados do relatório'
+        });
+      }
+    });
+
+    // buscar conta por CPF
+    app.get('/account/findByCpf/:cpf', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+      try {
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/findByCpf/${encodeURIComponent(req.params.cpf)}`
+        );
+        await encaminhaResponse(response, res);
+      } catch (error) {
+        console.error('Erro ao buscar conta por CPF -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        });
+      }
+    });
+
+    // buscar conta por número
+    app.get('/account/findByNumber/:number', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+      try {
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/findByNumber/${encodeURIComponent(req.params.number)}`
+        );
+        await encaminhaResponse(response, res);
+      } catch (error) {
+        console.error('Erro ao buscar conta por número -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        });
+      }
+    });
+
+    // buscar última versão / saldo atualizado da conta
+    app.get('/account/getLastVersion/:number', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+      try {
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/getLastVersion/${encodeURIComponent(req.params.number)}`
+        );
+        await encaminhaResponse(response, res);
+      } catch (error) {
+        console.error('Erro ao buscar última versão da conta -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
         });
       }
     });
