@@ -178,10 +178,6 @@ export function createRoutes({
   router.put('/gerentes/:id', ...somenteGerente, gerenteService.atualizar);
   router.delete('/gerentes/:id', ...somenteGerente, gerenteService.remover);
 
-  // jobs / saga
-  router.get('/jobs/:jobId/status', ...somenteGerente, autenticar, sagaService.buscarStatus);
-  router.get('/jobs/:jobId/result', ...somenteGerente, autenticar, sagaService.buscarResultado);
-
   //clientes
   router.get('/clientes', ...somenteGerente, async (req, res) => {
     const clientes = await clienteService.listar(req.query);

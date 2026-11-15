@@ -52,7 +52,7 @@ export class ManagerHttpService {
       null,
       { observe: 'response' }
     );
-    return this.jobPolling.executarComPolling<any>(req$);
+    return this.jobPolling.executarComPolling<any>(req$, false);
   }
 
   recusarSolicitacao(cpf: string, payload: RecusarClientePayload): Observable<void>{
