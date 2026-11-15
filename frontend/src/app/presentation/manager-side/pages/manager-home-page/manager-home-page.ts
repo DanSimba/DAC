@@ -11,126 +11,6 @@ import { ManagerHttpService } from '../../../../infraestructure/http/manager.htt
 })
 export class ManagerHomePage implements OnInit {
 
-  /*
-  // Mockzim pra testar a tela rlx
-  public solicitacoes: SolicitacaoCadastro[] = [
-    {
-      cpf: '856.789.123-44',
-      nome: 'Moster Hunter 2',
-      salario: 'R$ 3.200,00',
-      status: 'APROVADO',
-      dataHoraProcessamento: '18/09/2026 15:30'
-    },
-    {
-      cpf: '967.654.321-00',
-      nome: 'Monster Zero Quente',
-      salario: 'R$ 8.280,50',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '923.456.789-01',
-      nome: 'Monster Truck Jr',
-      salario: 'R$ 4.590,00',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '811.222.333-47',
-      nome: 'Draculaura Da Silva',
-      salario: 'R$ 5.900,00',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '755.666.777-85',
-      nome: 'Frankie Estein',
-      salario: 'R$ 3.300,00',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '523.123.123-14',
-      nome: 'Cleiton Cleiton',
-      salario: 'R$ 1.800,00',
-      status: 'NAO_APROVADO',
-      motivo: 'Renda incompatível com o declarado.',
-      dataHoraProcessamento: '18/09/2026 09:00'
-    },
-    {
-      cpf: '656.789.123-43',
-      nome: 'Monster Bike De Sousa',
-      salario: 'R$ 3.200,00',
-      status: 'APROVADO',
-      dataHoraProcessamento: '19/09/2026 10:15'
-    },
-    {
-      cpf: '587.654.321-01',
-      nome: 'Monster Mango Loco Gelado',
-      salario: 'R$ 8.400,50',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '423.456.789-02',
-      nome: 'Monster Car Doido',
-      salario: 'R$ 4.800,00',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '111.322.333-46',
-      nome: 'Mostro Do lago',
-      salario: 'R$8.000,00',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '555.766.777-89',
-      nome: 'Mostro Do pântano',
-      salario: 'R$ 3.400,00',
-      status: 'PENDENTE'
-    },
-    {
-      cpf: '123.523.123-19',
-      nome: 'Alma Sebosa Do Mal',
-      salario: 'R$ 1.900,00',
-      status: 'NAO_APROVADO',
-      motivo: 'Renda incompatível com o declarado.',
-      dataHoraProcessamento: '18/09/2026 09:00'
-    },
-    {
-      cpf: '223.125.123-10',
-      nome: 'Mostro Debaixo da Cama',
-      salario: 'R$ 1.300,00',
-      status: 'NAO_APROVADO',
-      motivo: 'Documento ilegível.',
-      dataHoraProcessamento: '26/09/2026 09:00'
-    },
-    {
-      cpf: '223.032.123-19',
-      nome: 'Serasa Negativado',
-      salario: 'R$ 1.580,00',
-      status: 'APROVADO',
-      dataHoraProcessamento: '26/09/2026 16:20'
-    },
-    {
-      cpf: '173.082.193-19',
-      nome: 'Barata Maluca',
-      salario: 'R$ 1.550,00',
-      status: 'APROVADO',
-      dataHoraProcessamento: '30/09/2026 11:00'
-    },
-    {
-      cpf: '823.032.163-29',
-      nome: 'Barrata',
-      salario: 'R$ 2.850,00',
-      status: 'APROVADO',
-      dataHoraProcessamento: '28/09/2026 17:00'
-    },
-    {
-      cpf: '225.036.124-13',
-      nome: 'Barata Voadora',
-      salario: 'R$ 1.350,00',
-      status: 'APROVADO',
-      dataHoraProcessamento: '29/09/2026 14:10'
-    }
-  ];
-  */
-
   private managerService = inject(ManagerHttpService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -138,7 +18,6 @@ export class ManagerHomePage implements OnInit {
 
   public mensagemSucesso: string = '';
   public mensagemErro: string = '';
-
 
   //Controle do pop-up
   public modalAberto: boolean = false;
@@ -158,9 +37,16 @@ export class ManagerHomePage implements OnInit {
 
   public carregarSolicitacoes(): void {
     this.managerService.listarSolicitacoes().subscribe({
-      next: (resposta: any) =>
-        { this.solicitacoes = resposta.solicitacoes || resposta;
-          this.cdr.detectChanges();
+      next: (resposta: any) => {
+        this.solicitacoes = resposta.solicitacoes || [];
+        
+        for (const solicitacao of this.solicitacoes) {
+          if (solicitacao.dataHoraProcessamento) {
+            solicitacao.dataHoraProcessamento = new Date(solicitacao.dataHoraProcessamento).toLocaleString('pt-BR');
+          }
+        }
+
+        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.error('Erro ao carregar solicitações:', erro);
@@ -173,16 +59,6 @@ export class ManagerHomePage implements OnInit {
   public aprovar(solicitacao: SolicitacaoCadastro): void {
     this.mensagemSucesso = '';
     this.mensagemErro = '';
-
-    /*
-    //teste com mock
-    solicitacao.status = 'APROVADO';
-    solicitacao.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
-    this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
-    this.ajustarPaginaAposRemocao();
-    */
-
-     // /*
 
     const cpfLimpo = solicitacao.cpf.replace(/\D/g, '');
     
@@ -200,7 +76,6 @@ export class ManagerHomePage implements OnInit {
         this.cdr.detectChanges(); 
       }
     });
-    // */
   }
 
   public confirmarRecusa(): void {
@@ -210,19 +85,6 @@ export class ManagerHomePage implements OnInit {
     }
 
     if (this.solicitacaoSelecionada) {
-
-      /*
-      //teste com mock
-      this.solicitacaoSelecionada.status = 'NAO_APROVADO';
-      this.solicitacaoSelecionada.motivo = this.motivo;
-      this.solicitacaoSelecionada.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
-      this.mensagemSucesso = `A solicitação de ${this.solicitacaoSelecionada.nome} foi recusada.`;
-      this.fecharModal();
-      this.ajustarPaginaAposRemocao();
-      */
-
-
-    // /*  
 
       const payload = { motivo: this.motivo }; 
       const cpfLimpo = this.solicitacaoSelecionada.cpf.replace(/\D/g, '');
@@ -240,7 +102,6 @@ export class ManagerHomePage implements OnInit {
           this.cdr.detectChanges();
         }
       });
-      // */
     }
   }
 
