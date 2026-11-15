@@ -557,7 +557,8 @@ app.get('/validacao', (req, res) => {
     }
 
     //lista cliente + saldo 
-    app.get('/clientes', async(req, res) => {
+    //app.get('/clientes', async(req, res) => {
+    app.get('/clientes', verificaToken, verificaPerfil('GERENTE'), async(req, res) => {
       try{
         const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
         if (!clienteresponse.ok){
@@ -584,6 +585,7 @@ app.get('/validacao', (req, res) => {
           })
         );
 
+        resultado.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
         return res.json(resultado);
 
       }catch (error){
@@ -595,7 +597,8 @@ app.get('/validacao', (req, res) => {
     });
 
     //relatório
-    app.get('/relatorio-clientes', async(req, res) => {
+    //app.get('/relatorio-clientes', async(req, res) => {
+    app.get('/relatorio-clientes', verificaToken, verificaPerfil('GERENTE'), async(req, res) => {
       try{
         //clientes
         const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
@@ -636,6 +639,7 @@ app.get('/validacao', (req, res) => {
           });
         }
 
+        resultado.sort((a, b) => a.nomeCliente.localeCompare(b.nomeCliente, 'pt-BR'));
         return res.json(resultado);
 
       }catch (error){
