@@ -1,6 +1,5 @@
 import { config } from '../config.js';
-import { addLinks } from '../helpers/hateoas.js';
-import { HttpError, request } from '../infra/http-client.js';
+import { request } from '../infra/http-client.js';
 
 const accountUrl = `${config.serviceUrls.account}/account`;
 
@@ -34,7 +33,7 @@ export async function buscarContas() {
   return data ?? [];
 }
 
-async function obterPorCpf(cpf, usuario) {
+export async function buscarPorCpf(cpf, usuario) {
   const { data } = await request(
     `${accountUrl}/findByCpf/${encodeURIComponent(cpf)}`,
     {
@@ -46,7 +45,7 @@ async function obterPorCpf(cpf, usuario) {
   return data;
 }
 
-async function obterPorNumero(numero, usuario) {
+export async function buscarPorNumero(numero, usuario) {
   const { data } = await request(
     `${accountUrl}/findByNumber/${encodeURIComponent(numero)}`,
     {
@@ -58,7 +57,7 @@ async function obterPorNumero(numero, usuario) {
   return data;
 }
 
-async function obterUltimaVersao(numero, usuario) {
+export async function buscarUltimaVersao(numero, usuario) {
   const { data } = await request(
     `${accountUrl}/getLastVersion/${encodeURIComponent(numero)}`,
     {
@@ -70,7 +69,7 @@ async function obterUltimaVersao(numero, usuario) {
   return data;
 }
 
-async function obterExtratos(numero, usuario) {
+export async function listarExtratos(numero, usuario) {
   const { data } = await request(
     `${accountUrl}/listExtratos/${encodeURIComponent(numero)}`,
     {
@@ -97,9 +96,9 @@ async function executarOperacao(tipo, operacao, usuario) {
   return data;
 }
 
-async function executarTransferencia(transferencia, usuario) {
+export async function transferir(transferencia, usuario) {
   const cpfOrigem = String(usuario.cpf);
-  const contaDestino = await obterPorNumero(transferencia.accDestiny, usuario);
+  const contaDestino = await buscarPorNumero(transferencia.accDestiny, usuario);
   const cpfDestino = String(contaDestino.clientCpf);
   const [nomeOrigem, nomeDestino] = await Promise.all([
     buscarNomeCliente(cpfOrigem),
@@ -123,96 +122,10 @@ async function executarTransferencia(transferencia, usuario) {
   return data;
 }
 
-function linksDaConta(conta) {
-  const numero = encodeURIComponent(conta.number);
-
-  return {
-    self: `/account/findByNumber/${numero}`,
-    extrato: `/account/listExtratos/${numero}`,
-    ultimaVersao: `/account/getLastVersion/${numero}`,
-    depositar: {
-      href: '/account/depositar',
-      method: 'POST'
-    },
-    sacar: {
-      href: '/account/sacar',
-      method: 'POST'
-    },
-    transferir: {
-      href: '/account/transfer',
-      method: 'POST'
-    }
-  };
+export async function sacar(operacao, usuario) {
+  return executarOperacao('sacar', operacao, usuario);
 }
 
-function enviarResultado(res, data) {
-  return data === undefined
-    ? res.status(200).end()
-    : res.status(200).json(data);
-}
-
-export async function buscarPorCpf(req, res) {
-  if (
-    req.usuario.tipo.toUpperCase() === 'CLIENTE'
-    && String(req.usuario.cpf) !== String(req.params.cpf)
-  ) {
-    return res.status(403).json({ message: 'Acesso negado.' });
-  }
-
-  const conta = await obterPorCpf(req.params.cpf, req.usuario);
-  const links = req.usuario.tipo.toUpperCase() === 'GERENTE'
-    ? { self: `/account/findByCpf/${encodeURIComponent(conta.clientCpf)}` }
-    : linksDaConta(conta);
-
-  return res.status(200).json(addLinks(req, conta, links));
-}
-
-export async function buscarPorNumero(req, res) {
-  const conta = await obterPorNumero(req.params.number, req.usuario);
-
-  return res.status(200).json(addLinks(req, conta, linksDaConta(conta)));
-}
-
-export async function buscarUltimaVersao(req, res) {
-  const versao = await obterUltimaVersao(req.params.number, req.usuario);
-
-  return res.status(200).json(versao);
-}
-
-export async function listarExtratos(req, res) {
-  const extratos = await obterExtratos(req.params.number, req.usuario);
-
-  return res.status(200).json(extratos);
-}
-
-export async function sacar(req, res) {
-  const resultado = await executarOperacao('sacar', req.body, req.usuario);
-
-  return enviarResultado(res, resultado);
-}
-
-export async function depositar(req, res) {
-  const resultado = await executarOperacao('depositar', req.body, req.usuario);
-
-  return enviarResultado(res, resultado);
-}
-
-export async function transferir(req, res) {
-  const resultado = await executarTransferencia(req.body, req.usuario);
-
-  return enviarResultado(res, resultado);
-}
-
-export async function operar(req, res) {
-  const operacao = String(req.body?.side).toUpperCase();
-
-  if (operacao === 'DEP') {
-    return depositar(req, res);
-  }
-
-  if (operacao === 'SAC') {
-    return sacar(req, res);
-  }
-
-  throw new HttpError(400, 'Tipo de operação inválido.');
+export async function depositar(operacao, usuario) {
+  return executarOperacao('depositar', operacao, usuario);
 }

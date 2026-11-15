@@ -297,14 +297,93 @@ export function createRoutes({
 
 
   //conta
-  router.get('/account/findByCpf/:cpf', autenticar, contaService.buscarPorCpf);
-  router.get('/account/findByNumber/:number', ...somenteCliente, contaService.buscarPorNumero);
-  router.get('/account/listExtratos/:number', ...somenteCliente, contaService.listarExtratos);
-  router.get('/account/getLastVersion/:number', ...somenteCliente, contaService.buscarUltimaVersao);
-  router.post('/account/depositar', ...somenteCliente, contaService.depositar);
-  router.post('/account/sacar', ...somenteCliente, contaService.sacar);
-  router.post('/account/transfer', ...somenteCliente, contaService.transferir);
-  router.post('/account/operate', ...somenteCliente, contaService.operar);
+  router.get('/account/findByCpf/:cpf', autenticar, async (req, res) => {
+    if (
+      req.usuario.tipo.toUpperCase() === 'CLIENTE'
+      && String(req.usuario.cpf) !== String(req.params.cpf)
+    ) {
+      return res.status(403).json({ message: 'Acesso negado.' });
+    }
+
+    const conta = await contaService.buscarPorCpf(req.params.cpf, req.usuario);
+    const numero = encodeURIComponent(conta.number);
+    const links = req.usuario.tipo.toUpperCase() === 'GERENTE'
+      ? { self: `/account/findByCpf/${encodeURIComponent(conta.clientCpf)}` }
+      : {
+          self: `/account/findByNumber/${numero}`,
+          extrato: `/account/listExtratos/${numero}`,
+          ultimaVersao: `/account/getLastVersion/${numero}`,
+          depositar: { href: '/account/depositar', method: 'POST' },
+          sacar: { href: '/account/sacar', method: 'POST' },
+          transferir: { href: '/account/transfer', method: 'POST' }
+        };
+
+    return res.status(200).json(addLinks(req, conta, links));
+  });
+
+  router.get('/account/findByNumber/:number', ...somenteCliente, async (req, res) => {
+    const conta = await contaService.buscarPorNumero(
+      req.params.number,
+      req.usuario
+    );
+    const numero = encodeURIComponent(conta.number);
+    const resultado = addLinks(
+      req,
+      conta,
+      {
+        self: `/account/findByNumber/${numero}`,
+        extrato: `/account/listExtratos/${numero}`,
+        ultimaVersao: `/account/getLastVersion/${numero}`,
+        depositar: { href: '/account/depositar', method: 'POST' },
+        sacar: { href: '/account/sacar', method: 'POST' },
+        transferir: { href: '/account/transfer', method: 'POST' }
+      }
+    );
+
+    return res.status(200).json(resultado);
+  });
+
+  router.get('/account/listExtratos/:number', ...somenteCliente, async (req, res) => {
+    const extratos = await contaService.listarExtratos(
+      req.params.number,
+      req.usuario
+    );
+
+    return res.status(200).json(extratos);
+  });
+
+  router.get('/account/getLastVersion/:number', ...somenteCliente, async (req, res) => {
+    const versao = await contaService.buscarUltimaVersao(
+      req.params.number,
+      req.usuario
+    );
+
+    return res.status(200).json(versao);
+  });
+
+  router.post('/account/depositar', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.depositar(req.body, req.usuario);
+
+    return resultado === undefined
+      ? res.status(200).end()
+      : res.status(200).json(resultado);
+  });
+
+  router.post('/account/sacar', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.sacar(req.body, req.usuario);
+
+    return resultado === undefined
+      ? res.status(200).end()
+      : res.status(200).json(resultado);
+  });
+
+  router.post('/account/transfer', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.transferir(req.body, req.usuario);
+
+    return resultado === undefined
+      ? res.status(200).end()
+      : res.status(200).json(resultado);
+  });
 
   router.use((error, req, res, next) => {
     if (res.headersSent) {
