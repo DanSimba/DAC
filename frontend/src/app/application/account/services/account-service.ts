@@ -112,26 +112,6 @@ export class AccountService {
       }
     })
   }
-
-    // operar(op: OperationModel): Observable<Account>{
-
-    //   return this.accountHttpService.operar(op).pipe(
-    //     map((response) => {
-
-    //       console.log("EXTRATO CRIADO: ", response);
-        
-    //       this.extratoService.addToExtList(response); //ATUALIZA EXTLIST
-    //       this.extratoService.addToRealList(response); //ATUALIZA LISTA CRUA
-
-    //       this.account.update(current => ({
-    //         ...current,  
-    //         balanco: response.saldoApos //ATUALIZA BALANCO
-    //       }));
-
-    //       return this.account(); 
-    //     })
-    //   )
-    // }
   
     transferir(t: TransferenceModel): Observable<Account>{
        return this.accountHttpService.transferir(t).pipe(

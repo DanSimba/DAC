@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { OperationModel } from '../../../../domain/operations/models/operation.model';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
@@ -18,7 +18,9 @@ export class DepSac {
   location = inject(Location);
 
   accountService = inject(AccountService);
-  account = signal<Account>(this.accountService.getAccount());
+  account = computed((): Account=>{
+    return this.accountService.getAccount();
+  })
 
   side = signal<'dep'|'sac'|''>('');
   value = signal<number>(0);
