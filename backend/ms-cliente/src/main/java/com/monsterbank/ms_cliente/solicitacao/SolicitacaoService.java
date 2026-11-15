@@ -2,7 +2,6 @@ package com.monsterbank.ms_cliente.solicitacao;
 
 import com.monsterbank.ms_cliente.exception.*;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -135,17 +134,16 @@ public class SolicitacaoService {
     }
 
 
-    public ListarSolicitacoesReturn listarSolicitacoes(StatusSolicitacao status, int page) {
+    public ListarSolicitacoesReturn listarSolicitacoes(StatusSolicitacao status) {
         log.info("{} --- Iniciando busca das solicitações", SolicitacaoService.class);
-        PageRequest pageable = PageRequest.of(page, 50);
         List<SolicitacaoEntity> lista;
 
         if (status != null) {
             log.info("{} --- Busca de solicitação com filtro de status {}", SolicitacaoService.class, status);
-            lista = solicitacaoRepository.findByStatus(status, pageable).getContent();
+            lista = solicitacaoRepository.findByStatus(status);
         } else {
             log.info("{} --- Busca de solicitação sem filtro de status.", SolicitacaoService.class);
-            lista = solicitacaoRepository.findAll(pageable).getContent();
+            lista = solicitacaoRepository.findAll();
         }
 
         return solicitacaoModelAssembler.toListModel(lista);

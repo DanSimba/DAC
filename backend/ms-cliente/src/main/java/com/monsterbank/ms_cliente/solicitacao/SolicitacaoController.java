@@ -42,11 +42,10 @@ public class SolicitacaoController {
 
     @GetMapping
     public ResponseEntity<ListarSolicitacoesReturn> buscarSolicitacoes(
-            @RequestParam(required = false) StatusSolicitacao status, 
-            @RequestParam(defaultValue = "0") int page
+            @RequestParam(required = false) StatusSolicitacao status
         ) {
         log.info("{} --- Entrei no Get de busca de todas as solicitações.", SolicitacaoController.class);
-        ListarSolicitacoesReturn solicitacoes = solicitacaoService.listarSolicitacoes(status, page);
+        ListarSolicitacoesReturn solicitacoes = solicitacaoService.listarSolicitacoes(status);
 
         return ResponseEntity.ok(solicitacoes);
     }
