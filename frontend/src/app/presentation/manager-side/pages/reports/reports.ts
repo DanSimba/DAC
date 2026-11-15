@@ -10,52 +10,6 @@ import { ManagerHttpService } from '../../../../infraestructure/http/manager.htt
 })
 export class Reports implements OnInit {
 
-  /*
-  // Mockzim pra testar a tela
-  public relatorio: RelatorioCliente[] = [
-    {
-      cpfCliente: '111.111.111-11',
-      nomeCliente: 'Clawdeen Wolf',
-      emailCliente: 'clawdeen@bantads.com',
-      salario: 'R$ 2.800,00',
-      numeroConta: '4821',
-      saldoConta: 'R$ 5.230,50',
-      cpfGerente: '999.999.999-99',
-      nomeGerente: 'Dievalson Oracle Pereira'
-    },
-    {
-      cpfCliente: '222.222.222-22',
-      nomeCliente: 'Cleo de Nile',
-      emailCliente: 'cleo@bantads.com',
-      salario: 'R$ 5.300,00',
-      numeroConta: '1093',
-      saldoConta: 'R$ 12.040,90',
-      cpfGerente: '999.999.999-99',
-      nomeGerente: 'Dievalson Oracle Pereira'
-    },
-    {
-      cpfCliente: '333.333.333-33',
-      nomeCliente: 'Draculaura',
-      emailCliente: 'draculaura@bantads.com',
-      salario: 'R$ 4.100,00',
-      numeroConta: '7345',
-      saldoConta: 'R$ 870,15',
-      cpfGerente: '888.888.888-88',
-      nomeGerente: 'Lagoona Blue'
-    },
-    {
-      cpfCliente: '444.444.444-44',
-      nomeCliente: 'Frankie Stein',
-      emailCliente: 'frankie@bantads.com',
-      salario: 'R$ 3.200,00',
-      numeroConta: '2210',
-      saldoConta: 'R$ 2.200,00',
-      cpfGerente: '888.888.888-88',
-      nomeGerente: 'Lagoona Blue'
-    }
-  ];
-  */
-
   private managerService = inject(ManagerHttpService);
   private cdr = inject(ChangeDetectorRef);
 
