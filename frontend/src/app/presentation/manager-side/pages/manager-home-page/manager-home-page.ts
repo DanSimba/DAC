@@ -46,11 +46,13 @@ export class ManagerHomePage implements OnInit {
           }
         }
 
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
       error: (erro) => {
         console.error('Erro ao carregar solicitações:', erro);
         this.mensagemErro = 'Falha ao carregar solicitações. Tente novamente.';
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
       }
     });
@@ -67,7 +69,6 @@ export class ManagerHomePage implements OnInit {
         solicitacao.status = 'APROVADO';
         solicitacao.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
         this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
-        //this.carregarSolicitacoes();
         this.ajustarPaginaAposRemocao();
         this.cdr.detectChanges();
       },
