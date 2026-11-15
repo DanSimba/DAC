@@ -51,6 +51,7 @@ public class GerenteController {
         return ResponseEntity.ok(gerenteService.buscaPorCpf(cpf));
     }
     
+    
     @PostMapping 
     public ResponseEntity<GerenteDTO> criar(@RequestBody GerenteDTO gerenteDTO) {
         GerenteDTO gerente = gerenteService.salvar(gerenteDTO);

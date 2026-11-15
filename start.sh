@@ -12,6 +12,7 @@ if [ $? -eq 0 ]; then
 	echo "==================================="
 	echo "informações sobre como docker subiu"
 	echo "==================================="	
+	xdg-open http://localhost:4200
 else 
 	echo "Deu algum xabu rapaziada" >&2
 	exit 1
