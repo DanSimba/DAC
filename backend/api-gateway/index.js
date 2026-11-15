@@ -817,7 +817,7 @@ app.get('/validacao', (req, res) => {
     //   }
     // });
 
-    app.post('/account/sacar', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+    app.post('/account/sacar', async (req, res) => {
       try {
         const response = await fetch(
           `${process.env.MS_ACCOUNT_URL}/account/sacar`,
@@ -837,7 +837,7 @@ app.get('/validacao', (req, res) => {
       }
     });
 
-  app.post('/account/depositar', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+  app.post('/account/depositar', async (req, res) => {
     try {
       const response = await fetch(
         `${process.env.MS_ACCOUNT_URL}/account/depositar`,
