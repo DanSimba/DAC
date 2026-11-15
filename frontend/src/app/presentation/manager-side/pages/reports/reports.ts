@@ -26,6 +26,7 @@ export class Reports implements OnInit {
     this.managerService.listarRelatorioClientes().subscribe({
       next: (dados) => {
         this.relatorio = dados;
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
       error: (erro) => {
