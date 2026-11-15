@@ -47,7 +47,7 @@ public class SolicitacaoModelAssembler implements RepresentationModelAssembler<S
         );
         model.add(
                 linkTo(methodOn(SolicitacaoController.class)
-                        .buscarSolicitacoes(null, 0))
+                        .buscarSolicitacoes(null))
                         .withSelfRel()
         );
         return model;
@@ -60,7 +60,7 @@ public class SolicitacaoModelAssembler implements RepresentationModelAssembler<S
                         .buscaSolicitacaoPorCpf(cpf))
                         .withSelfRel(),
                 linkTo(methodOn(SolicitacaoController.class)
-                        .buscarSolicitacoes(null, 0))
+                        .buscarSolicitacoes(null))
                         .withRel("solicitacoes")
         );
 

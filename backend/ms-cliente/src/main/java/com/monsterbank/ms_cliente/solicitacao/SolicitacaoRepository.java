@@ -1,11 +1,10 @@
 package com.monsterbank.ms_cliente.solicitacao;
 
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,5 +12,5 @@ public interface SolicitacaoRepository extends JpaRepository<SolicitacaoEntity, 
 
     Optional<SolicitacaoEntity> findByCpf(String cpf);
     Optional<SolicitacaoEntity> findByEmailIgnoreCase(String email);
-    Page<SolicitacaoEntity> findByStatus(StatusSolicitacao status, Pageable pageable);
+    List<SolicitacaoEntity> findByStatus(StatusSolicitacao status);
 }

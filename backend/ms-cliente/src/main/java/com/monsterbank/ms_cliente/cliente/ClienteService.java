@@ -6,7 +6,6 @@ import com.monsterbank.ms_cliente.exception.ErroCriacaoClienteException;
 import com.monsterbank.ms_cliente.exception.SolicitacaoNaoEncontradaException;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoEntity;
 import com.monsterbank.ms_cliente.solicitacao.SolicitacaoRepository;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -37,21 +36,19 @@ public class ClienteService {
         this.clienteModelAssembler = clienteModelAssembler;
     }
 
-    public List<ClienteRetorno> listarClientes(String field, Integer page){
-        PageRequest peageable = PageRequest.of(page, 50, Sort.by(Sort.Direction.ASC, "nome"));
+    public List<ClienteRetorno> listarClientes(String field){
+        Sort sort = Sort.by(Sort.Direction.ASC, "nome");
+        List<ClienteEntity> clientes;
+
         if(field == null || field.isBlank()){
-            List<ClienteEntity> lista = clienteRepository.findAll(peageable).getContent();
-
-            return lista.stream()
-                    .map(clienteModelAssembler::toModel)
-                    .toList();
-
+            clientes = clienteRepository.findAll(sort);
+        } else {
+            clientes = clienteRepository.findByCpfContainingOrNomeContaining(field, field, sort);
         }
 
-        return clienteRepository.findByCpfContainingOrNomeContaining(field, field, peageable)
+        return clientes.stream()
                 .map(clienteModelAssembler::toModel)
                 .toList();
-
     }
 
 
