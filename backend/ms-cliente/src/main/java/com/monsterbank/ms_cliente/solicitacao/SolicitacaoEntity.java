@@ -124,7 +124,7 @@ public class SolicitacaoEntity {
         Endereco endereco = new Endereco(
                 this.cep,
                 this.logradouro,
-                this.numero,
+                String.valueOf(this.numero),
                 this.complemento,
                 this.bairro,
                 this.cidade,

@@ -308,7 +308,7 @@ export function createRoutes({
     const conta = await contaService.buscarPorCpf(req.params.cpf, req.usuario);
     const numero = encodeURIComponent(conta.number);
     const links = req.usuario.tipo.toUpperCase() === 'GERENTE'
-      ? { self: `/account/findByCpf/${encodeURIComponent(conta.clientCpf)}` }
+      ? { self: `/account/findByCpf/${encodeURIComponent(conta.client_cpf)}` }
       : {
           self: `/account/findByNumber/${numero}`,
           extrato: `/account/listExtratos/${numero}`,
