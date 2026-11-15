@@ -18,6 +18,7 @@ import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RecusarSolicitacao
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.RegistrarSolicitacaoRequest;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoHateoasResponse;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoResponseDTO;
+import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.SolicitacaoSagaDTO;
 import com.monsterbank.ms_cliente.solicitacao.solicitacaoDTOs.ListarSolicitacoesReturn;
 
 import org.slf4j.Logger;
@@ -67,6 +68,16 @@ public class SolicitacaoController {
         URI location = URI.create("/solicitacoes/" + solicitacao.getCpf());
 
         return ResponseEntity.created(location).body(solicitacaoModelAssembler.toResponseModel(solicitacao));
+    }
+
+    @PostMapping("/{cpf}/aprovacao")
+    public ResponseEntity<SolicitacaoSagaDTO> aprovarSolicitacao(@PathVariable String cpf, @Valid @RequestBody RecusarSolicitacaoRequest dto) {
+        log.info("{} --- Entrei no Post para aprovar uma solicitação.", SolicitacaoController.class);
+        SolicitacaoSagaDTO solicitacao = solicitacaoService.aprovar(cpf);
+
+        
+
+        return ResponseEntity.ok(solicitacao);
     }
 
     @PostMapping("/{cpf}/rejeicao")
