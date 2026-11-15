@@ -15,7 +15,7 @@ require('dotenv').config();
 app.use(cors({
   origin: 'http://localhost:4200',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
 }));
 app.use(express.json());
 
@@ -184,6 +184,22 @@ async function iniciarServidor() {
     }
   });
 
+  app.post('/auth/logout', verificaToken, async (req, res) => {
+    try {
+      const { jti, cpf } = req.usuario;
+      await redisClient.del(`sessao:${jti}`);
+      await redisClient.del(`sessao:cpf:${cpf}`);
+
+      return res.status(200).json({ mensagem: 'Logout realizado com sucesso.' });
+    } catch (error) {
+      console.error('Erro ao realizar logout:', error.message);
+      return res.status(500).json({ 
+        status: 500, 
+        mensagem: 'Erro ao encerrar sessão.' 
+      });
+    }
+  });
+
 // Valida Token
 
 app.get('/validacao', (req, res) => {
@@ -225,26 +241,64 @@ app.get('/validacao', (req, res) => {
 
 // }
     // TESTES
-    function verificaToken(req, res, next) {
-      console.log('Entrei para verificar token');
+    // function verificaToken(req, res, next) {
+    //   console.log('Entrei para verificar token');
 
+    //   const authHeader = req.headers.authorization;
+    //   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    //     console.error('Erro: Token não informado');
+    //     return res.status(401).json({ message : 'Token não informado' });
+    //   }
+
+    //   const token = authHeader.split(' ')[1];
+    //   console.log('Token: ', token);
+
+    //   try {
+    //     const usuario = jwt.verify(token, 'MONSTERBANK');
+    //     req.usuario = usuario;
+    //     console.log('Token existente e válido');
+    //     return next();
+    //   } catch (error) {
+    //     console.error('Erro: Token inválido ou expirado');
+    //     return res.status(401).json({ message : 'Token inválido ou expirado' });
+    //   }
+    // }
+
+    async function verificaToken(req, res, next) {
+      const accessToken = req.headers['x-access-token'];;
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.error('Erro: Token não informado');
-        return res.status(401).json({ message : 'Token não informado' });
+      const token = accessToken || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
+
+      if (!token) {
+        return res.status(401).json({
+          status: 401,
+          mensagem: 'Token não informado.'
+        });
       }
 
-      const token = authHeader.split(' ')[1];
-      console.log('Token: ', token);
-
       try {
-        const usuario = jwt.verify(token, 'MONSTERBANK');
-        req.usuario = usuario;
-        console.log('Token existente e válido');
+        const decoded = jwt.verify(token, 'MONSTERBANK');
+        const chaveSessao = `sessao:${decoded.jti}`;
+        const sessaoAtiva = await redisClient.get(chaveSessao);
+
+        if (!sessaoAtiva) {
+          return res.ststus(401).json({
+            status: 401,
+            mensagem: 'Sessao expirada ou encerrada.'
+          });
+        }
+
+        const ttlSessao = 1800;
+        await redisClient.expire(chaveSessao, ttlSessao);
+        await redisClient.expire(`sessao:cpf:${decoded.cpf}`, ttlSessao);
+
+        req.usuario = decoded;
         return next();
       } catch (error) {
-        console.error('Erro: Token inválido ou expirado');
-        return res.status(401).json({ message : 'Token inválido ou expirado' });
+        return res.status(401).json({
+          status: 401,
+          mensagem: 'Token inválido ou expirado.'
+        });
       }
     }
 
@@ -417,6 +471,35 @@ app.get('/validacao', (req, res) => {
       return res.status(500).json({
         status: 500, 
         mensagem: 'Erro interno no Gateway.'
+      });
+    }
+  });
+
+  // Retorna o resultado inline de um Job concluído (R15 e R16)
+  app.get('/jobs/:jobId/result', async (req, res) => {
+    try {
+      const jobRedis = await redisClient.get(`job:${req.params.jobId}`);
+      if (!jobRedis) {
+        return res.status(404).json({ 
+          status: 404, 
+          mensagem: 'Job não encontrado ou expirado.' 
+        });
+      }
+
+      const job = JSON.parse(jobRedis);
+      if (job.status !== 'CONCLUIDO') {
+        return res.status(409).json({ 
+          status: 409, 
+          mensagem: 'O job ainda não foi concluído.' 
+        });
+      }
+
+      return res.status(200).json(job.resultado);
+    } catch (error) {
+      console.error(`Erro ao buscar resultado do job ${req.params.jobId}:`, error.message);
+      return res.status(500).json({ 
+        status: 500, 
+        mensagem: 'Erro interno no Gateway.' 
       });
     }
   });

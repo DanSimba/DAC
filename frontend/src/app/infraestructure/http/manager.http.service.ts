@@ -6,12 +6,14 @@ import { SolicitacaoCadastro } from '../../domain/manager/models/solicitacao-cad
 import { ClienteConsulta } from '../../domain/manager/models/consulta-cliente.model';
 import { RecusarClientePayload } from '../../domain/manager/models/manager-requests.model';
 import { RelatorioCliente } from '../../domain/manager/models/relatorio-cliente.model';
+import { JobPollingService } from './JobPolling.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ManagerHttpService {
-  http = inject(HttpClient);
+  private http = inject(HttpClient);
+  private jobPolling = inject(JobPollingService);
   private readonly api_URl = 'http://localhost:8080'; //a qualquer momento vira a oficial
 
   listarGerentes(): Observable<ManagerDTO[]>{
@@ -40,8 +42,17 @@ export class ManagerHttpService {
 
   }
 
-  aprovarSolicitacao(cpf: string): Observable<void>{
-    return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovacao`, null);
+  // aprovarSolicitacao(cpf: string): Observable<void>{
+  //   return this.http.post<void>(`${this.api_URl}/solicitacoes/${cpf}/aprovacao`, null);
+  // }
+
+  aprovarSolicitacao(cpf: string): Observable<any> {
+    const req$ = this.http.post<any>(
+      `${this.api_URl}/solicitacoes/${cpf}/aprovacao`,
+      null,
+      { observe: 'response' }
+    );
+    return this.jobPolling.executarComPolling<any>(req$);
   }
 
   recusarSolicitacao(cpf: string, payload: RecusarClientePayload): Observable<void>{
