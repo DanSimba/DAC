@@ -75,7 +75,7 @@ public class SolicitacaoController {
         log.info("{} --- Entrei no Post para aprovar uma solicitação.", SolicitacaoController.class);
         SolicitacaoSagaDTO solicitacao = solicitacaoService.aprovar(cpf);
 
-        
+        // Não fiz a SAGA ainda da aprovação pq fiquei sem tempo
 
         return ResponseEntity.ok(solicitacao);
     }
