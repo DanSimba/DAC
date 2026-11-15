@@ -1,4 +1,4 @@
-package com.monsterbank.ms_account.query.consumer;
+package com.monsterbank.ms_account.mensageria.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monsterbank.ms_account.mensageria.dto.EventMessageDTO;
@@ -49,6 +49,11 @@ public class EventConsumer {
         if (message.getTipo() == EventType.CRIADO) {
 
             JsonNode payload = objectMapper.valueToTree(message.getPayload());
+            String clientCpf = payload.get("clientCpf").asText();
+            
+            if (accountReadRepository.findByClientCpf(clientCpf).isPresent()) {
+                return;
+            }
 
             AccountReadEntity acc = new AccountReadEntity();
 

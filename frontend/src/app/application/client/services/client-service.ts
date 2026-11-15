@@ -35,15 +35,44 @@ export class ClientService {
         type     : UserType.CLIENT,
   });
 
+  private client = signal<Client>({
+    id: 0,
+    cpf: '',
+    name: '',
+    email: '',
+    password: '',
+    salary: 0,
+    address: {
+      cep: '',
+      logradouro: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      uf: '',
+      state: '',
+    },
+    status: ClientStatus.ACTIVE,
+    type: UserType.CLIENT,
+  });
+
   //CONTROLE DE LOGGADO OU NÃO
   logged = signal<boolean>(true);
 
-  getClient():Client{
+  getClientMock():Client{
     return this.clientMock();
   }
 
-  setClient(c:Client){
+  setClientMock(c:Client){
     this.clientMock.set(c);
+  }
+
+  getClient(): Client {
+    return this.client();
+  }
+
+  setClient(c: Client) {
+    this.client.set(c);
   }
 
   private isMenuOpen = signal<boolean>(false);
@@ -53,6 +82,23 @@ export class ClientService {
 
   getIMO(): boolean{
     return this.isMenuOpen()
+  }
+
+  findClientByCpf(cpf: string): void {
+    this.clientHttpService.findClientByCpf(cpf).subscribe({
+      next: (response: any) => {
+        // Mapeia caso o backend Java retorne campos em português (nome, salario, endereco...)
+        this.client.set({
+          ...this.client(),
+          ...response,
+          name: response.name ?? response.nome ?? '',
+          cpf: response.cpf ?? cpf,
+          email: response.email ?? '',
+          salary: response.salary ?? response.salario ?? 0,
+        });
+      },
+      error: (err) => console.error('Erro ao buscar dados do cliente:', err)
+    });
   }
 
   createClientRequest(payload: any): Observable<void>{

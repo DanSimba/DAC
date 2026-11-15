@@ -84,27 +84,46 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
     }
 
     @Transactional
-    public AccountDTO createAccount(String cpf, Long managerId){
+    public AccountDTO createAccount(String cpf, Long managerId) {
         log.info("{} --- Iniciando criação de conta para o CPF: {} e ID gerente: {}", AccountService.class, cpf, managerId);
-        try{
+        try {
+            // 1. Idempotência: se já existe conta para esse CPF no write, retorna ela sem gerar número novo nem evento duplicado
+            var contaExistente = this.accountRepository.findByClientCpf(cpf);
+            if (contaExistente.isPresent()) {
+                AccountEntity existing = contaExistente.get();
+                log.warn("{} --- Conta {} já existe para o CPF {}. Retornando conta existente.", AccountService.class, existing.getNumber(), cpf);
+                return new AccountDTO(
+                    existing.getNumber(),
+                    existing.getClientCpf(),
+                    existing.getBalanco(),
+                    existing.getManagerId(),
+                    existing.getCreatedAt()
+                );
+            }
+
+            // 2. Criação normal apenas na primeira vez
             AccountEntity acc = new AccountEntity(
                 cpf,
-                BigDecimal.ZERO, 
+                BigDecimal.ZERO,
                 managerId
             );
 
-            log.info("{} --- Salvando conta", AccountService.class);
+            log.info("{} --- Salvando conta {}", AccountService.class, acc.getNumber());
             this.accountRepository.save(acc);
 
-            log.info("{} --- Criando evento ", AccountService.class);
-            //CRIA EVENTO CRIADO
+            log.info("{} --- Criando evento CRIADO para conta {}", AccountService.class, acc.getNumber());
             this.eventService.createCreateEvent(acc.getNumber(), acc.getClientCpf(), managerId);
 
-            AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId(), acc.getCreatedAt());
-            return accDto;
-            
+            return new AccountDTO(
+                acc.getNumber(),
+                acc.getClientCpf(),
+                acc.getBalanco(),
+                acc.getManagerId(),
+                acc.getCreatedAt()
+            );
+
         } catch (Exception e) {
-            log.error("{} --- Erro ao criar conta.", AccountService.class);
+            log.error("{} --- Erro ao criar conta para CPF {}: {}", AccountService.class, cpf, e.getMessage(), e);
             throw new ErroCriacaoAccountException();
         }
     }

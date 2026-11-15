@@ -15,7 +15,7 @@ require('dotenv').config();
 app.use(cors({
   origin: 'http://localhost:4200',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
 }));
 app.use(express.json());
 
@@ -184,6 +184,22 @@ async function iniciarServidor() {
     }
   });
 
+  app.post('/auth/logout', verificaToken, async (req, res) => {
+    try {
+      const { jti, cpf } = req.usuario;
+      await redisClient.del(`sessao:${jti}`);
+      await redisClient.del(`sessao:cpf:${cpf}`);
+
+      return res.status(200).json({ mensagem: 'Logout realizado com sucesso.' });
+    } catch (error) {
+      console.error('Erro ao realizar logout:', error.message);
+      return res.status(500).json({ 
+        status: 500, 
+        mensagem: 'Erro ao encerrar sessão.' 
+      });
+    }
+  });
+
 // Valida Token
 
 app.get('/validacao', (req, res) => {
@@ -225,26 +241,64 @@ app.get('/validacao', (req, res) => {
 
 // }
     // TESTES
-    function verificaToken(req, res, next) {
-      console.log('Entrei para verificar token');
+    // function verificaToken(req, res, next) {
+    //   console.log('Entrei para verificar token');
 
+    //   const authHeader = req.headers.authorization;
+    //   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    //     console.error('Erro: Token não informado');
+    //     return res.status(401).json({ message : 'Token não informado' });
+    //   }
+
+    //   const token = authHeader.split(' ')[1];
+    //   console.log('Token: ', token);
+
+    //   try {
+    //     const usuario = jwt.verify(token, 'MONSTERBANK');
+    //     req.usuario = usuario;
+    //     console.log('Token existente e válido');
+    //     return next();
+    //   } catch (error) {
+    //     console.error('Erro: Token inválido ou expirado');
+    //     return res.status(401).json({ message : 'Token inválido ou expirado' });
+    //   }
+    // }
+
+    async function verificaToken(req, res, next) {
+      const accessToken = req.headers['x-access-token'];;
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.error('Erro: Token não informado');
-        return res.status(401).json({ message : 'Token não informado' });
+      const token = accessToken || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
+
+      if (!token) {
+        return res.status(401).json({
+          status: 401,
+          mensagem: 'Token não informado.'
+        });
       }
 
-      const token = authHeader.split(' ')[1];
-      console.log('Token: ', token);
-
       try {
-        const usuario = jwt.verify(token, 'MONSTERBANK');
-        req.usuario = usuario;
-        console.log('Token existente e válido');
+        const decoded = jwt.verify(token, 'MONSTERBANK');
+        const chaveSessao = `sessao:${decoded.jti}`;
+        const sessaoAtiva = await redisClient.get(chaveSessao);
+
+        if (!sessaoAtiva) {
+          return res.ststus(401).json({
+            status: 401,
+            mensagem: 'Sessao expirada ou encerrada.'
+          });
+        }
+
+        const ttlSessao = 1800;
+        await redisClient.expire(chaveSessao, ttlSessao);
+        await redisClient.expire(`sessao:cpf:${decoded.cpf}`, ttlSessao);
+
+        req.usuario = decoded;
         return next();
       } catch (error) {
-        console.error('Erro: Token inválido ou expirado');
-        return res.status(401).json({ message : 'Token inválido ou expirado' });
+        return res.status(401).json({
+          status: 401,
+          mensagem: 'Token inválido ou expirado.'
+        });
       }
     }
 
@@ -421,6 +475,35 @@ app.get('/validacao', (req, res) => {
     }
   });
 
+  // Retorna o resultado inline de um Job concluído (R15 e R16)
+  app.get('/jobs/:jobId/result', async (req, res) => {
+    try {
+      const jobRedis = await redisClient.get(`job:${req.params.jobId}`);
+      if (!jobRedis) {
+        return res.status(404).json({ 
+          status: 404, 
+          mensagem: 'Job não encontrado ou expirado.' 
+        });
+      }
+
+      const job = JSON.parse(jobRedis);
+      if (job.status !== 'CONCLUIDO') {
+        return res.status(409).json({ 
+          status: 409, 
+          mensagem: 'O job ainda não foi concluído.' 
+        });
+      }
+
+      return res.status(200).json(job.resultado);
+    } catch (error) {
+      console.error(`Erro ao buscar resultado do job ${req.params.jobId}:`, error.message);
+      return res.status(500).json({ 
+        status: 500, 
+        mensagem: 'Erro interno no Gateway.' 
+      });
+    }
+  });
+
     // para o lado de GERENTE 
     // get gerente com quantidade de clientes por gerente
     app.get('/gerentes', async(req, res) => {
@@ -441,7 +524,7 @@ app.get('/validacao', (req, res) => {
         const resultado = gerentes.map(gerente =>{
           const quantClientes = contas.filter(
             conta => Number(conta.managerId) === Number(gerente.id)
-          ).lenght;
+          ).length;
           return{
             ...gerente,
             quantClientes
@@ -557,7 +640,8 @@ app.get('/validacao', (req, res) => {
     }
 
     //lista cliente + saldo 
-    app.get('/clientes', async(req, res) => {
+    //app.get('/clientes', async(req, res) => {
+    app.get('/clientes', verificaToken, verificaPerfil('GERENTE'), async(req, res) => {
       try{
         const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
         if (!clienteresponse.ok){
@@ -584,6 +668,7 @@ app.get('/validacao', (req, res) => {
           })
         );
 
+        resultado.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
         return res.json(resultado);
 
       }catch (error){
@@ -595,7 +680,8 @@ app.get('/validacao', (req, res) => {
     });
 
     //relatório
-    app.get('/relatorio-clientes', async(req, res) => {
+    //app.get('/relatorio-clientes', async(req, res) => {
+    app.get('/relatorio-clientes', verificaToken, verificaPerfil('GERENTE'), async(req, res) => {
       try{
         //clientes
         const clienteresponse = await fetch(`${process.env.MS_CLIENTE_URL}/clientes`);
@@ -636,12 +722,58 @@ app.get('/validacao', (req, res) => {
           });
         }
 
+        resultado.sort((a, b) => a.nomeCliente.localeCompare(b.nomeCliente, 'pt-BR'));
         return res.json(resultado);
 
       }catch (error){
         console.error('Erro no relatório de clientes-> ', error);
         res.status(502).json({
           message: 'Erro ao compor os dados do relatório'
+        });
+      }
+    });
+
+    // buscar conta por CPF
+    app.get('/account/findByCpf/:cpf', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+      try {
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/findByCpf/${encodeURIComponent(req.params.cpf)}`
+        );
+        await encaminhaResponse(response, res);
+      } catch (error) {
+        console.error('Erro ao buscar conta por CPF -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        });
+      }
+    });
+
+    // buscar conta por número
+    app.get('/account/findByNumber/:number', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+      try {
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/findByNumber/${encodeURIComponent(req.params.number)}`
+        );
+        await encaminhaResponse(response, res);
+      } catch (error) {
+        console.error('Erro ao buscar conta por número -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
+        });
+      }
+    });
+
+    // buscar última versão / saldo atualizado da conta
+    app.get('/account/getLastVersion/:number', verificaToken, verificaPerfil('CLIENTE'), async (req, res) => {
+      try {
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/getLastVersion/${encodeURIComponent(req.params.number)}`
+        );
+        await encaminhaResponse(response, res);
+      } catch (error) {
+        console.error('Erro ao buscar última versão da conta -> ', error);
+        res.status(502).json({
+          message: 'Erro ao comunicar com ms-account'
         });
       }
     });
@@ -666,23 +798,63 @@ app.get('/validacao', (req, res) => {
     });
 
     //operação 
-    app.post('/account/operate', async(req, res) =>{
+    // app.post('/account/operate', async(req, res) =>{
+    //   try {
+    //     const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
+    //       {
+    //         method: 'POST',
+    //         headers: {'Content-Type':'application/json'},
+    //         body: JSON.stringify(req.body)
+
+    //       }
+    //     )
+    //     await encaminhaResponse(response,res)
+    //   } catch (error) {
+    //     console.error('Erro ao realizar a operação -> ', error);
+    //     res.status(502).json({
+    //       message: 'Erro ao comunicar com ms-account'
+    //     })
+    //   }
+    // });
+
+    app.post('/account/sacar', async (req, res) => {
       try {
-        const response = await fetch(`${process.env.MS_ACCOUNT_URL}/account/operate`,
+        const response = await fetch(
+          `${process.env.MS_ACCOUNT_URL}/account/sacar`,
           {
             method: 'POST',
-            headers: {'Content-Type':'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
-
           }
-        )
-        await encaminhaResponse(response,res)
+        );
+
+        await encaminhaResponse(response, res);
       } catch (error) {
-        console.error('Erro ao realizar a operação -> ', error);
+        console.error('Erro ao realizar saque -> ', error);
         res.status(502).json({
           message: 'Erro ao comunicar com ms-account'
-        })
+        });
       }
     });
+
+  app.post('/account/depositar', async (req, res) => {
+    try {
+      const response = await fetch(
+        `${process.env.MS_ACCOUNT_URL}/account/depositar`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req.body)
+        }
+      );
+
+      await encaminhaResponse(response, res);
+    } catch (error) {
+      console.error('Erro ao realizar depósito -> ', error);
+      res.status(502).json({
+        message: 'Erro ao comunicar com ms-account'
+      });
+    }
+  });
 
 iniciarServidor();
