@@ -28,11 +28,10 @@ public class ClienteController {
 
     @GetMapping
     public ResponseEntity<List<ClienteRetorno>> listarClientes
-            (@RequestParam(required = false) String field,
-             @RequestParam(defaultValue = "0") int page)
+            (@RequestParam(required = false) String field)
     {
 
-        return ResponseEntity.ok(clienteService.listarClientes(field, page));
+        return ResponseEntity.ok(clienteService.listarClientes(field));
 
     }
 
@@ -47,10 +46,4 @@ public class ClienteController {
      public ResponseEntity<ClienteRetorno> findByCpf(@PathVariable("cpf") String cpf){
           return ResponseEntity.ok(this.clienteService.findByCpf(cpf));
      }
-
-    // @GetMapping("/solicitacoes")
-    // public ResponseEntity<List<ListarSolicitacoesReturn>> getSolicitacaos(@RequestParam(defaultValue = "0") int page){
-    //     return ResponseEntity.ok(solicitacaoService.listarSolicitacoes(page));
-    // }
-
 }
