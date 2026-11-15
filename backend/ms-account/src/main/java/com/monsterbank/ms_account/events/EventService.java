@@ -42,7 +42,7 @@ public class EventService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    public void createCreateEvent(String accNumber, Long cpfGerente){
+    public void createCreateEvent(String accNumber, String clientCpf, Long cpfGerente){
 
         //CRIA DATETIME
             LocalDateTime hoje = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
@@ -55,8 +55,9 @@ public class EventService {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("cpfGerente", cpfGerente);
+            payload.put("clientCpf", clientCpf);
             payload.put("saldo", BigDecimal.ZERO); //INICIA COM VALOR 0
-            payload.put("data", datetime);
+            payload.put("data", datetime.toString());
 
         //COMO ACABOU DE CRIAR A VERSÃO TEM QUE SER 1
         EventEntity ee = new EventEntity(accNumber, EventType.CRIADO, payload, 1L);

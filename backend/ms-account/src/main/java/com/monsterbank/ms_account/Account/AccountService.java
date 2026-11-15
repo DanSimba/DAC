@@ -98,7 +98,7 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
             log.info("{} --- Criando evento ", AccountService.class);
             //CRIA EVENTO CRIADO
-            this.eventService.createCreateEvent(acc.getNumber(), managerId);
+            this.eventService.createCreateEvent(acc.getNumber(), acc.getClientCpf(), managerId);
 
             AccountDTO accDto = new AccountDTO(acc.getNumber(), acc.getClientCpf(),acc.getBalanco(), acc.getManagerId(), acc.getCreatedAt());
             return accDto;
