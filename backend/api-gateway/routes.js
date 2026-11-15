@@ -5,7 +5,6 @@ import { login, logout } from './services/auth.service.js';
 import { buscarResultado, buscarStatus } from './services/saga.service.js';
 
 export function createRoutes({
-  gatewayService,
   solicitacaoService,
   gerenteService,
   clienteService,
@@ -14,9 +13,6 @@ export function createRoutes({
   const router = express.Router();
   const somenteGerente = [autenticar, autorizar('GERENTE')];
   const somenteCliente = [autenticar, autorizar('CLIENTE')];
-
-  router.get('/', gatewayService.status);
-
 
   //auth
   router.post('/auth/login', async (req, res) => {
@@ -172,11 +168,91 @@ export function createRoutes({
     return res.status(200).json(resultado);
   });
 
-  router.get('/gerentes', ...somenteGerente, gerenteService.listar);
-  router.get('/gerentes/:identificador', ...somenteGerente, gerenteService.buscar);
-  router.post('/gerentes', ...somenteGerente, gerenteService.criar);
-  router.put('/gerentes/:id', ...somenteGerente, gerenteService.atualizar);
-  router.delete('/gerentes/:id', ...somenteGerente, gerenteService.remover);
+  router.get('/gerentes', ...somenteGerente, async (req, res) => {
+    const gerentes = await gerenteService.listar();
+    const resultado = gerentes.map(gerente => addLinks(
+      req,
+      gerente,
+      {
+        self: `/gerentes/${gerente.id}`,
+        atualizar: {
+          href: `/gerentes/${gerente.id}`,
+          method: 'PUT'
+        },
+        remover: {
+          href: `/gerentes/${gerente.id}`,
+          method: 'DELETE'
+        }
+      }
+    ));
+
+    return res.status(200).json(resultado);
+  });
+
+  router.get('/gerentes/:identificador', ...somenteGerente, async (req, res) => {
+    const gerente = await gerenteService.buscar(req.params.identificador);
+    const resultado = addLinks(
+      req,
+      gerente,
+      {
+        self: `/gerentes/${gerente.id}`,
+        gerentes: '/gerentes',
+        atualizar: {
+          href: `/gerentes/${gerente.id}`,
+          method: 'PUT'
+        },
+        remover: {
+          href: `/gerentes/${gerente.id}`,
+          method: 'DELETE'
+        }
+      }
+    );
+
+    return res.status(200).json(resultado);
+  });
+
+  router.post('/gerentes', ...somenteGerente, async (req, res) => {
+    const job = await gerenteService.criar(req.body);
+    const resultado = addLinks(
+      req,
+      job,
+      { status: `/jobs/${job.jobId}/status` }
+    );
+
+    return res.status(202).json(resultado);
+  });
+
+  router.put('/gerentes/:id', ...somenteGerente, async (req, res) => {
+    const gerente = await gerenteService.atualizar(req.params.id, req.body);
+    const resultado = addLinks(
+      req,
+      gerente,
+      {
+        self: `/gerentes/${gerente.id}`,
+        gerentes: '/gerentes',
+        remover: {
+          href: `/gerentes/${gerente.id}`,
+          method: 'DELETE'
+        }
+      }
+    );
+
+    return res.status(200).json(resultado);
+  });
+
+  router.delete('/gerentes/:id', ...somenteGerente, async (req, res) => {
+    const job = await gerenteService.remover(
+      req.params.id,
+      req.usuario.cpf
+    );
+    const resultado = addLinks(
+      req,
+      job,
+      { status: `/jobs/${job.jobId}/status` }
+    );
+
+    return res.status(202).json(resultado);
+  });
 
   //clientes
   router.get('/clientes', ...somenteGerente, async (req, res) => {
@@ -221,8 +297,112 @@ export function createRoutes({
 
 
   //conta
-  router.post('/account/transfer', ...somenteCliente, contaService.transferir);
-  router.post('/account/operate', ...somenteCliente, contaService.operar);
+  router.get('/account/findByCpf/:cpf', autenticar, async (req, res) => {
+    if (
+      req.usuario.tipo.toUpperCase() === 'CLIENTE'
+      && String(req.usuario.cpf) !== String(req.params.cpf)
+    ) {
+      return res.status(403).json({ message: 'Acesso negado.' });
+    }
+
+    const conta = await contaService.buscarPorCpf(req.params.cpf, req.usuario);
+    const numero = encodeURIComponent(conta.number);
+    const links = req.usuario.tipo.toUpperCase() === 'GERENTE'
+      ? { self: `/account/findByCpf/${encodeURIComponent(conta.clientCpf)}` }
+      : {
+          self: `/account/findByNumber/${numero}`,
+          extrato: `/account/listExtratos/${numero}`,
+          ultimaVersao: `/account/getLastVersion/${numero}`,
+          depositar: {
+            href: '/account/depositar',
+            method: 'POST'
+          },
+          sacar: {
+            href: '/account/sacar',
+            method: 'POST'
+          },
+          transferir: {
+            href: '/account/transfer',
+            method: 'POST'
+          }
+        };
+    const resultado = addLinks(req, conta, links);
+
+    return res.status(200).json(resultado);
+  });
+
+  router.get('/account/findByNumber/:number', ...somenteCliente, async (req, res) => {
+    const conta = await contaService.buscarPorNumero(
+      req.params.number,
+      req.usuario
+    );
+    const numero = encodeURIComponent(conta.number);
+    const resultado = addLinks(
+      req,
+      conta,
+      {
+        self: `/account/findByNumber/${numero}`,
+        extrato: `/account/listExtratos/${numero}`,
+        ultimaVersao: `/account/getLastVersion/${numero}`,
+        depositar: {
+          href: '/account/depositar',
+          method: 'POST'
+        },
+        sacar: {
+          href: '/account/sacar',
+          method: 'POST'
+        },
+        transferir: {
+          href: '/account/transfer',
+          method: 'POST'
+        }
+      }
+    );
+
+    return res.status(200).json(resultado);
+  });
+
+  router.get('/account/listExtratos/:number', ...somenteCliente, async (req, res) => {
+    const extratos = await contaService.listarExtratos(
+      req.params.number,
+      req.usuario
+    );
+
+    return res.status(200).json(extratos);
+  });
+
+  router.get('/account/getLastVersion/:number', ...somenteCliente, async (req, res) => {
+    const versao = await contaService.buscarUltimaVersao(
+      req.params.number,
+      req.usuario
+    );
+
+    return res.status(200).json(versao);
+  });
+
+  router.post('/account/depositar', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.depositar(req.body, req.usuario);
+
+    return resultado === undefined
+      ? res.status(200).end()
+      : res.status(200).json(resultado);
+  });
+
+  router.post('/account/sacar', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.sacar(req.body, req.usuario);
+
+    return resultado === undefined
+      ? res.status(200).end()
+      : res.status(200).json(resultado);
+  });
+
+  router.post('/account/transfer', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.transferir(req.body, req.usuario);
+
+    return resultado === undefined
+      ? res.status(200).end()
+      : res.status(200).json(resultado);
+  });
 
   router.use((error, req, res, next) => {
     if (res.headersSent) {

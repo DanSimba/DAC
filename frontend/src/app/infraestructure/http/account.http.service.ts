@@ -13,7 +13,7 @@ import { AccountLastVersionModel } from '../../domain/account/models/account-las
 })
 export class AccountHttpService {
   http = inject(HttpClient);
-  private readonly API_URL = `${environmentDev.apiUrlAccount}/account`;
+  private readonly API_URL = `${environmentDev.apiUrlGateway}/account`;
 
   findAccountByCpf(cpf:string): Observable<Account>{
     return this.http.get<Account>(`${this.API_URL}/findByCpf/${cpf}`);
