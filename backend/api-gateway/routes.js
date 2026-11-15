@@ -41,11 +41,92 @@ export function createRoutes({
 
 
   //solicitacao
-  router.post('/solicitacoes', solicitacaoService.criar);
-  router.get('/solicitacoes', ...somenteGerente, solicitacaoService.listar);
-  router.get('/solicitacoes/:cpf', ...somenteGerente, solicitacaoService.buscarPorCpf);
-  router.post('/solicitacoes/:cpf/rejeicao', ...somenteGerente, solicitacaoService.rejeitar);
-  router.post('/solicitacoes/:cpf/aprovacao', ...somenteGerente, solicitacaoService.aprovar);
+  router.post('/solicitacoes', async (req, res) => {
+    const solicitacao = await solicitacaoService.criar(req.body);
+    const cpf = encodeURIComponent(solicitacao.cpf);
+    const resultado = addLinks(
+      req,
+      solicitacao,
+      { self: `/solicitacoes/${cpf}` }
+    );
+
+    res.location(resultado._links.self.href);
+    return res.status(201).json(resultado);
+  });
+
+  router.get('/solicitacoes', ...somenteGerente, async (req, res) => {
+    const solicitacoes = await solicitacaoService.listar(req.query.status);
+    const resultado = solicitacoes.map(solicitacao => {
+      const cpf = encodeURIComponent(solicitacao.cpf);
+      const links = { self: `/solicitacoes/${cpf}` };
+
+      if (solicitacao.status === 'PENDENTE') {
+        links.aprovar = {
+          href: `/solicitacoes/${cpf}/aprovacao`,
+          method: 'POST'
+        };
+        links.rejeitar = {
+          href: `/solicitacoes/${cpf}/rejeicao`,
+          method: 'POST'
+        };
+      }
+
+      return addLinks(req, solicitacao, links);
+    });
+
+    return res.status(200).json(resultado);
+  });
+
+  router.get('/solicitacoes/:cpf', ...somenteGerente, async (req, res) => {
+    const solicitacao = await solicitacaoService.buscarPorCpf(req.params.cpf);
+    const cpf = encodeURIComponent(solicitacao.cpf);
+    const links = {
+      self: `/solicitacoes/${cpf}`,
+      solicitacoes: '/solicitacoes'
+    };
+
+    if (solicitacao.status === 'PENDENTE') {
+      links.aprovar = {
+        href: `/solicitacoes/${cpf}/aprovacao`,
+        method: 'POST'
+      };
+      links.rejeitar = {
+        href: `/solicitacoes/${cpf}/rejeicao`,
+        method: 'POST'
+      };
+    }
+
+    return res.status(200).json(addLinks(req, solicitacao, links));
+  });
+
+  router.post('/solicitacoes/:cpf/rejeicao', ...somenteGerente, async (req, res) => {
+    const solicitacao = await solicitacaoService.rejeitar(
+      req.params.cpf,
+      req.body
+    );
+    const cpf = encodeURIComponent(solicitacao.cpf);
+    const resultado = addLinks(
+      req,
+      solicitacao,
+      {
+        self: `/solicitacoes/${cpf}`,
+        solicitacoes: '/solicitacoes'
+      }
+    );
+
+    return res.status(200).json(resultado);
+  });
+
+  router.post('/solicitacoes/:cpf/aprovacao', ...somenteGerente, async (req, res) => {
+    const job = await solicitacaoService.aprovar(req.params.cpf);
+    const resultado = addLinks(
+      req,
+      job,
+      { status: `/jobs/${job.jobId}/status` }
+    );
+
+    return res.status(202).json(resultado);
+  });
 
 
   //gerente
