@@ -108,8 +108,8 @@ export async function transferir(transferencia, usuario) {
     ...transferencia,
     cpfOrigin: cpfOrigem,
     cpfDestiny: cpfDestino,
-    nameOrigin: nomeOrigem,
-    nameDestiny: nomeDestino,
+    nameOrigin: nomeOrigem.nome,
+    nameDestiny: nomeDestino.nome,
     value: String(transferencia.value)
   };
   const { data } = await request(`${accountUrl}/transfer`, {

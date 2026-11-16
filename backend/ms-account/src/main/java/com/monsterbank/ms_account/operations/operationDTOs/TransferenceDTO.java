@@ -30,7 +30,7 @@ public class TransferenceDTO {
         this.datetime = te.getDatetime();
 
         //O DTO VAI PARA O GATEWAY COM O NAMEDEST VAZIO, O GATEWAY DEVE REQUISITAR ESTAR PARTE DA COMPOSIÇÃO PARA O MS-CLIENTE
-        this.nameDestiny = "";
+        this.nameDestiny = te.getNameDestiny();
     }
 
     public TransferenceDTO(String cpfOrigin, String cpfDestiny, String nameOrigin, String accOrigin, String accDestiny, BigDecimal value, String datetime){
