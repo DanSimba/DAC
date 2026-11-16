@@ -16,4 +16,6 @@ public interface EventReadRepository extends JpaRepository<EventReadEntity, Long
 
     //ENCONTRA EVENTO E VAI DIRETO PRA VERSÃO MAIS RECENTE (TOP + DESC)
     Optional<EventReadEntity> findTopByObjetoIdOrderByVersaoDesc(String objetoId);
+
+    void deleteByObjetoId(String objetoId);
 }

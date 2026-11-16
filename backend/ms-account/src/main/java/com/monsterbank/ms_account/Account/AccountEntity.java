@@ -2,8 +2,6 @@ package com.monsterbank.ms_account.account;
 
 import jakarta.persistence.*;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import java.math.BigDecimal;
 
 import java.time.LocalDate;
@@ -35,8 +33,6 @@ public class AccountEntity {
         BigDecimal balanco,
         Long managerId
     ){
-        //pode gerar um valor repetido, mas a chance é mínima
-        this.number = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
         this.clientCpf = clientCpf;
         this.balanco = balanco;
         this.managerId = managerId;

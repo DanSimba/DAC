@@ -1,6 +1,7 @@
 package com.monsterbank.ms_account.query.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.monsterbank.ms_account.query.entities.EventReadEntity;
 import com.monsterbank.ms_account.query.repositories.EventReadRepository;
@@ -79,6 +80,14 @@ public class ReadService {
 
     public List<AccountReadEntity> findAllAccounts() {
         return accountRepository.findAll();
+    }
+
+    @Transactional("readTransactionManager")
+    public void removerContaPorCpf(String cpf) {
+        accountRepository.findByClientCpf(cpf).ifPresent(conta -> {
+            eventRepository.deleteByObjetoId(conta.getNumber());
+            accountRepository.delete(conta);
+        });
     }
 
     //PARTE DOS EVENTOS-----------------------------idhwcbedcbupdkhcb kpwdnk

@@ -34,6 +34,7 @@ import java.nio.file.OpenOption;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -107,6 +108,7 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
                 BigDecimal.ZERO,
                 managerId
             );
+            acc.setNumber(gerarNumeroContaUnico());
 
             log.info("{} --- Salvando conta {}", AccountService.class, acc.getNumber());
             this.accountRepository.save(acc);
@@ -126,6 +128,23 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
             log.error("{} --- Erro ao criar conta para CPF {}: {}", AccountService.class, cpf, e.getMessage(), e);
             throw new ErroCriacaoAccountException();
         }
+    }
+
+    @Transactional
+    public void removerContaPorCpf(String cpf) {
+        accountRepository.findByClientCpf(cpf).ifPresent(conta -> {
+            extratoRepository.deleteByAccNumber(conta.getNumber());
+            eventService.removerEventosDaConta(conta.getNumber());
+            accountRepository.delete(conta);
+        });
+    }
+
+    private String gerarNumeroContaUnico() {
+        String numero;
+        do {
+            numero = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
+        } while (accountRepository.existsById(numero));
+        return numero;
     }
 
     @Transactional

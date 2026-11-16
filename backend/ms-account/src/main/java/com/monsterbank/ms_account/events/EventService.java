@@ -42,6 +42,10 @@ public class EventService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    public void removerEventosDaConta(String numeroConta) {
+        eventRepository.deleteByObjetoId(numeroConta);
+    }
+
     public void createCreateEvent(String accNumber, String clientCpf, Long cpfGerente){
 
         //CRIA DATETIME

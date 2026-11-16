@@ -9,9 +9,13 @@ public enum AuthReplyQueue {
         "auth.criar-usuario",
         "ms.auth.criar-usuario.reply"
     ),
+    COMPENSAR_CRIACAO(
+        "auth.compensar-criacao",
+        "ms.auth.compensar-criacao.reply"
+    ),
     COMANDO_DESCONHECIDO(
             null,
-            "ms.cliente.comando-desconhecido.reply"
+            "ms.auth.comando-desconhecido.reply"
     );
 
     private final String commandType;

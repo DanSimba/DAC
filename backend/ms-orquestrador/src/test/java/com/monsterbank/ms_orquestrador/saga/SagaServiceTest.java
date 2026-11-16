@@ -46,7 +46,8 @@ class SagaServiceTest {
             authCommandProducer,
             emailCommandProducer,
             sagaStateRepository,
-            stringRedisTemplate
+            stringRedisTemplate,
+            new ObjectMapper()
     );
     
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -151,22 +152,30 @@ class SagaServiceTest {
 
         sagaService.processarResposta(
                 SagaService.CRIAR_USUARIO,
-                new SagaReply("saga-5", "agora", "FALHA", "AUTH_INDISPONIVEL", objectMapper.createObjectNode())
+                new SagaReply("saga-5", "agora", "SUCESSO", null,
+                        objectMapper.createObjectNode().put("senhaTemporariaTransacional", "senha"))
         );
-
-        verify(clienteCommandProducer).enviar(
+        sagaService.processarResposta(
+                SagaService.CRIAR_CONTA,
+                new SagaReply("saga-5", "agora", "FALHA", "CONTA_INDISPONIVEL", objectMapper.createObjectNode())
+        );
+        verify(contaCommandProducer).enviar(
                 "saga-5",
-                SagaService.COMPENSAR_CRIACAO_CLIENTE,
+                SagaService.COMPENSAR_CRIACAO_CONTA,
                 objectMapper.createObjectNode().put("cpf", "12345678901")
         );
-        assertThat(estados.get("saga-5").operacaoAtual())
-                .isEqualTo(SagaService.COMPENSAR_CRIACAO_CLIENTE);
-
+        sagaService.processarResposta(
+                SagaService.COMPENSAR_CRIACAO_CONTA,
+                new SagaReply("saga-5", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
+        sagaService.processarResposta(
+                SagaService.COMPENSAR_CRIACAO_USUARIO,
+                new SagaReply("saga-5", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
         sagaService.processarResposta(
                 SagaService.COMPENSAR_CRIACAO_CLIENTE,
                 new SagaReply("saga-5", "agora", "SUCESSO", null, objectMapper.createObjectNode())
         );
-
         verify(clienteCommandProducer).enviar(
                 "saga-5",
                 SagaService.COMPENSAR_APROVACAO,
@@ -186,6 +195,10 @@ class SagaServiceTest {
                 SagaService.CRIAR_USUARIO,
                 new SagaReply("saga-6", "agora", "FALHA", "EMAIL_DUPLICADO", objectMapper.createObjectNode())
         );
+        sagaService.processarResposta(
+                SagaService.COMPENSAR_CRIACAO_USUARIO,
+                new SagaReply("saga-6", "agora", "SUCESSO", null, objectMapper.createObjectNode())
+        );
 
         sagaService.processarResposta(
                 SagaService.COMPENSAR_CRIACAO_CLIENTE,
@@ -197,7 +210,7 @@ class SagaServiceTest {
                 SagaService.MARCAR_NAO_APROVADA,
                 objectMapper.createObjectNode()
                         .put("cpf", "12345678901")
-                        .put("motivo", "E-mail já cadastrado")
+                        .put("motivo", "E-mail ja cadastrado")
         );
         assertThat(estados.get("saga-6").operacaoAtual()).isEqualTo(SagaService.MARCAR_NAO_APROVADA);
     }
@@ -246,7 +259,7 @@ class SagaServiceTest {
                         "agora",
                         "SUCESSO",
                         null,
-                        objectMapper.createObjectNode().put("gerenteId", "gerente-1")
+                        objectMapper.createObjectNode().put("gerenteCpf", 12345678901L)
                 )
         );
     }

@@ -33,7 +33,6 @@ public class EmailService {
 
             log.info("{} --- Enviando e-mail destinatario: {}", EmailService.class, dest);
             log.info("{} --- Enviando e-mail assunto: {}", EmailService.class, assunto);
-            log.info("{} --- Enviando e-mail mensagem: {}", EmailService.class, message);
         } catch(Exception e){
             log.error("{} --- Erro ao enviar email: {}", EmailService.class, e);
             throw new RuntimeException("Falha ao enviar e-mail", e);
@@ -47,7 +46,6 @@ public class EmailService {
         String mensagem = "A senha da sua conta é: " + password;
 
         log.info("{} --- Assunto: {}", EmailService.class, assunto);
-        log.info("{} --- Mensagem: {}", EmailService.class, mensagem);
         sendEmailText(dest, assunto, mensagem);
     }
 

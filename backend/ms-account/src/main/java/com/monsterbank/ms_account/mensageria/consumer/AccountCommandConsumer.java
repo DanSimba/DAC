@@ -7,6 +7,7 @@ import com.monsterbank.ms_account.mensageria.dto.SagaCommand;
 import com.monsterbank.ms_account.mensageria.dto.SagaReply;
 import com.monsterbank.ms_account.mensageria.enumeration.AccountReplyQueue;
 import com.monsterbank.ms_account.mensageria.producer.OrquestradorResponseProducer;
+import com.monsterbank.ms_account.query.services.ReadService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +29,16 @@ public class AccountCommandConsumer {
     private final AccountService accountService;
     private final ObjectMapper objectMapper;
     private final OrquestradorResponseProducer responseProducer;
+    private final ReadService readService;
 
     public AccountCommandConsumer(
             AccountService accountService,
+            ReadService readService,
             ObjectMapper objectMapper,
             OrquestradorResponseProducer responseProducer
     ) {
         this.accountService = accountService;
+        this.readService = readService;
         this.objectMapper = objectMapper;
         this.responseProducer = responseProducer;
     }
@@ -53,26 +57,26 @@ public class AccountCommandConsumer {
 
                     JsonNode listaGerentesNode = command.payload();
 
-                    List<Long> idsGerentes = new ArrayList<>();
+                    List<Long> cpfsGerentes = new ArrayList<>();
 
                     if (listaGerentesNode != null && listaGerentesNode.isArray()) {
                         log.info("{} --- Recebido array diferente de null", AccountCommandConsumer.class);
                         int contador = 1;
                         for (JsonNode node : listaGerentesNode) {
-                            Long id = node.get("id").asLong();
-                            idsGerentes.add(id);
-                            log.info("{} --- Contador: {} - ID: {}", AccountCommandConsumer.class, contador, id);
+                            Long cpf = node.get("cpf").asLong();
+                            cpfsGerentes.add(cpf);
+                            log.info("{} --- Contador: {} - CPF: {}", AccountCommandConsumer.class, contador, cpf);
                             contador++;
                         }
                     }
 
                     log.info("{} --- Buscando gerentes com menos contas vinculadas", AccountCommandConsumer.class);
-                    Long idGerenteMenosOcupado = accountService.findLeastBusyManager(idsGerentes);
+                    Long cpfGerenteMenosOcupado = accountService.findLeastBusyManager(cpfsGerentes);
 
                     ObjectNode payload = objectMapper.createObjectNode();
-                    payload.put("gerenteId", idGerenteMenosOcupado);
+                    payload.put("gerenteCpf", cpfGerenteMenosOcupado);
 
-                    log.info("{} --- Enviando resposta de sucesso com o id de gerente: {}", AccountCommandConsumer.class, idGerenteMenosOcupado);
+                    log.info("{} --- Enviando resposta de sucesso com o CPF de gerente: {}", AccountCommandConsumer.class, cpfGerenteMenosOcupado);
                     enviarRespostaSucesso(command, replyQueue, payload);
                 }
 
@@ -80,7 +84,7 @@ public class AccountCommandConsumer {
                     log.info("{} --- Fila conta.identificar-gerente", AccountCommandConsumer.class);
 
                     String cpf = command.payload().get("cpf").asString();
-                    Long managerId = command.payload().get("gerenteId").asLong();
+                    Long managerId = command.payload().get("gerenteCpf").asLong();
 
                     AccountDTO account = accountService.createAccount(cpf, managerId);
 
@@ -88,6 +92,13 @@ public class AccountCommandConsumer {
                     log.info("{} --- Enviando resposta de sucesso com dados da conta. Payload: {}", AccountCommandConsumer.class, payload);
                     enviarRespostaSucesso(command, replyQueue, payload);
 
+                }
+
+                case "conta.compensar-criacao" -> {
+                    String cpf = command.payload().get("cpf").asString();
+                    accountService.removerContaPorCpf(cpf);
+                    readService.removerContaPorCpf(cpf);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
                 }
 
                 default -> {
