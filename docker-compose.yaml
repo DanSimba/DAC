@@ -35,6 +35,12 @@ services:
       - mgdata-auth:/data/db
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   db-account:
     image: postgres:15-alpine
@@ -160,12 +166,6 @@ services:
         condition: service_started
       ms-cliente:
         condition: service_started
-      seed-cliente:
-        condition: service_completed_successfully
-      seed-account:
-        condition: service_completed_successfully
-      seed-auth:
-        condition: service_completed_successfully
       redis:
         condition: service_started
       rabbitmq:
@@ -185,8 +185,10 @@ services:
       context: ./backend/ms-auth
 
     depends_on:
-      - db-auth
-      - rabbitmq
+      db-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
     mem_limit: 512m
     mem_reservation: 384m
@@ -198,29 +200,13 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      APP_SEED_ENABLED: "true"
 
     ports:
       - "8081:8081"
 
     networks:
       - monsterbank-net
-
-  seed-auth:
-    image: mongo:7
-    depends_on:
-      db-auth:
-        condition: service_started
-    volumes:
-      - ./backend/ms-auth/database/seed.js:/seed.js:ro
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        set -e
-        until mongosh --quiet "mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin" --eval "db.adminCommand('ping').ok" | grep -q 1; do sleep 2; done
-        mongosh --quiet "mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin" /seed.js
-    networks:
-      - monsterbank-net
-
 
   ms-cliente:
     build:
@@ -240,6 +226,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-cliente:5432/ms-cliente
       SPRING_DATASOURCE_USERNAME: ms-cliente
       SPRING_DATASOURCE_PASSWORD: psql
+      SPRING_SQL_INIT_MODE: always
 
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -292,6 +279,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      APP_SEED_ENABLED: "true"
     ports:
       - "8082:8080"
     networks:
@@ -300,45 +288,6 @@ services:
       resources:
         limits:
           memory: 512M 
-
-  seed-cliente:
-    image: postgres:15-alpine
-    depends_on:
-      ms-cliente:
-        condition: service_started
-    environment:
-      PGPASSWORD: psql
-    volumes:
-      - ./backend/ms-cliente/database/seed.sql:/seed.sql:ro
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        set -e
-        until psql -h db-cliente -U ms-cliente -d ms-cliente -tAc "SELECT to_regclass('public.clientes')" | grep -q clientes; do sleep 2; done
-        psql -v ON_ERROR_STOP=1 -h db-cliente -U ms-cliente -d ms-cliente -f /seed.sql
-    networks:
-      - monsterbank-net
-
-  seed-account:
-    image: postgres:15-alpine
-    depends_on:
-      ms-account:
-        condition: service_started
-    environment:
-      PGPASSWORD: psql
-    volumes:
-      - ./backend/ms-account/database/seed.sql:/seed.sql:ro
-      - ./backend/ms-account/database/seedread.sql:/seedread.sql:ro
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        set -e
-        until psql -h db-account -U ms-account -d ms-account -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('account', 'extrato', 'operation', 'transference', 'eventos')" | grep -q '^5$'; do sleep 2; done
-        until psql -h db-account-read -U ms-account -d ms-account-read -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('account', 'eventos')" | grep -q '^2$'; do sleep 2; done
-        psql -v ON_ERROR_STOP=1 -h db-account -U ms-account -d ms-account -f /seed.sql
-        psql -v ON_ERROR_STOP=1 -h db-account-read -U ms-account -d ms-account-read -f /seedread.sql
-    networks:
-      - monsterbank-net
 
   ms-email:
     build:
