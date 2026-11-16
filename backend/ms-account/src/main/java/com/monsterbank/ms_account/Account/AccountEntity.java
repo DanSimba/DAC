@@ -21,7 +21,7 @@ public class AccountEntity {
     @Column(name = "client_cpf", length = 11, nullable = false, unique = true)
     private String clientCpf;
 
-    @Column(name = "balanco", nullable = false, precision = 17, scale = 2)
+    @Column(name = "balanco", nullable = false, precision = 19, scale = 4)
     private BigDecimal balanco;
 
     @Column(name = "manager_id", nullable = false)
