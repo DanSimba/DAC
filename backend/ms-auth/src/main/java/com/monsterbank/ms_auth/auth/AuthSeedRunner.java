@@ -16,6 +16,6 @@ public class AuthSeedRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        authSeedService.recriarDados();
+        authSeedService.popularSeVazio();
     }
 }

@@ -19,8 +19,18 @@ public class AuthSeedService {
         this.argon2Encoder = new Argon2PasswordEncoder(16, 32, 1, 16384, 2);
     }
 
+    public void popularSeVazio() {
+        if (userRepository.count() == 0) {
+            inserirDados();
+        }
+    }
+
     public void recriarDados() {
         userRepository.deleteAll();
+        inserirDados();
+    }
+
+    private void inserirDados() {
         userRepository.saveAll(List.of(
             usuario("cli1@bantads.com.br", "12912861012", UserType.CLIENTE),
             usuario("cli2@bantads.com.br", "09506382000", UserType.CLIENTE),
