@@ -24,12 +24,21 @@ export class ManagerHttpService {
     return this.http.get<ManagerDTO>(`${this.api_URl}/gerentes/${id}`);
   }
 
-  criarGerente(gerente:ManagerDTO): Observable<ManagerDTO>{
-    return this.http.post<ManagerDTO>(`${this.api_URl}/gerentes`, gerente);
+  criarGerente(gerente: ManagerDTO): Observable<ManagerDTO> {
+    const req$ = this.http.post<any>(
+      `${this.api_URl}/gerentes`,
+      gerente,
+      { observe: 'response' }
+    );
+    return this.jobPolling.executarComPolling<ManagerDTO>(req$, true);
   }
 
-  deletarGerente(id:number): Observable<void>{
-    return this.http.delete<void>(`${this.api_URl}/gerentes/${id}`);
+  deletarGerente(id: number): Observable<void> {
+    const req$ = this.http.delete<any>(
+      `${this.api_URl}/gerentes/${id}`,
+      { observe: 'response' }
+    );
+    return this.jobPolling.executarComPolling<void>(req$, true);
   }
 
   atualizarGerente(id: number, gerente:ManagerDTO): Observable<ManagerDTO>{
@@ -52,7 +61,7 @@ export class ManagerHttpService {
       null,
       { observe: 'response' }
     );
-    return this.jobPolling.executarComPolling<any>(req$, false);
+    return this.jobPolling.executarComPolling<any>(req$, true);
   }
 
   recusarSolicitacao(cpf: string, payload: RecusarClientePayload): Observable<void>{
