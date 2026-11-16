@@ -35,6 +35,9 @@ public class TransferenceEntity {
     @Column(name = "name_origin", nullable = false)
     private String nameOrigin;
 
+    @Column(name = "name_destiny", nullable = true)
+    private String nameDestiny;
+
     @Column(name = "acc_origin", nullable = false) //AMBOS OS ACCS SÃO O NUMERO DA CONTA
     private String accOrigin;
 
@@ -54,6 +57,7 @@ public class TransferenceEntity {
         this.cpfOrigin = t.getCpfOrigin();
         this.cpfDestiny = t.getCpfDestiny();
         this.nameOrigin = t.getNameOrigin();
+        this.nameDestiny = t.getNameDestiny();
         this.accOrigin = t.getAccOrigin();
         this.accDestiny = t.getAccDestiny();
         this.value = t.getValue();
@@ -82,6 +86,10 @@ public class TransferenceEntity {
 
     public String getNameOrigin() {
         return this.nameOrigin;
+    }
+
+    public String getNameDestiny() {
+        return nameDestiny;
     }
 
     public String getAccOrigin() {
@@ -118,6 +126,10 @@ public class TransferenceEntity {
 
     public void setNameOrigin(String nameOrigin) {
         this.nameOrigin = nameOrigin;
+    }
+
+    public void setNameDestiny(String nameDestiny) {
+        this.nameDestiny = nameDestiny;
     }
 
     public void setAccOrigin(String accOrigin) {
