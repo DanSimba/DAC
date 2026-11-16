@@ -5,6 +5,8 @@ import { ClientService } from '../../../../application/client/services/client-se
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AccountService } from '../../../../application/account/services/account-service';
+import { ManagerService } from '../../../../application/manager/services/manager-service';
+import { ManagerDTO } from '../../../../domain/manager/models/managerDTO';
 
 @Component({
   selector: 'app-client-menu',
@@ -14,6 +16,7 @@ import { AccountService } from '../../../../application/account/services/account
 })
 export class ClientMenu implements OnInit{
   clientService = inject(ClientService);
+  managerService = inject(ManagerService);
   private router = inject(Router);
 
   private accountService = inject(AccountService);
@@ -24,6 +27,10 @@ export class ClientMenu implements OnInit{
 
   client = computed((): Client => {
     return this.clientService.getClient();
+  });
+
+  manager = computed((): ManagerDTO => {
+    return this.managerService.getGerente();
   });
 
   ngOnInit(): void {
