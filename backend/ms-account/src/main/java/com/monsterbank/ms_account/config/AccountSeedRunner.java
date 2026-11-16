@@ -7,6 +7,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.stereotype.Component;
 
@@ -26,11 +27,20 @@ public class AccountSeedRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        executar(writeDataSource, "db/seed.sql");
-        executar(readDataSource, "db/seedread.sql");
+        executarSeVazio(writeDataSource, "db/seed.sql");
+        executarSeVazio(readDataSource, "db/seedread.sql");
     }
 
-    private void executar(DataSource dataSource, String arquivo) {
+    private void executarSeVazio(DataSource dataSource, String arquivo) {
+        Long total = new JdbcTemplate(dataSource).queryForObject(
+            "SELECT COUNT(*) FROM account",
+            Long.class
+        );
+
+        if (total != null && total > 0) {
+            return;
+        }
+
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
             new ClassPathResource(arquivo)
         );

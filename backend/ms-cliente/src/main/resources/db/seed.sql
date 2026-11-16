@@ -1,9 +1,8 @@
-TRUNCATE TABLE clientes RESTART IDENTITY CASCADE;
-
 INSERT INTO clientes
     (cpf, nome, email, telefone, salario, logradouro, numero,
      complemento, cep, cidade, uf)
-VALUES
+SELECT *
+FROM (VALUES
     ('12912861012', 'Catharyna', 'cli1@bantads.com.br',
      '41999991001', 10000.0000, 'Rua das Flores', 101,
      NULL, '80010000', 'Curitiba', 'PR'),
@@ -22,4 +21,7 @@ VALUES
 
     ('76179646090', 'Coândrya', 'cli5@bantads.com.br',
      '41999991005', 1500.0000, 'Rua Paraná', 505,
-     'Casa', '80050000', 'Curitiba', 'PR');
+     'Casa', '80050000', 'Curitiba', 'PR')
+) AS dados(cpf, nome, email, telefone, salario, logradouro, numero,
+           complemento, cep, cidade, uf)
+WHERE NOT EXISTS (SELECT 1 FROM clientes);
