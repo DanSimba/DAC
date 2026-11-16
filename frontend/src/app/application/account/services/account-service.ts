@@ -5,6 +5,7 @@ import { TransferenceModel } from '../../../domain/operations/models/transferenc
 import { map, Observable, switchMap, tap } from 'rxjs';
 import { AccountHttpService } from '../../../infraestructure/http/account.http.service';
 import { OperationModel } from '../../../domain/operations/models/operation.model';
+import { ManagerService } from '../../manager/services/manager-service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ import { OperationModel } from '../../../domain/operations/models/operation.mode
 export class AccountService {
   private extratoService = inject(ExtratoService);
   private accountHttpService = inject(AccountHttpService)
+  private managerService = inject(ManagerService);
 
   private account = signal<Account>({
       client_cpf: '',
@@ -36,6 +38,7 @@ export class AccountService {
     this.accountHttpService.findAccountByCpf(cpf).subscribe({
       next:(response)=>{
         this.account.set(response);
+        this.getLastVersion();
         //console.log("conta: ", response);
       }
     })
@@ -115,6 +118,9 @@ export class AccountService {
                 managerId: response.managerId,
                 lastUpdt: response.datetime
               }));
+        
+        
+        this.managerService.buscarGerente(response.managerId);
       }
     })
   }

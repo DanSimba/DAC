@@ -16,6 +16,7 @@ import { AuthHttpService } from '../../../../infraestructure/http/auth.http.serv
 export class ClientHomePage implements OnInit{
   clientService = inject(ClientService);
   accountService = inject(AccountService);
+
   private authHttpService = inject(AuthHttpService);
 
   client = computed((): Client => {
