@@ -82,7 +82,7 @@ export class Extrato implements OnInit, OnDestroy{
     //console.log('enddate: ', this.endDate());
 
     //seta o começo um mes antes do fim
-    this.startDate.set(+(dateInt[0]+(+dateInt[1]-1)+'01'));
+    this.startDate.set(+(dateInt[0]+(+dateInt[1]-1)+dateInt[2]));
     //console.log('startdate: ', this.startDate());
 
     //popula mes atual e o anterior que vai aparecer
