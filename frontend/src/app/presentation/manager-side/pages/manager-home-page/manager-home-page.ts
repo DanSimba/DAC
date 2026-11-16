@@ -59,21 +59,26 @@ export class ManagerHomePage implements OnInit {
   }
 
   public aprovar(solicitacao: SolicitacaoCadastro): void {
+    if (solicitacao.status !== 'PENDENTE') return;
+
     this.mensagemSucesso = '';
     this.mensagemErro = '';
+    solicitacao.status = 'APROVADO';
+    this.ajustarPaginaAposRemocao();
 
     const cpfLimpo = solicitacao.cpf.replace(/\D/g, '');
     
     this.managerService.aprovarSolicitacao(cpfLimpo).subscribe({
       next: () => {
-        solicitacao.status = 'APROVADO';
         solicitacao.dataHoraProcessamento = new Date().toLocaleString('pt-BR');
         this.mensagemSucesso = `A conta de ${solicitacao.nome} foi aprovada com sucesso!`;
-        this.ajustarPaginaAposRemocao();
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
       error: (erro) => {
+        solicitacao.status = 'PENDENTE';
         this.mensagemErro = 'Ocorreu um erro ao aprovar o cliente.';
+        this.cdr.markForCheck();
         this.cdr.detectChanges(); 
       }
     });
