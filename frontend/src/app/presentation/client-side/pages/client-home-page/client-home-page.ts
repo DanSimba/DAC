@@ -36,7 +36,6 @@ export class ClientHomePage implements OnInit{
           cpf: usuarioLogado.cpf,
           name: usuarioLogado.nome ?? ''
         });
-        this.clientService.findClientByCpf(usuarioLogado.cpf);
       }
 
       if (!this.account().number) {

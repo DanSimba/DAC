@@ -48,6 +48,12 @@ services:
       - pgdata-conta:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-account -d ms-account"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     deploy:
       resources:
         limits:
@@ -81,6 +87,12 @@ services:
       - pgdata-conta-read:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-account -d ms-account-read"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     deploy:
       resources:
         limits:
@@ -98,6 +110,12 @@ services:
       - pgdata-cliente:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-cliente -d ms-cliente"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   db-gerente:
     image: postgres:15-alpine
@@ -111,6 +129,12 @@ services:
       - pgdata-gerente:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-gerente -d ms-gerente"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   #=====SERVIÇOS=====#
   api-gateway:
@@ -124,6 +148,9 @@ services:
       MS_GERENTE_URL: http://ms-gerente:8084
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-MONSTERBANK}
+      FRONTEND_URL: http://localhost:4200
+      PORT: 8080
     depends_on: # testando verificação do rabbitmq antes de subir o api-gateway
       ms-auth:
         condition: service_started
@@ -133,6 +160,12 @@ services:
         condition: service_started
       ms-cliente:
         condition: service_started
+      seed-cliente:
+        condition: service_completed_successfully
+      seed-account:
+        condition: service_completed_successfully
+      seed-auth:
+        condition: service_completed_successfully
       redis:
         condition: service_started
       rabbitmq:
@@ -172,6 +205,22 @@ services:
     networks:
       - monsterbank-net
 
+  seed-auth:
+    image: mongo:7
+    depends_on:
+      db-auth:
+        condition: service_started
+    volumes:
+      - ./backend/ms-auth/database/seed.js:/seed.js:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        until mongosh --quiet "mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin" --eval "db.adminCommand('ping').ok" | grep -q 1; do sleep 2; done
+        mongosh --quiet "mongodb://ms-auth:psql@db-auth:27017/ms-auth?authSource=admin" /seed.js
+    networks:
+      - monsterbank-net
+
 
   ms-cliente:
     build:
@@ -181,8 +230,10 @@ services:
     mem_reservation: 384m
 
     depends_on:
-      - db-cliente
-      - rabbitmq
+      db-cliente:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
     environment:
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
@@ -226,9 +277,12 @@ services:
       context: ./backend/ms-account
       dockerfile: ms-account.dockerfile
     depends_on:
-      - db-account
-      - db-account-read
-      - rabbitmq
+      db-account:
+        condition: service_healthy
+      db-account-read:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/ms-account
@@ -246,6 +300,45 @@ services:
       resources:
         limits:
           memory: 512M 
+
+  seed-cliente:
+    image: postgres:15-alpine
+    depends_on:
+      ms-cliente:
+        condition: service_started
+    environment:
+      PGPASSWORD: psql
+    volumes:
+      - ./backend/ms-cliente/database/seed.sql:/seed.sql:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        until psql -h db-cliente -U ms-cliente -d ms-cliente -tAc "SELECT to_regclass('public.clientes')" | grep -q clientes; do sleep 2; done
+        psql -v ON_ERROR_STOP=1 -h db-cliente -U ms-cliente -d ms-cliente -f /seed.sql
+    networks:
+      - monsterbank-net
+
+  seed-account:
+    image: postgres:15-alpine
+    depends_on:
+      ms-account:
+        condition: service_started
+    environment:
+      PGPASSWORD: psql
+    volumes:
+      - ./backend/ms-account/database/seed.sql:/seed.sql:ro
+      - ./backend/ms-account/database/seedread.sql:/seedread.sql:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        until psql -h db-account -U ms-account -d ms-account -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('account', 'extrato', 'operation', 'transference', 'eventos')" | grep -q '^5$'; do sleep 2; done
+        until psql -h db-account-read -U ms-account -d ms-account-read -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('account', 'eventos')" | grep -q '^2$'; do sleep 2; done
+        psql -v ON_ERROR_STOP=1 -h db-account -U ms-account -d ms-account -f /seed.sql
+        psql -v ON_ERROR_STOP=1 -h db-account-read -U ms-account -d ms-account-read -f /seedread.sql
+    networks:
+      - monsterbank-net
 
   ms-email:
     build:
@@ -285,8 +378,10 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - db-gerente
-      - rabbitmq
+      db-gerente:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60 -XX:+UseSerialGC  
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-gerente:5432/ms-gerente

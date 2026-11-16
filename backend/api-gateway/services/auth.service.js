@@ -14,24 +14,35 @@ export class AuthServiceError extends Error {
 
 async function buscarUsuario(cpf, tipo) {
   const cpfEncoded = encodeURIComponent(cpf);
-  let url;
 
   if (tipo === 'CLIENTE') {
-    url = `${config.serviceUrls.cliente}/clientes/findByCpf/${cpfEncoded}`;
-  } else if (tipo === 'GERENTE') {
-    url = `${config.serviceUrls.gerente}/gerente/${cpfEncoded}`;
-  } else {
-    throw new AuthServiceError(502, 'Tipo de usuário inválido.');
+    const { data } = await request(
+      `${config.serviceUrls.cliente}/clientes/findByCpf/${cpfEncoded}`,
+      {
+        unavailableMessage: 'Erro ao buscar os dados do usuário.'
+      }
+    );
+
+    return data;
   }
 
-  const { data } = await request(
-    url,
-    {
-      unavailableMessage: 'Erro ao buscar os dados do usuário.'
-    }
-  );
+  if (tipo === 'GERENTE') {
+    const { data } = await request(
+      `${config.serviceUrls.gerente}/gerente`,
+      {
+        unavailableMessage: 'Erro ao buscar os dados do usuário.'
+      }
+    );
+    const gerente = data.find(item => String(item.cpf) === String(cpf));
 
-  return data;
+    if (!gerente) {
+      throw new AuthServiceError(404, 'Gerente não encontrado.');
+    }
+
+    return gerente;
+  }
+
+  throw new AuthServiceError(502, 'Tipo de usuário inválido.');
 }
 
 export async function login(email, senha) {
