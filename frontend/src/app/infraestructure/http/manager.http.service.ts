@@ -64,8 +64,12 @@ export class ManagerHttpService {
     return this.http.get<ClienteConsulta[]>(`${this.api_URl}/clientes`);
   }
 
-  listarRelatorioClientes(): Observable<RelatorioCliente[]>{
-    return this.http.get<RelatorioCliente[]>(`${this.api_URl}/relatorio-clientes`);
+  listarRelatorioClientes(): Observable<RelatorioCliente[]> {
+    const req$ = this.http.get<any>(
+      `${this.api_URl}/relatorio-clientes`,
+      { observe: 'response' }
+    );
+    return this.jobPolling.executarComPolling<RelatorioCliente[]>(req$, true);
   }
 
 }
