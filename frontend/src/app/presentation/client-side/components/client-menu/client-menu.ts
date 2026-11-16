@@ -16,13 +16,15 @@ export class ClientMenu implements OnInit{
   clientService = inject(ClientService);
   private router = inject(Router);
 
-  client = signal<Client>(this.clientService.getClient());
-
   private accountService = inject(AccountService);
 
   account = computed(():Account =>{
     return this.accountService.getAccount();
   })
+
+  client = computed((): Client => {
+    return this.clientService.getClient();
+  });
 
   ngOnInit(): void {
     // this.accountService.findAccountByNumber("1291").subscribe({
