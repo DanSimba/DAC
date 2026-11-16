@@ -2,16 +2,12 @@ package com.monsterbank.ms_orquestrador.saga;
 
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaCommand;
 import com.monsterbank.ms_orquestrador.messaging.dto.SagaReply;
-import com.monsterbank.ms_orquestrador.messaging.producer.AuthCommandProducer;
-import com.monsterbank.ms_orquestrador.messaging.producer.BaseCommandProducer;
-import com.monsterbank.ms_orquestrador.messaging.producer.ClienteCommandProducer;
-import com.monsterbank.ms_orquestrador.messaging.producer.ContaCommandProducer;
-import com.monsterbank.ms_orquestrador.messaging.producer.EmailCommandProducer;
-import com.monsterbank.ms_orquestrador.messaging.producer.GerenteCommandProducer;
+import com.monsterbank.ms_orquestrador.messaging.producer.*;
 import com.monsterbank.ms_orquestrador.redis.SagaStateRepository;
-
-import java.util.Map;
-
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,311 +18,269 @@ import tools.jackson.databind.node.ObjectNode;
 
 @Service
 public class SagaService {
-
-    private static final Logger log = LoggerFactory.getLogger(SagaService.class);
-    private final StringRedisTemplate redisTemplate;
-    private final SagaStateRepository sagaStateRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public static final String LISTAR_GERENTES = "gerente.listar-ativos";
-    public static final String IDENTIFICAR_GERENTE = "conta.identificar-gerente";
-    public static final String CRIAR_USUARIO = "auth.criar-usuario";
-    public static final String CRIAR_CONTA = "conta.criar";
-    public static final String ENVIAR_SENHA = "email.enviar-senha";
-    public static final String COMPENSAR_CRIACAO_CLIENTE = "cliente.compensar-criacao";
-    public static final String MARCAR_NAO_APROVADA = "cliente.marcar-nao-aprovada";
     public static final String APROVAR_CLIENTE = "aprovar-cliente";
     public static final String APROVAR_SOLICITACAO = "cliente.aprovar-solicitacao";
+    public static final String LISTAR_GERENTES = "gerente.listar-ativos";
+    public static final String IDENTIFICAR_GERENTE = "conta.identificar-gerente";
     public static final String CRIAR_CLIENTE = "cliente.criar";
+    public static final String CRIAR_CONTA = "conta.criar";
+    public static final String CRIAR_USUARIO = "auth.criar-usuario";
+    public static final String ENVIAR_SENHA = "email.enviar-senha";
+    public static final String ENVIAR_FALHA = "email.rejeitar-solicitacao";
+    public static final String COMPENSAR_CRIACAO_USUARIO = "auth.compensar-criacao";
+    public static final String COMPENSAR_CRIACAO_CONTA = "conta.compensar-criacao";
+    public static final String COMPENSAR_CRIACAO_CLIENTE = "cliente.compensar-criacao";
     public static final String COMPENSAR_APROVACAO = "cliente.compensar-aprovacao";
+    public static final String MARCAR_NAO_APROVADA = "cliente.marcar-nao-aprovada";
 
+    private static final Logger log = LoggerFactory.getLogger(SagaService.class);
+    private static final Duration JOB_TTL = Duration.ofMinutes(5);
+    private static final Duration ETAPA_TIMEOUT = Duration.ofSeconds(30);
 
+    private final ClienteCommandProducer clienteProducer;
     private final GerenteCommandProducer gerenteProducer;
     private final ContaCommandProducer contaProducer;
     private final AuthCommandProducer authProducer;
-    private final ClienteCommandProducer clienteCommandProducer;
     private final EmailCommandProducer emailProducer;
+    private final SagaStateRepository stateRepository;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
+    private final ConcurrentMap<String, SagaReply> respostasAuthPendentes = new ConcurrentHashMap<>();
 
-    public SagaService(
-            ClienteCommandProducer clienteCommandProducer, GerenteCommandProducer gerenteProducer,
+    public SagaService(ClienteCommandProducer clienteProducer, GerenteCommandProducer gerenteProducer,
             ContaCommandProducer contaProducer, AuthCommandProducer authProducer,
-            EmailCommandProducer emailProducer, SagaStateRepository sagaStateRepository,
-            StringRedisTemplate redisTemplate) {
-        this.clienteCommandProducer = clienteCommandProducer;
+            EmailCommandProducer emailProducer, SagaStateRepository stateRepository,
+            StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+        this.clienteProducer = clienteProducer;
         this.gerenteProducer = gerenteProducer;
         this.contaProducer = contaProducer;
         this.authProducer = authProducer;
         this.emailProducer = emailProducer;
-        this.sagaStateRepository = sagaStateRepository;
+        this.stateRepository = stateRepository;
         this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public void iniciar(SagaCommand command) {
-        log.info("{} --- Iniciando SAGA", SagaService.class);
         validarInicio(command);
-
-        if (sagaStateRepository.existe(command.sagaId())) {
-            log.warn("{} --- SAGA já existente. ID: {}", SagaService.class, command.sagaId());
+        if (stateRepository.existe(command.sagaId())) {
+            log.warn("Saga {} ja existe", command.sagaId());
             return;
         }
-
-        SagaState sagaState = new SagaState(
-            command.sagaId(),
-            APROVAR_CLIENTE,
-            command.payload(),
-            APROVAR_SOLICITACAO,
-            1
-        );
-
-        log.info("{} --- Salvando SAGA. ID: {}, Etapa: {}, Tipo: {}, Operação: {}", SagaService.class, sagaState.getSagaId(), sagaState.getEtapaAtual(), sagaState.getTipo(), sagaState.getOperacaoAtual());
-        sagaStateRepository.salvar(sagaState);
-        
-        log.info("{} --- Salvando SAGA. ID: {}", SagaService.class, sagaState.getSagaId());
-        enviar(clienteCommandProducer, sagaState, APROVAR_SOLICITACAO, command.payload());
+        SagaState state = new SagaState(command.sagaId(), APROVAR_CLIENTE,
+                command.payload(), APROVAR_SOLICITACAO, 1);
+        stateRepository.salvar(state);
+        enviar(clienteProducer, state, APROVAR_SOLICITACAO, command.payload());
     }
-    /**
-     * Ponto unico de entrada das respostas. A continuacao/compensacao da saga pode ser
-     * acrescentada aqui sem acoplar os listeners aos demais microsservicos.
-     */
-    public void processarResposta(String operacao, SagaReply reply) {
-        SagaState state = sagaStateRepository.buscarPorId(reply.sagaId());
-        if (state == null) {
-            log.warn("Resposta da saga {} ignorada: estado inexistente", reply.sagaId());
-            return;
-        }
-        if (state.finalizada()) {
-            log.info("Resposta da saga {} ignorada: saga ja finalizada", reply.sagaId());
-            return;
-        }
+
+    public synchronized void processarResposta(String operacao, SagaReply reply) {
+        SagaState state = stateRepository.buscarPorId(reply.sagaId());
+        if (state == null || state.finalizada()) return;
         if (!operacao.equals(state.operacaoAtual())) {
             log.warn("Saga {} aguardava {}, mas recebeu {}", reply.sagaId(), state.operacaoAtual(), operacao);
             return;
         }
-
         switch (operacao) {
             case APROVAR_SOLICITACAO -> processarAprovacao(state, reply);
             case LISTAR_GERENTES -> processarListagemGerentes(state, reply);
             case IDENTIFICAR_GERENTE -> processarIdentificacaoGerente(state, reply);
             case CRIAR_CLIENTE -> processarCriacaoCliente(state, reply);
-            case CRIAR_USUARIO -> processarCriacaoUsuario(state, reply);
             case CRIAR_CONTA -> processarCriacaoConta(state, reply);
-            case COMPENSAR_CRIACAO_CLIENTE -> processarCompensacaoCriacaoCliente(state, reply);
-            case COMPENSAR_APROVACAO -> finalizarCompensacao(state, reply, "aprovacao");
-            case MARCAR_NAO_APROVADA -> finalizarCompensacao(state, reply, "marcacao da solicitacao como nao aprovada");
-            default -> log.warn("Operacao {} nao pertence a esta etapa da saga", operacao);
+            case CRIAR_USUARIO -> processarCriacaoUsuario(state, reply);
+            case COMPENSAR_CRIACAO_USUARIO -> processarCompensacaoUsuario(state, reply);
+            case COMPENSAR_CRIACAO_CONTA -> processarCompensacaoConta(state, reply);
+            case COMPENSAR_CRIACAO_CLIENTE -> processarCompensacaoCliente(state, reply);
+            case COMPENSAR_APROVACAO -> finalizarCompensacao(state, reply, "aprovacao da solicitacao");
+            case MARCAR_NAO_APROVADA -> finalizarCompensacao(state, reply, "reprovacao da solicitacao");
+            default -> log.warn("Operacao desconhecida na saga {}: {}", state.sagaId(), operacao);
+        }
+    }
+
+    public synchronized void processarTimeout(String sagaId) {
+        SagaState state = stateRepository.buscarPorId(sagaId);
+        if (state == null || state.finalizada()) return;
+        LocalDateTime transicao = LocalDateTime.parse(state.getTimestamp());
+        if (Duration.between(transicao, LocalDateTime.now()).compareTo(ETAPA_TIMEOUT) < 0) return;
+
+        String erro = "Timeout de 30 segundos na operacao " + state.operacaoAtual();
+        if (state.getStatus() == SagaState.Status.COMPENSANDO) {
+            falharSaga(state, erro + ". Erro original: " + state.erro());
+            return;
+        }
+        switch (state.operacaoAtual()) {
+            case APROVAR_SOLICITACAO, LISTAR_GERENTES, IDENTIFICAR_GERENTE -> iniciarCompensacaoAprovacao(state, erro);
+            case CRIAR_CLIENTE -> iniciarCompensacaoCliente(state, erro);
+            case CRIAR_CONTA -> iniciarCompensacaoConta(state, erro);
+            case CRIAR_USUARIO -> iniciarCompensacaoUsuario(state, erro);
+            default -> falharSaga(state, erro);
         }
     }
 
     private void processarAprovacao(SagaState state, SagaReply reply) {
-        log.info("{} --- Iniciando processarAprovacao()", SagaService.class);
-        if (!reply.sucesso()) {
-            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
-            state.falhar(reply.erro());
-            sagaStateRepository.salvar(state);
-            return;
-        }
-        
-        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
+        if (!reply.sucesso()) { falharSaga(state, reply.erro()); return; }
         ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
         payload.set("dadosSolicitacao", reply.payload());
         state.setPayload(payload);
-        
-        log.info("{} --- Avançar saga para LISTAR_GERENTES: {}", SagaService.class, LISTAR_GERENTES);
-        state.avancarPara(LISTAR_GERENTES, 2);
-
-        sagaStateRepository.salvar(state);
+        avancar(state, LISTAR_GERENTES, 2);
         enviar(gerenteProducer, state, LISTAR_GERENTES, objectMapper.createObjectNode());
     }
 
     private void processarListagemGerentes(SagaState state, SagaReply reply) {
-        log.info("{} --- Iniciando processarListagemGerentes()", SagaService.class);
-        if (!reply.sucesso()) {
-            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
-            iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
-            return;
-        }
-        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
-        log.info("{} --- Avançar saga para IDENTIFICAR_GERENTE: {}", SagaService.class, IDENTIFICAR_GERENTE);
-        state.avancarPara(IDENTIFICAR_GERENTE, 3);
-        sagaStateRepository.salvar(state);
+        if (!reply.sucesso()) { iniciarCompensacaoAprovacao(state, reply.erro()); return; }
+        avancar(state, IDENTIFICAR_GERENTE, 3);
         enviar(contaProducer, state, IDENTIFICAR_GERENTE, reply.payload());
     }
 
     private void processarIdentificacaoGerente(SagaState state, SagaReply reply) {
-        log.info("{} --- Iniciando processarIdentificacaoGerente()", SagaService.class);
-        if (!reply.sucesso()) {
-            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
-            iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
-            return;
-        }
-        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
+        if (!reply.sucesso()) { iniciarCompensacaoAprovacao(state, reply.erro()); return; }
         ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
-        payload.put("gerenteId", reply.payload().get("gerenteId").asLong());
+        payload.put("gerenteCpf", reply.payload().get("gerenteCpf").asLong());
         state.setPayload(payload);
-        
-        log.info("{} --- Avançar saga para CRIAR_CLIENTE: {}", SagaService.class, CRIAR_CLIENTE);
-        state.avancarPara(CRIAR_CLIENTE, 4);
-        sagaStateRepository.salvar(state);
-        enviar(clienteCommandProducer, state, CRIAR_CLIENTE, state.getPayload());
+        avancar(state, CRIAR_CLIENTE, 4);
+        enviar(clienteProducer, state, CRIAR_CLIENTE, state.getPayload());
     }
 
     private void processarCriacaoCliente(SagaState state, SagaReply reply) {
-        log.info("{} --- Iniciando processarCriacaoCliente()", SagaService.class);
-        if (!reply.sucesso()) {
-            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
-            iniciarCompensacao(state, COMPENSAR_APROVACAO, reply.erro());
-            return;
-        }
-        log.info("{} --- Avançar saga para CRIAR_USUARIO: {}", SagaService.class, CRIAR_USUARIO);
-        state.avancarPara(CRIAR_USUARIO, 5);
-        sagaStateRepository.salvar(state);
-        
-        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
-        String email = state.getPayload().get("dadosSolicitacao").get("email").asString();
-        ObjectNode authPayload = objectMapper.createObjectNode().put("cpf", state.cpf()).put("email", email);
-        enviar(authProducer, state, CRIAR_USUARIO, authPayload);
+        if (!reply.sucesso()) { iniciarCompensacaoAprovacao(state, reply.erro()); return; }
+        avancar(state, CRIAR_USUARIO, 5);
+        String email = dadosSolicitacao(state).get("email").asString();
+        enviar(authProducer, state, CRIAR_USUARIO,
+                objectMapper.createObjectNode().put("cpf", state.cpf()).put("email", email));
     }
 
     private void processarCriacaoUsuario(SagaState state, SagaReply reply) {
-        log.info("{} --- Iniciando processarCriacaoUsuario()", SagaService.class);
-        if (!reply.sucesso()) {
-            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
-            iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
-            return;
-        }
-
-        String senhaClara = reply.payload().get("senhaTemporariaTransacional").asString(); // Senha que vem do MS Auth
-        ObjectNode payloadState = (ObjectNode) state.getPayload();
-        payloadState.put("senhaTemporariaTransacional", senhaClara);
-        state.setPayload(payloadState);
-        log.info("{} --- SAGA state: {}", SagaService.class, state.getPayload());
-
-        log.info("{} --- Avançar saga para CRIAR_CONTA: {}", SagaService.class, CRIAR_CONTA);
-        state.avancarPara(CRIAR_CONTA, 6);
-        sagaStateRepository.salvar(state);
-
-        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
-        log.info("{} --- SAGA reply {}", SagaService.class, reply);
-        log.info("{} --- SAGA state {}", SagaService.class, state.getPayload());
-        ObjectNode contaPayload = objectMapper.createObjectNode()
-                .put("cpf", state.cpf())
-                .put("gerenteId", state.getPayload().get("gerenteId").asString())
-                .put("senhaTemporariaTransacional", senhaClara);
-        
-        log.info("{} --- SAGA contaPayload {}", SagaService.class, contaPayload);
-        enviar(contaProducer, state, CRIAR_CONTA, contaPayload);
+        if (!reply.sucesso()) { iniciarCompensacaoUsuario(state, reply.erro()); return; }
+        respostasAuthPendentes.put(state.sagaId(), reply);
+        avancar(state, CRIAR_CONTA, 6);
+        ObjectNode payload = objectMapper.createObjectNode().put("cpf", state.cpf())
+                .put("gerenteCpf", state.getPayload().get("gerenteCpf").asLong());
+        enviar(contaProducer, state, CRIAR_CONTA, payload);
     }
 
     private void processarCriacaoConta(SagaState state, SagaReply reply) {
-        log.info("{} --- Iniciando processarCriacaoConta()", SagaService.class);
-        if (!reply.sucesso()) {
-            log.info("{} --- SAGA com falha. Erro: {}", SagaService.class, reply.erro());
-            iniciarCompensacao(state, COMPENSAR_CRIACAO_CLIENTE, reply.erro());
+        if (!reply.sucesso()) { iniciarCompensacaoConta(state, reply.erro()); return; }
+        SagaReply respostaAuth = respostasAuthPendentes.remove(state.sagaId());
+        if (respostaAuth == null) {
+            iniciarCompensacaoConta(state, "Resposta temporaria do Auth indisponivel");
             return;
         }
-        
-        log.info("{} --- SAGA status {}", SagaService.class, reply.status());
-        log.info("{} --- SAGA reply {}", SagaService.class, reply);
-        log.info("{} --- SAGA state {}", SagaService.class, state.getPayload());
-        // ULTIMO PASSO: Enviar Email (Fire and forget)
-        String email = state.getPayload().get("dadosSolicitacao").get("email").asString();
-        String senhaClara = state.getPayload().get("senhaTemporariaTransacional").asString();
-        
-        log.info("{} --- SAGA email: {}", SagaService.class, email);
-        log.info("{} --- SAGA senhaClara: {}", SagaService.class, senhaClara);
-
-        ObjectNode emailPayload = objectMapper.createObjectNode()
-            .put("email", email)
-            .put("senha", senhaClara);
-        
-        log.info("{} --- SAGA emailPayload: {}", SagaService.class, emailPayload);
-        enviar(emailProducer, state, ENVIAR_SENHA, emailPayload);
+        String email = dadosSolicitacao(state).get("email").asString();
+        String senha = respostaAuth.payload().get("senhaTemporariaTransacional").asString();
+        enviar(emailProducer, state, ENVIAR_SENHA,
+                objectMapper.createObjectNode().put("email", email).put("senha", senha));
         concluirSaga(state);
     }
 
-    private void iniciarCompensacao(SagaState state, String comandoCompensacao, String erro) {
-        log.info("{} --- Iniciando compensação SAGA ID: [{}]", SagaService.class, state.getSagaId());
-        log.info("{} --- Erro: {}", SagaService.class, erro);
-        state.compensar(comandoCompensacao, state.getEtapaAtual(), erro);
-        sagaStateRepository.salvar(state);
-        enviar(clienteCommandProducer, state, comandoCompensacao, objectMapper.createObjectNode().put("cpf", state.cpf()));
+    private void iniciarCompensacaoUsuario(SagaState state, String erro) {
+        compensar(state, COMPENSAR_CRIACAO_USUARIO, erro);
+        enviar(authProducer, state, COMPENSAR_CRIACAO_USUARIO, objectMapper.createObjectNode().put("cpf", state.cpf()));
     }
 
-    private void processarCompensacaoCriacaoCliente(SagaState state, SagaReply reply) {
-        if (!reply.sucesso()) {
-            log.warn("{} --- SAGA COM ERRO. Status: {}", SagaService.class, reply.erro());
-            finalizarCompensacao(state, reply, "criacao do cliente");
-            return;
-        }
+    private void iniciarCompensacaoConta(SagaState state, String erro) {
+        compensar(state, COMPENSAR_CRIACAO_CONTA, erro);
+        enviar(contaProducer, state, COMPENSAR_CRIACAO_CONTA, objectMapper.createObjectNode().put("cpf", state.cpf()));
+    }
 
+    private void iniciarCompensacaoCliente(SagaState state, String erro) {
+        compensar(state, COMPENSAR_CRIACAO_CLIENTE, erro);
+        enviar(clienteProducer, state, COMPENSAR_CRIACAO_CLIENTE, objectMapper.createObjectNode().put("cpf", state.cpf()));
+    }
+
+    private void iniciarCompensacaoAprovacao(SagaState state, String erro) {
+        compensar(state, COMPENSAR_APROVACAO, erro);
+        enviar(clienteProducer, state, COMPENSAR_APROVACAO, objectMapper.createObjectNode().put("cpf", state.cpf()));
+    }
+
+    private void processarCompensacaoUsuario(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) { finalizarCompensacao(state, reply, "criacao do usuario"); return; }
+        iniciarCompensacaoCliente(state, state.erro());
+    }
+
+    private void processarCompensacaoConta(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) { finalizarCompensacao(state, reply, "criacao da conta"); return; }
+        iniciarCompensacaoUsuario(state, state.erro());
+    }
+
+    private void processarCompensacaoCliente(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) { finalizarCompensacao(state, reply, "criacao do cliente"); return; }
         if ("EMAIL_DUPLICADO".equals(state.erro())) {
-            log.warn("{} --- SAGA COM ERRO. EMAIL_DUPLICADO: {}", SagaService.class, reply.erro());
-            ObjectNode motivo = objectMapper.createObjectNode()
-                    .put("cpf", state.cpf())
-                    .put("motivo", "E-mail já cadastrado");
-            state.compensar(MARCAR_NAO_APROVADA, state.getEtapaAtual(), state.erro());
-            sagaStateRepository.salvar(state);
-            enviar(clienteCommandProducer, state, MARCAR_NAO_APROVADA, motivo);
+            compensar(state, MARCAR_NAO_APROVADA, state.erro());
+            ObjectNode payload = objectMapper.createObjectNode().put("cpf", state.cpf())
+                    .put("motivo", "E-mail ja cadastrado");
+            enviar(clienteProducer, state, MARCAR_NAO_APROVADA, payload);
             return;
         }
-
-        iniciarCompensacao(state, COMPENSAR_APROVACAO, state.erro());
+        iniciarCompensacaoAprovacao(state, state.erro());
     }
 
-    private void finalizarCompensacao(SagaState state, SagaReply reply, String etapaCompensada) {
+    private void finalizarCompensacao(SagaState state, SagaReply reply, String etapa) {
+        String original = state.erro();
         if (!reply.sucesso()) {
-            log.warn("{} --- SAGA COM ERRO. Status: {}", SagaService.class, reply.erro());
-            String erroOriginal = state.erro();
-            falharSaga(
-                    state,
-                    "Falha ao compensar " + etapaCompensada + ": " + reply.erro()
-                            + ". Erro original: " + erroOriginal
-            );
-            log.info("{} --- Erro: {}", SagaService.class, erroOriginal);
+            falharSaga(state, "Falha ao compensar " + etapa + ": " + reply.erro() + ". Erro original: " + original);
             return;
         }
+        falharSaga(state, original);
+    }
 
-        String erroOriginal = state.erro();
-        log.info("Saga {} compensada com sucesso ate a etapa de {}", state.sagaId(), etapaCompensada);
-        falharSaga(state, erroOriginal);
+    private void avancar(SagaState state, String operacao, int etapa) {
+        state.avancarPara(operacao, etapa);
+        stateRepository.salvar(state);
+    }
+
+    private void compensar(SagaState state, String operacao, String erro) {
+        state.compensar(operacao, state.getEtapaAtual(), erro);
+        stateRepository.salvar(state);
     }
 
     private void concluirSaga(SagaState state) {
-        log.info("{} --- Iniciando concluirSaga()", SagaService.class);
+        respostasAuthPendentes.remove(state.sagaId());
         state.concluir();
-        sagaStateRepository.salvar(state);
-        log.info("{} --- Finalizando SAGA... : ID: [{}]", SagaService.class, state.sagaId());
-        try {
-            ObjectNode job = objectMapper.createObjectNode()
-                .put("jobId", state.sagaId())
-                .put("status", "CONCLUIDO")
-                .put("resultType", "resource")
-                .put("dominio", "clientes")
-                .put("resourceId", state.cpf())
-                .putNull("erro");
-
-            log.info("{} --- Finalizando SAGA... : job: [{}]", SagaService.class, job);
-
-            redisTemplate.opsForValue().set("job:" + state.sagaId(), objectMapper.writeValueAsString(job));
-            redisTemplate.delete("cache:cliente:" + state.cpf()); // Invalida cache do Gateway
-            log.info("{} --- SAGA [{}] FINALIZADA COM SUCESSO!", SagaService.class, state.sagaId());
-        } catch (Exception e) { log.error("Erro no Job Redis", e); }
+        stateRepository.salvar(state);
+        ObjectNode job = objectMapper.createObjectNode().put("jobId", state.sagaId())
+                .put("status", "CONCLUIDO").put("resultType", "resource")
+                .put("dominio", "clientes").put("resourceId", state.cpf()).putNull("erro");
+        salvarJob(state.sagaId(), job);
+        redisTemplate.delete("cache:cliente:" + state.cpf());
+        log.info("Saga {} concluida", state.sagaId());
     }
 
     private void falharSaga(SagaState state, String erro) {
-        state.falhar(erro);
-        sagaStateRepository.salvar(state);
-        log.error("Saga {} FALHOU: {}", state.sagaId(), erro);
+        respostasAuthPendentes.remove(state.sagaId());
+        String mensagem = erro == null ? "Erro interno" : erro;
+        state.falhar(mensagem);
+        stateRepository.salvar(state);
+        ObjectNode job = objectMapper.createObjectNode().put("jobId", state.sagaId())
+                .put("status", "FALHA").putNull("resultType").put("dominio", "clientes")
+                .putNull("resourceId").put("erro", mensagem);
+        salvarJob(state.sagaId(), job);
+        enviarEmailFalha(state);
+        log.error("Saga {} falhou: {}", state.sagaId(), mensagem);
+    }
+
+    private void salvarJob(String sagaId, ObjectNode job) {
         try {
-            Map<String, Object> job = Map.of("jobId", state.sagaId(), "status", "FALHA", "resultType", null, "dominio", "clientes", "resourceId", null, "erro", erro != null ? erro : "Erro interno");
-            redisTemplate.opsForValue().set("job:" + state.sagaId(), objectMapper.writeValueAsString(job));
-        } catch (Exception e) { log.error("Erro no Job Redis"); }
+            redisTemplate.opsForValue().set("job:" + sagaId, objectMapper.writeValueAsString(job), JOB_TTL);
+        } catch (Exception e) {
+            log.error("Erro ao atualizar o job {} no Redis", sagaId, e);
+        }
+    }
+
+    private void enviarEmailFalha(SagaState state) {
+        JsonNode dados = dadosSolicitacao(state);
+        if (dados == null || dados.get("email") == null) return;
+        ObjectNode payload = objectMapper.createObjectNode().put("email", dados.get("email").asString())
+                .put("assunto", "Falha na solicitacao de conta")
+                .put("mensagem", "Sua solicitacao de conta nao pode ser concluida.");
+        enviar(emailProducer, state, ENVIAR_FALHA, payload);
+    }
+
+    private JsonNode dadosSolicitacao(SagaState state) {
+        return state.getPayload() == null ? null : state.getPayload().get("dadosSolicitacao");
     }
 
     private void enviar(BaseCommandProducer producer, SagaState state, String tipo, JsonNode payload) {
-        log.info("{} --- Enviando SAGA tipo {} para {}", SagaService.class, tipo, producer.getClass().getSimpleName());
-        log.info("{} --- Enviando SAGA payload: {}", SagaService.class, payload);
-        producer.enviar(state.sagaId(), tipo, payload); 
+        log.info("Enviando comando {} da saga {} para {}", tipo, state.sagaId(), producer.getClass().getSimpleName());
+        producer.enviar(state.sagaId(), tipo, payload);
     }
 
     private void validarInicio(SagaCommand command) {

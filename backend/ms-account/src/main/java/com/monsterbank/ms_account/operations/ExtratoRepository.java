@@ -16,4 +16,6 @@ public interface ExtratoRepository extends JpaRepository<ExtratoEntity, Long>{
     Optional<ExtratoEntity> findByDateIdAndAccNumber(Integer dateId, String accNumber);
 
     List<ExtratoEntity> findByAccNumber(String accNumber);
+
+    void deleteByAccNumber(String accNumber);
 }

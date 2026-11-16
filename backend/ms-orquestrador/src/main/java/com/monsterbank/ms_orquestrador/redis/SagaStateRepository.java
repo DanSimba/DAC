@@ -1,6 +1,8 @@
 package com.monsterbank.ms_orquestrador.redis;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -59,5 +61,24 @@ public class SagaStateRepository {
     public boolean existe(String sagaId) {
         log.info("{} --- Iniciando verificação de existência da SAGA {}", SagaStateRepository.class, sagaId);
         return Boolean.TRUE.equals(redisTemplate.hasKey(SAGA_PREFIX + sagaId));
+    }
+
+    public List<SagaState> listar() {
+        Set<String> keys = redisTemplate.keys(SAGA_PREFIX + "*");
+        if (keys == null || keys.isEmpty()) {
+            return List.of();
+        }
+        return redisTemplate.opsForValue().multiGet(keys).stream()
+                .filter(json -> json != null)
+                .map(this::desserializar)
+                .toList();
+    }
+
+    private SagaState desserializar(String json) {
+        try {
+            return objectMapper.readValue(json, SagaState.class);
+        } catch (JacksonException e) {
+            throw new RuntimeException("Falha na desserializacao do SagaState", e);
+        }
     }
 }

@@ -69,6 +69,11 @@ public class SagaReplyConsumer {
         sagaService.processarResposta("auth.criar-usuario", reply);
     }
 
+    @RabbitListener(queues = RabbitConfig.AUTH_COMPENSAR_CRIACAO_REPLY_QUEUE)
+    public void receberCompensacaoCriacaoUsuario(SagaReply reply) {
+        sagaService.processarResposta("auth.compensar-criacao", reply);
+    }
+
     @RabbitListener(queues = RabbitConfig.CONTA_CRIAR_REPLY_QUEUE)
     public void receberCriacaoConta(SagaReply reply) {
         sagaService.processarResposta("conta.criar", reply);
@@ -77,11 +82,6 @@ public class SagaReplyConsumer {
     @RabbitListener(queues = RabbitConfig.CONTA_APROVAR_SOLICITACAO_REPLY_QUEUE)
     public void receberAprovarSolicitacaoConta(SagaReply reply) {
         sagaService.processarResposta("conta.aprovar-solicitacao", reply);
-    }
-
-    @RabbitListener(queues = RabbitConfig.CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE)
-    public void receberIdentificarGerente(SagaReply reply) {
-        sagaService.processarResposta("conta.identificar-gerente", reply);
     }
 
     @RabbitListener(queues = RabbitConfig.CONTA_COMPENSAR_APROVACAO_REPLY_QUEUE)

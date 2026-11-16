@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface UserRepository extends MongoRepository<AuthEntity, String>{
     AuthEntity findByLogin(String login);
+    AuthEntity findByCpf(String cpf);
 }

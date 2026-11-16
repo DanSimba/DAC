@@ -54,14 +54,17 @@ public class AuthCommandConsumer {
 
                      String senhaProvisoria = authService.criarUsuarioCliente(email, cpf);
 
-                     log.info("{} --- Senha provisória: {}", AuthCommandConsumer.class, senhaProvisoria);
-
                      ObjectNode payloadResposta = objectMapper.createObjectNode();
                      payloadResposta.put("senhaTemporariaTransacional", senhaProvisoria);
 
-                     log.info("{} --- Enviando resposta de sucesso para a command: {}", AuthCommandConsumer.class, command);
+                     log.info("{} --- Usuário criado para a saga {}", AuthCommandConsumer.class, command.sagaId());
                      enviarRespostaSucesso(command, replyQueue, payloadResposta);
-                } 
+                }
+                case "auth.compensar-criacao" -> {
+                    String cpf = command.payload().get("cpf").asString();
+                    authService.removerUsuarioCliente(cpf);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
+                }
             
                 default -> {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", AuthCommandConsumer.class);
@@ -69,7 +72,7 @@ public class AuthCommandConsumer {
             }
         } catch (EmailJaCadastradoException e) {
             log.warn("{} --- Erro de negócio no ms-auth: {}", AuthCommandConsumer.class, e.getMessage());
-            enviarRespostaErro(command, replyQueue, e.getMessage());
+            enviarRespostaErro(command, replyQueue, "EMAIL_DUPLICADO");
         } catch (Exception e) {
             log.error("{} --- Erro interno catastrófico no ms-auth", AuthCommandConsumer.class, e);
             enviarRespostaErro(command, replyQueue, "Erro interno ao processar credenciais no ms-auth");
@@ -90,8 +93,7 @@ public class AuthCommandConsumer {
 
         );
 
-        log.info("{} --- Enviando resposta: {}", AuthCommandConsumer.class, reply);
-
+        log.info("{} --- Enviando resposta de sucesso da saga {}", AuthCommandConsumer.class, command.sagaId());
         responseProducer.enviar(replyQueue, reply);
     }
 
@@ -109,7 +111,7 @@ public class AuthCommandConsumer {
 
         );
 
-        log.info("{} --- Enviando resposta: {}", AuthCommandConsumer.class, reply);
+        log.info("{} --- Enviando resposta de falha da saga {}", AuthCommandConsumer.class, command.sagaId());
         responseProducer.enviar(replyQueue, reply);
     }
 

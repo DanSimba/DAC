@@ -27,7 +27,7 @@ public class EmailCommandConsumer {
         //EmailReplyQueue replyQueue = EmailReplyQueue.fromCommandType(command.tipo()).orElse(EmailReplyQueue.COMANDO_DESCONHECIDO);
 
         log.info("{} --- Iniciando consumo do ms.email.cmd", EmailReplyQueue.class);
-        log.info("{} --- command: {}", EmailReplyQueue.class, command);
+        log.info("{} --- Tipo do comando: {}", EmailReplyQueue.class, command.tipo());
 
         try {
             switch (command.tipo()) {
@@ -52,8 +52,6 @@ public class EmailCommandConsumer {
                     String senha = command.payload().get("senha").asString();
 
                     log.info("{} --- Email: {}", EmailCommandConsumer.class, email);
-                    log.info("{} --- Senha: {}", EmailCommandConsumer.class, senha);
-
                     emailService.sendPassword(email, senha);
                 }
             

@@ -25,6 +25,7 @@ public class RabbitConfig {
 
     public static final String AUTH_COMMAND_QUEUE = "ms.auth.cmd";
     public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
+    public static final String AUTH_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.auth.compensar-criacao.reply";
     
     public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
     public static final String CONTA_COMMAND_QUEUE = "ms.conta.cmd";
@@ -105,6 +106,11 @@ public class RabbitConfig {
     @Bean
     public Queue authCriarUsuarioReplyQueue() {
         return new Queue(AUTH_CRIAR_USUARIO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authCompensarCriacaoReplyQueue() {
+        return new Queue(AUTH_COMPENSAR_CRIACAO_REPLY_QUEUE, true);
     }
 
     @Bean 

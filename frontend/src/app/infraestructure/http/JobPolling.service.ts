@@ -42,7 +42,7 @@ export class JobPollingService {
           takeWhile((job) => job.status === 'PENDENTE', true),
           filter((job) => job.status !== 'PENDENTE'),
           take(1),
-          timeout({ first: 60000 }),
+          timeout({ first: 180000 }),
           switchMap((jobFinal) => {
             if (jobFinal.status === 'FALHA') {
               return throwError(() => ({ error: { message: jobFinal.erro || 'Falha ao processar operação.' } }));

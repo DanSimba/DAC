@@ -35,7 +35,7 @@ public class AuthService {
         AuthEntity usuario = userRepository.findByLogin(email);
 
         if (usuario == null || !argon2Encoder.matches(password, usuario.getSenha())) {
-            log.error("{} --- Usuário: [{}] ou senha inválidos: [{}]", AuthService.class, email, password);
+            log.error("{} --- Usuário ou senha inválidos para: [{}]", AuthService.class, email);
             throw new UsuarioOuSenhaIvalidosException();
         }
 
@@ -61,5 +61,12 @@ public class AuthService {
         }
 
         return senhaProvisoria;
+    }
+
+    public void removerUsuarioCliente(String cpf) {
+        AuthEntity usuario = userRepository.findByCpf(cpf);
+        if (usuario != null && usuario.getTipo() == UserType.CLIENTE) {
+            userRepository.delete(usuario);
+        }
     }
 }
