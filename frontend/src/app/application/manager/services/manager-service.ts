@@ -34,6 +34,10 @@ export class ManagerService {
     return this.manager();
     // já q não puxei do back ainda
   }
+
+  setGerente(gerente: any) {
+    this.manager.set(gerente);
+  }
   
   // private mock = signal<{ id: number; nome: string; email: string }>({
   //   id    : 1,
