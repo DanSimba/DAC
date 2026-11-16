@@ -1,6 +1,4 @@
---usando as mesmas merdas de dados da porra do documento do razer
---pra não ter problema com a porra de dado sujo nessa bosta
-TRUNCATE TABLE clientes;
+TRUNCATE TABLE clientes RESTART IDENTITY CASCADE;
 
 INSERT INTO clientes
     (cpf, nome, email, telefone, salario, logradouro, numero,

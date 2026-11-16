@@ -99,7 +99,7 @@ async function executarOperacao(tipo, operacao, usuario) {
 export async function transferir(transferencia, usuario) {
   const cpfOrigem = String(usuario.cpf);
   const contaDestino = await buscarPorNumero(transferencia.accDestiny, usuario);
-  const cpfDestino = String(contaDestino.clientCpf);
+  const cpfDestino = String(contaDestino.client_cpf);
   const [nomeOrigem, nomeDestino] = await Promise.all([
     buscarNomeCliente(cpfOrigem),
     buscarNomeCliente(cpfDestino)

@@ -29,8 +29,7 @@ export class Autocadastro {
     complemento: '',
     bairro: '',
     cidade: '',
-    uf: '',
-    state: ''
+    uf: ''
   };
 
     public client: CreateClient = {
@@ -147,8 +146,8 @@ export class Autocadastro {
           } catch (e) {}
         }
         
-        if (errorObject && errorObject.mensagem) {
-          this.mensagemErro = errorObject.mensagem;
+        if (errorObject && errorObject.message) {
+          this.mensagemErro = errorObject.message;
         } else if (error.status === 400) {
           this.mensagemErro = 'Dados inválidos enviados na requisição.';
         } else if (error.status === 409) {
@@ -201,7 +200,6 @@ export class Autocadastro {
           this.address.cidade = result.localidade;
           this.address.bairro = result.bairro;
           this.address.uf = result.uf;
-          this.address.state = result.estado;
         }
       },
       error: (error: HttpErrorResponse) => {
@@ -226,7 +224,6 @@ export class Autocadastro {
     this.address.bairro = '';
     this.address.cidade = '';
     this.address.uf = '';
-    this.address.state = '';
     this.ruaBloqueada = false;
   }
   

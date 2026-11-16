@@ -37,8 +37,8 @@ export class ManagerHomePage implements OnInit {
 
   public carregarSolicitacoes(): void {
     this.managerService.listarSolicitacoes().subscribe({
-      next: (resposta: any) => {
-        this.solicitacoes = resposta.solicitacoes || [];
+      next: (solicitacoes) => {
+        this.solicitacoes = solicitacoes;
         
         for (const solicitacao of this.solicitacoes) {
           if (solicitacao.dataHoraProcessamento) {

@@ -1,4 +1,5 @@
 package com.monsterbank.ms_account.account.accountDTOs;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 
 public class AccountDTO {
@@ -26,6 +27,7 @@ public class AccountDTO {
         return number;
     }
 
+    @JsonProperty("client_cpf")
     public String getClientCpf() {
         return clientCpf;
     }

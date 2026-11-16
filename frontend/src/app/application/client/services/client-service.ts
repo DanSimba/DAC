@@ -29,7 +29,6 @@ export class ClientService {
           bairro       : 'a',
           cidade       : 'a',
           uf           : 'a',
-          state        : 'a',
         },
         status   : ClientStatus.ACTIVE,
         type     : UserType.CLIENT,
@@ -50,7 +49,6 @@ export class ClientService {
       bairro: '',
       cidade: '',
       uf: '',
-      state: '',
     },
     status: ClientStatus.ACTIVE,
     type: UserType.CLIENT,
@@ -82,23 +80,6 @@ export class ClientService {
 
   getIMO(): boolean{
     return this.isMenuOpen()
-  }
-
-  findClientByCpf(cpf: string): void {
-    this.clientHttpService.findClientByCpf(cpf).subscribe({
-      next: (response: any) => {
-        // Mapeia caso o backend Java retorne campos em português (nome, salario, endereco...)
-        this.client.set({
-          ...this.client(),
-          ...response,
-          name: response.name ?? response.nome ?? '',
-          cpf: response.cpf ?? cpf,
-          email: response.email ?? '',
-          salary: response.salary ?? response.salario ?? 0,
-        });
-      },
-      error: (err) => console.error('Erro ao buscar dados do cliente:', err)
-    });
   }
 
   createClientRequest(payload: any): Observable<void>{

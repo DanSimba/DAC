@@ -64,7 +64,7 @@ public class SolicitacaoService {
                 dto.telefone(),
                 salario,
                 dto.endereco().logradouro(),
-                dto.endereco().numero(),
+                Integer.parseInt(dto.endereco().numero()),
                 dto.endereco().complemento(),
                 dto.endereco().cep(),
                 dto.endereco().bairro(),

@@ -35,6 +35,12 @@ services:
       - mgdata-auth:/data/db
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   db-account:
     image: postgres:15-alpine
@@ -48,6 +54,12 @@ services:
       - pgdata-conta:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-account -d ms-account"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     deploy:
       resources:
         limits:
@@ -81,6 +93,12 @@ services:
       - pgdata-conta-read:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-account -d ms-account-read"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     deploy:
       resources:
         limits:
@@ -98,6 +116,12 @@ services:
       - pgdata-cliente:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-cliente -d ms-cliente"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   db-gerente:
     image: postgres:15-alpine
@@ -111,6 +135,12 @@ services:
       - pgdata-gerente:/var/lib/postgresql/data
     networks:
       - monsterbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms-gerente -d ms-gerente"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   #=====SERVIÇOS=====#
   api-gateway:
@@ -124,6 +154,9 @@ services:
       MS_GERENTE_URL: http://ms-gerente:8084
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-MONSTERBANK}
+      FRONTEND_URL: http://localhost:4200
+      PORT: 8080
     depends_on: # testando verificação do rabbitmq antes de subir o api-gateway
       ms-auth:
         condition: service_started
@@ -152,8 +185,10 @@ services:
       context: ./backend/ms-auth
 
     depends_on:
-      - db-auth
-      - rabbitmq
+      db-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
     mem_limit: 512m
     mem_reservation: 384m
@@ -165,13 +200,13 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      APP_SEED_ENABLED: "true"
 
     ports:
       - "8081:8081"
 
     networks:
       - monsterbank-net
-
 
   ms-cliente:
     build:
@@ -181,14 +216,17 @@ services:
     mem_reservation: 384m
 
     depends_on:
-      - db-cliente
-      - rabbitmq
+      db-cliente:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
     environment:
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-cliente:5432/ms-cliente
       SPRING_DATASOURCE_USERNAME: ms-cliente
       SPRING_DATASOURCE_PASSWORD: psql
+      SPRING_SQL_INIT_MODE: always
 
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -226,9 +264,12 @@ services:
       context: ./backend/ms-account
       dockerfile: ms-account.dockerfile
     depends_on:
-      - db-account
-      - db-account-read
-      - rabbitmq
+      db-account:
+        condition: service_healthy
+      db-account-read:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-account:5432/ms-account
@@ -238,6 +279,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      APP_SEED_ENABLED: "true"
     ports:
       - "8082:8080"
     networks:
@@ -285,8 +327,10 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - db-gerente
-      - rabbitmq
+      db-gerente:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60 -XX:+UseSerialGC  
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-gerente:5432/ms-gerente

@@ -45,7 +45,7 @@ export class JobPollingService {
           timeout({ first: 60000 }),
           switchMap((jobFinal) => {
             if (jobFinal.status === 'FALHA') {
-              return throwError(() => ({ error: { mensagem: jobFinal.erro || 'Falha ao processar operação.' } }));
+              return throwError(() => ({ error: { message: jobFinal.erro || 'Falha ao processar operação.' } }));
             }
 
             if (!buscarRecursoFinal) {

@@ -35,7 +35,7 @@ export async function listar({ field } = {}) {
   ]);
 
   const contasPorCpf = new Map(
-    contas.map(conta => [String(conta.clientCpf), conta])
+    contas.map(conta => [String(conta.client_cpf), conta])
   );
 
   return clientes
@@ -71,7 +71,7 @@ async function montarRelatorio() {
   ]);
 
   const contasPorCpf = new Map(
-    contas.map(conta => [String(conta.clientCpf), conta])
+    contas.map(conta => [String(conta.client_cpf), conta])
   );
   const gerentesPorId = new Map(
     gerentes.map(gerente => [String(gerente.id), gerente])
