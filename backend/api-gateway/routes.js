@@ -204,7 +204,7 @@ export function createRoutes({
     ));
   });
 
-  router.get('/gerentes/:identificador', ...somenteGerente, async (req, res) => {
+  router.get('/gerentes/:identificador', async (req, res) => {
     const gerente = await gerenteService.buscar(req.params.identificador);
     const resultado = addLinks(
       req,
