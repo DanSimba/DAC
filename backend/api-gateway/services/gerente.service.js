@@ -22,8 +22,9 @@ export async function listar() {
   return gerentes
     .map(gerente => ({
       ...gerente,
-      quantClientes: contas.filter(
-        conta => String(conta.managerId) === String(gerente.id)
+      ativo: gerente.ativo ?? true,
+      quantidadeClientes: contas.filter(
+        conta => String(conta.managerId) === String(gerente.cpf)
       ).length
     }))
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
@@ -53,8 +54,13 @@ export async function criar(gerente) {
 }
 
 export async function atualizar(id, gerente) {
+  if (Object.keys(gerente).some(campo => !['nome', 'telefone'].includes(campo))) {
+    throw new HttpError(400, 'Somente nome e telefone podem ser alterados.');
+  }
+
+  const atual = await buscar(id);
   const { data } = await request(
-    `${gerenteUrl}/${encodeURIComponent(id)}`,
+    `${gerenteUrl}/${encodeURIComponent(atual.id)}`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

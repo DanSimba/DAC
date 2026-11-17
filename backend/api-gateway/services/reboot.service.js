@@ -3,7 +3,14 @@ import { HttpError, request } from '../infra/http-client.js';
 import { redis } from '../infra/redis.js';
 
 async function reiniciarServico(url, nome) {
-  await request(`${url}/reboot`, {
+  const paths = {
+    'MS Auth': '/auth/reboot',
+    'MS Cliente': '/clientes/reboot',
+    'MS Conta': '/account/reboot',
+    'MS Gerente': '/gerente/reboot'
+  };
+  const path = paths[nome];
+  await request(`${url}${path}`, {
     method: 'POST',
     unavailableMessage: `${nome} indisponível.`
   });

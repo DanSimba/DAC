@@ -74,6 +74,13 @@ public class GerenteService {
         gerenteRepository.save(gerente);
     }
 
+    public void removerPorCpf(String cpf) {
+        GerenteEntity gerente = gerenteRepository.findByCpf(cpf)
+                .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));
+        gerente.setAtivo(false);
+        gerenteRepository.save(gerente);
+    }
+
     public GerenteDTO buscaPorCpf(String cpf) {
         GerenteEntity gerente = gerenteRepository.findByCpf(cpf)
                 .orElseThrow(() -> new RuntimeException("Gerente não encontrado"));

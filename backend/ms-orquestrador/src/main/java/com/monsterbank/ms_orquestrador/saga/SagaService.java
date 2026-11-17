@@ -19,6 +19,8 @@ import tools.jackson.databind.node.ObjectNode;
 @Service
 public class SagaService {
     public static final String APROVAR_CLIENTE = "aprovar-cliente";
+    public static final String INSERIR_GERENTE = "inserir-gerente";
+    public static final String REMOVER_GERENTE = "remover-gerente";
     public static final String APROVAR_SOLICITACAO = "cliente.aprovar-solicitacao";
     public static final String LISTAR_GERENTES = "gerente.listar-ativos";
     public static final String IDENTIFICAR_GERENTE = "conta.identificar-gerente";
@@ -32,6 +34,11 @@ public class SagaService {
     public static final String COMPENSAR_CRIACAO_CLIENTE = "cliente.compensar-criacao";
     public static final String COMPENSAR_APROVACAO = "cliente.compensar-aprovacao";
     public static final String MARCAR_NAO_APROVADA = "cliente.marcar-nao-aprovada";
+    public static final String CRIAR_GERENTE = "gerente.criar";
+    public static final String DESATIVAR_GERENTE = "gerente.desativar";
+    public static final String CRIAR_USUARIO_GERENTE = "auth.criar-gerente";
+    public static final String REMOVER_USUARIO_GERENTE = "auth.remover-gerente";
+    public static final String REDISTRIBUIR_GERENTE = "conta.redistribuir-gerente";
 
     private static final Logger log = LoggerFactory.getLogger(SagaService.class);
     private static final Duration JOB_TTL = Duration.ofMinutes(5);
@@ -67,10 +74,20 @@ public class SagaService {
             log.warn("Saga {} ja existe", command.sagaId());
             return;
         }
-        SagaState state = new SagaState(command.sagaId(), APROVAR_CLIENTE,
-                command.payload(), APROVAR_SOLICITACAO, 1);
+        String primeiraOperacao = switch (command.tipo()) {
+            case APROVAR_CLIENTE -> APROVAR_SOLICITACAO;
+            case INSERIR_GERENTE -> CRIAR_GERENTE;
+            case REMOVER_GERENTE -> DESATIVAR_GERENTE;
+            default -> throw new IllegalArgumentException("tipo de saga nao suportado");
+        };
+        SagaState state = new SagaState(command.sagaId(), command.tipo(),
+                command.payload(), primeiraOperacao, 1);
         stateRepository.salvar(state);
-        enviar(clienteProducer, state, APROVAR_SOLICITACAO, command.payload());
+        switch (command.tipo()) {
+            case APROVAR_CLIENTE -> enviar(clienteProducer, state, primeiraOperacao, command.payload());
+            case INSERIR_GERENTE, REMOVER_GERENTE -> enviar(gerenteProducer, state, primeiraOperacao, command.payload());
+            default -> throw new IllegalArgumentException("tipo de saga nao suportado");
+        }
     }
 
     public synchronized void processarResposta(String operacao, SagaReply reply) {
@@ -92,6 +109,11 @@ public class SagaService {
             case COMPENSAR_CRIACAO_CLIENTE -> processarCompensacaoCliente(state, reply);
             case COMPENSAR_APROVACAO -> finalizarCompensacao(state, reply, "aprovacao da solicitacao");
             case MARCAR_NAO_APROVADA -> finalizarCompensacao(state, reply, "reprovacao da solicitacao");
+            case CRIAR_GERENTE -> processarCriacaoGerente(state, reply);
+            case DESATIVAR_GERENTE -> processarDesativacaoGerente(state, reply);
+            case CRIAR_USUARIO_GERENTE -> processarCriacaoUsuarioGerente(state, reply);
+            case REMOVER_USUARIO_GERENTE -> processarRemocaoUsuarioGerente(state, reply);
+            case REDISTRIBUIR_GERENTE -> processarRedistribuicaoGerente(state, reply);
             default -> log.warn("Operacao desconhecida na saga {}: {}", state.sagaId(), operacao);
         }
     }
@@ -126,6 +148,14 @@ public class SagaService {
     }
 
     private void processarListagemGerentes(SagaState state, SagaReply reply) {
+        if (REMOVER_GERENTE.equals(state.getTipo())) {
+            if (!reply.sucesso()) { falharSagaGerente(state, reply.erro()); return; }
+            ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
+            payload.set("gerentes", reply.payload());
+            avancar(state, REDISTRIBUIR_GERENTE, 3);
+            enviar(contaProducer, state, REDISTRIBUIR_GERENTE, payload);
+            return;
+        }
         if (!reply.sucesso()) { iniciarCompensacaoAprovacao(state, reply.erro()); return; }
         avancar(state, IDENTIFICAR_GERENTE, 3);
         enviar(contaProducer, state, IDENTIFICAR_GERENTE, reply.payload());
@@ -133,11 +163,61 @@ public class SagaService {
 
     private void processarIdentificacaoGerente(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) { iniciarCompensacaoAprovacao(state, reply.erro()); return; }
+        JsonNode gerenteCpf = reply.payload() == null ? null : reply.payload().get("gerenteCpf");
+        if (gerenteCpf == null || gerenteCpf.isNull()) {
+            iniciarCompensacaoAprovacao(state, "Nenhum gerente ativo disponivel");
+            return;
+        }
         ObjectNode payload = (ObjectNode) state.getPayload().deepCopy();
-        payload.put("gerenteCpf", reply.payload().get("gerenteCpf").asLong());
+        payload.put("gerenteCpf", gerenteCpf.asLong());
         state.setPayload(payload);
         avancar(state, CRIAR_CLIENTE, 4);
         enviar(clienteProducer, state, CRIAR_CLIENTE, state.getPayload());
+    }
+
+    private void processarCriacaoGerente(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) { falharSagaGerente(state, reply.erro()); return; }
+        avancar(state, CRIAR_USUARIO_GERENTE, 2);
+        enviar(authProducer, state, CRIAR_USUARIO_GERENTE, state.getPayload());
+    }
+
+    private void processarCriacaoUsuarioGerente(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) {
+            compensar(state, DESATIVAR_GERENTE, reply.erro());
+            enviar(gerenteProducer, state, DESATIVAR_GERENTE, state.getPayload());
+            return;
+        }
+        concluirSagaGerente(state);
+    }
+
+    private void processarDesativacaoGerente(SagaState state, SagaReply reply) {
+        if (state.getStatus() == SagaState.Status.COMPENSANDO) {
+            finalizarCompensacaoGerente(state, reply);
+            return;
+        }
+        if (!reply.sucesso()) { falharSagaGerente(state, reply.erro()); return; }
+        avancar(state, LISTAR_GERENTES, 2);
+        enviar(gerenteProducer, state, LISTAR_GERENTES, objectMapper.createObjectNode());
+    }
+
+    private void processarRedistribuicaoGerente(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) { falharSagaGerente(state, reply.erro()); return; }
+        avancar(state, REMOVER_USUARIO_GERENTE, 4);
+        enviar(authProducer, state, REMOVER_USUARIO_GERENTE, state.getPayload());
+    }
+
+    private void processarRemocaoUsuarioGerente(SagaState state, SagaReply reply) {
+        if (!reply.sucesso()) { falharSagaGerente(state, reply.erro()); return; }
+        revogarSessaoGerente(state.cpf());
+        concluirSagaGerente(state);
+    }
+
+    private void finalizarCompensacaoGerente(SagaState state, SagaReply reply) {
+        String erro = state.erro();
+        if (!reply.sucesso()) {
+            erro = "Falha ao compensar criacao do gerente: " + reply.erro() + ". Erro original: " + erro;
+        }
+        falharSagaGerente(state, erro);
     }
 
     private void processarCriacaoCliente(SagaState state, SagaReply reply) {
@@ -257,6 +337,36 @@ public class SagaService {
         log.error("Saga {} falhou: {}", state.sagaId(), mensagem);
     }
 
+    private void concluirSagaGerente(SagaState state) {
+        state.concluir();
+        stateRepository.salvar(state);
+        ObjectNode job = objectMapper.createObjectNode().put("jobId", state.sagaId())
+                .put("status", "CONCLUIDO").put("resultType", "resource")
+                .put("dominio", "gerentes").put("resourceId", state.cpf()).putNull("erro");
+        salvarJob(state.sagaId(), job);
+        log.info("Saga de gerente {} concluida", state.sagaId());
+    }
+
+    private void falharSagaGerente(SagaState state, String erro) {
+        String mensagem = erro == null ? "Erro interno" : erro;
+        state.falhar(mensagem);
+        stateRepository.salvar(state);
+        ObjectNode job = objectMapper.createObjectNode().put("jobId", state.sagaId())
+                .put("status", "FALHA").putNull("resultType").put("dominio", "gerentes")
+                .putNull("resourceId").put("erro", mensagem);
+        salvarJob(state.sagaId(), job);
+        log.error("Saga de gerente {} falhou: {}", state.sagaId(), mensagem);
+    }
+
+    private void revogarSessaoGerente(String cpf) {
+        String chaveCpf = "sessao:cpf:" + cpf;
+        String jti = redisTemplate.opsForValue().get(chaveCpf);
+        if (jti != null) {
+            redisTemplate.delete("sessao:" + jti);
+        }
+        redisTemplate.delete(chaveCpf);
+    }
+
     private void salvarJob(String sagaId, ObjectNode job) {
         try {
             redisTemplate.opsForValue().set("job:" + sagaId, objectMapper.writeValueAsString(job), JOB_TTL);
@@ -284,7 +394,9 @@ public class SagaService {
     }
 
     private void validarInicio(SagaCommand command) {
-        if (command == null || !APROVAR_CLIENTE.equals(command.tipo()))
+        if (command == null || (!APROVAR_CLIENTE.equals(command.tipo())
+                && !INSERIR_GERENTE.equals(command.tipo())
+                && !REMOVER_GERENTE.equals(command.tipo())))
             throw new IllegalArgumentException("tipo de saga nao suportado");
         if (command.payload() == null || command.payload().get("cpf") == null
                 || command.payload().get("cpf").asString().isBlank())

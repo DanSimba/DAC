@@ -14,19 +14,38 @@ export function createRoutes({
   const somenteGerente = [autenticar, autorizar('GERENTE')];
   const somenteCliente = [autenticar, autorizar('CLIENTE')];
 
-  //auth
-  router.post('/auth/login', async (req, res) => {
+  function jobAceito(req, res, job) {
+    res.location(`/jobs/${job.jobId}/status`);
+    return res.status(202).json(job);
+  }
+
+  function normalizarSolicitacao(solicitacao) {
+    const status = solicitacao.status === 'APROVADO'
+      ? 'APROVADA'
+      : solicitacao.status === 'NAO_APROVADO'
+        ? 'NAO_APROVADA'
+        : solicitacao.status;
+
+    return { ...solicitacao, status };
+  }
+
+  async function executarLogin(req, res) {
     const { email, senha } = req.body ?? {};
     const resultado = await login(email, senha);
-
     return res.status(200).json(resultado);
-  });
+  }
 
-  router.post('/auth/logout', autenticar, async (req, res) => {
-    const resultado = await logout(req.usuario);
+  async function executarLogout(req, res) {
+    await logout(req.usuario);
+    return res.status(204).end();
+  }
 
-    return res.status(200).json(resultado);
-  });
+  //auth
+  router.post('/login', executarLogin);
+  router.post('/auth/login', executarLogin);
+
+  router.post('/logout', autenticar, executarLogout);
+  router.post('/auth/logout', autenticar, executarLogout);
 
   router.get('/validacao', autenticar, (req, res) => {
     return res.status(200).json({
@@ -38,13 +57,21 @@ export function createRoutes({
 
   //solicitacao
   router.post('/solicitacoes', async (req, res) => {
-    const solicitacao = await solicitacaoService.criar(req.body);
-    const cpf = encodeURIComponent(solicitacao.cpf);
-    const resultado = addLinks(
-      req,
-      solicitacao,
-      { self: `/solicitacoes/${cpf}` }
+    const solicitacao = normalizarSolicitacao(
+      await solicitacaoService.criar(req.body)
     );
+    const cpf = encodeURIComponent(solicitacao.cpf);
+    const resultado = addLinks(req, solicitacao, {
+      self: `/solicitacoes/${cpf}`,
+      aprovacao: {
+        href: `/solicitacoes/${cpf}/aprovacao`,
+        method: 'POST'
+      },
+      rejeicao: {
+        href: `/solicitacoes/${cpf}/rejeicao`,
+        method: 'POST'
+      }
+    });
 
     res.location(resultado._links.self.href);
     return res.status(201).json(resultado);
@@ -52,16 +79,17 @@ export function createRoutes({
 
   router.get('/solicitacoes', ...somenteGerente, async (req, res) => {
     const solicitacoes = await solicitacaoService.listar(req.query.status);
-    const resultado = solicitacoes.map(solicitacao => {
+    const resultado = solicitacoes.map(item => {
+      const solicitacao = normalizarSolicitacao(item);
       const cpf = encodeURIComponent(solicitacao.cpf);
       const links = { self: `/solicitacoes/${cpf}` };
 
       if (solicitacao.status === 'PENDENTE') {
-        links.aprovar = {
+        links.aprovacao = {
           href: `/solicitacoes/${cpf}/aprovacao`,
           method: 'POST'
         };
-        links.rejeitar = {
+        links.rejeicao = {
           href: `/solicitacoes/${cpf}/rejeicao`,
           method: 'POST'
         };
@@ -70,11 +98,17 @@ export function createRoutes({
       return addLinks(req, solicitacao, links);
     });
 
-    return res.status(200).json(resultado);
+    return res.status(200).json(addLinks(
+      req,
+      { solicitacoes: resultado },
+      { self: '/solicitacoes' }
+    ));
   });
 
   router.get('/solicitacoes/:cpf', ...somenteGerente, async (req, res) => {
-    const solicitacao = await solicitacaoService.buscarPorCpf(req.params.cpf);
+    const solicitacao = normalizarSolicitacao(
+      await solicitacaoService.buscarPorCpf(req.params.cpf)
+    );
     const cpf = encodeURIComponent(solicitacao.cpf);
     const links = {
       self: `/solicitacoes/${cpf}`,
@@ -82,11 +116,11 @@ export function createRoutes({
     };
 
     if (solicitacao.status === 'PENDENTE') {
-      links.aprovar = {
+      links.aprovacao = {
         href: `/solicitacoes/${cpf}/aprovacao`,
         method: 'POST'
       };
-      links.rejeitar = {
+      links.rejeicao = {
         href: `/solicitacoes/${cpf}/rejeicao`,
         method: 'POST'
       };
@@ -96,10 +130,10 @@ export function createRoutes({
   });
 
   router.post('/solicitacoes/:cpf/rejeicao', ...somenteGerente, async (req, res) => {
-    const solicitacao = await solicitacaoService.rejeitar(
+    const solicitacao = normalizarSolicitacao(await solicitacaoService.rejeitar(
       req.params.cpf,
       req.body
-    );
+    ));
     const cpf = encodeURIComponent(solicitacao.cpf);
     const resultado = addLinks(
       req,
@@ -115,13 +149,7 @@ export function createRoutes({
 
   router.post('/solicitacoes/:cpf/aprovacao', ...somenteGerente, async (req, res) => {
     const job = await solicitacaoService.aprovar(req.params.cpf);
-    const resultado = addLinks(
-      req,
-      job,
-      { status: `/jobs/${job.jobId}/status` }
-    );
-
-    return res.status(202).json(resultado);
+    return jobAceito(req, res, job);
   });
 
 
@@ -136,24 +164,7 @@ export function createRoutes({
     }
 
     const { resultado, ...status } = job;
-    const links = {
-      self: `/jobs/${job.jobId}/status`
-    };
-
-    if (job.status === 'CONCLUIDO' && job.resultType === 'inline') {
-      links.resultado = `/jobs/${job.jobId}/result`;
-    }
-
-    if (
-      job.status === 'CONCLUIDO'
-      && job.resultType === 'resource'
-      && job.dominio
-      && job.resourceId
-    ) {
-      links.recurso = `/${job.dominio}/${encodeURIComponent(job.resourceId)}`;
-    }
-
-    return res.status(200).json(addLinks(req, status, links));
+    return res.status(200).json(status);
   });
 
   router.get('/jobs/:jobId/result', ...somenteGerente, async (req, res) => {
@@ -174,35 +185,39 @@ export function createRoutes({
       req,
       gerente,
       {
-        self: `/gerentes/${gerente.id}`,
+        self: `/gerentes/${gerente.cpf}`,
         atualizar: {
-          href: `/gerentes/${gerente.id}`,
+          href: `/gerentes/${gerente.cpf}`,
           method: 'PUT'
         },
         remover: {
-          href: `/gerentes/${gerente.id}`,
+          href: `/gerentes/${gerente.cpf}`,
           method: 'DELETE'
         }
       }
     ));
 
-    return res.status(200).json(resultado);
+    return res.status(200).json(addLinks(
+      req,
+      { gerentes: resultado },
+      { self: '/gerentes', cadastro: { href: '/gerentes', method: 'POST' } }
+    ));
   });
 
-  router.get('/gerentes/:identificador', async (req, res) => {
+  router.get('/gerentes/:identificador', ...somenteGerente, async (req, res) => {
     const gerente = await gerenteService.buscar(req.params.identificador);
     const resultado = addLinks(
       req,
       gerente,
       {
-        self: `/gerentes/${gerente.id}`,
+        self: `/gerentes/${gerente.cpf}`,
         gerentes: '/gerentes',
         atualizar: {
-          href: `/gerentes/${gerente.id}`,
+          href: `/gerentes/${gerente.cpf}`,
           method: 'PUT'
         },
         remover: {
-          href: `/gerentes/${gerente.id}`,
+          href: `/gerentes/${gerente.cpf}`,
           method: 'DELETE'
         }
       }
@@ -213,13 +228,7 @@ export function createRoutes({
 
   router.post('/gerentes', ...somenteGerente, async (req, res) => {
     const job = await gerenteService.criar(req.body);
-    const resultado = addLinks(
-      req,
-      job,
-      { status: `/jobs/${job.jobId}/status` }
-    );
-
-    return res.status(202).json(resultado);
+    return jobAceito(req, res, job);
   });
 
   router.put('/gerentes/:id', ...somenteGerente, async (req, res) => {
@@ -228,10 +237,10 @@ export function createRoutes({
       req,
       gerente,
       {
-        self: `/gerentes/${gerente.id}`,
+        self: `/gerentes/${gerente.cpf}`,
         gerentes: '/gerentes',
         remover: {
-          href: `/gerentes/${gerente.id}`,
+          href: `/gerentes/${gerente.cpf}`,
           method: 'DELETE'
         }
       }
@@ -245,13 +254,7 @@ export function createRoutes({
       req.params.id,
       req.usuario.cpf
     );
-    const resultado = addLinks(
-      req,
-      job,
-      { status: `/jobs/${job.jobId}/status` }
-    );
-
-    return res.status(202).json(resultado);
+    return jobAceito(req, res, job);
   });
 
   //clientes
@@ -266,10 +269,20 @@ export function createRoutes({
       }
     ));
 
-    return res.status(200).json(resultado);
+    return res.status(200).json(addLinks(
+      req,
+      { clientes: resultado },
+      { self: '/clientes' }
+    ));
   });
 
-  router.get('/clientes/:cpf', ...somenteGerente, async (req, res) => {
+  router.get('/clientes/:cpf', autenticar, async (req, res) => {
+    if (
+      req.usuario.tipo.toUpperCase() === 'CLIENTE'
+      && String(req.usuario.cpf) !== String(req.params.cpf)
+    ) {
+      return res.status(403).json({ message: 'Acesso negado.' });
+    }
     const cliente = await clienteService.buscarPorCpf(req.params.cpf);
     const resultado = addLinks(
       req,
@@ -277,7 +290,7 @@ export function createRoutes({
       {
         self: `/clientes/${cliente.cpf}`,
         clientes: '/clientes',
-        conta: `/account/findByCpf/${encodeURIComponent(cliente.cpf)}`
+        conta: `/clientes/${encodeURIComponent(cliente.cpf)}/conta`
       }
     );
 
@@ -286,17 +299,103 @@ export function createRoutes({
 
   router.get('/relatorio-clientes', ...somenteGerente, async (req, res) => {
     const job = await clienteService.gerarRelatorio();
-    const resultado = addLinks(
-      req,
-      job,
-      { status: `/jobs/${job.jobId}/status` }
-    );
+    return jobAceito(req, res, job);
+  });
 
-    return res.status(202).json(resultado);
+  router.get('/relatorios/clientes', ...somenteGerente, async (req, res) => {
+    const job = await clienteService.gerarRelatorio();
+    return jobAceito(req, res, job);
+  });
+
+  router.get('/clientes/:cpf/conta', autenticar, async (req, res) => {
+    if (
+      req.usuario.tipo.toUpperCase() === 'CLIENTE'
+      && String(req.usuario.cpf) !== String(req.params.cpf)
+    ) {
+      return res.status(403).json({ message: 'Acesso negado.' });
+    }
+
+    const conta = await contaService.buscarPorCpf(req.params.cpf, req.usuario);
+    const publica = contaService.paraContratoPublico(conta);
+    return res.status(200).json(addLinks(req, publica, {
+      self: `/contas/${publica.numero}`,
+      cliente: `/clientes/${publica.cpfCliente}`,
+      deposito: { href: `/contas/${publica.numero}/deposito`, method: 'POST' },
+      saque: { href: `/contas/${publica.numero}/saque`, method: 'POST' },
+      transferencia: { href: `/contas/${publica.numero}/transferencia`, method: 'POST' },
+      extrato: `/contas/${publica.numero}/extrato`
+    }));
   });
 
 
   //conta
+  router.get('/contas/:numero', autenticar, async (req, res) => {
+    const conta = await contaService.buscarPorNumero(req.params.numero, req.usuario);
+
+    if (
+      req.usuario.tipo.toUpperCase() === 'CLIENTE'
+      && String(conta.client_cpf) !== String(req.usuario.cpf)
+    ) {
+      return res.status(403).json({ message: 'Acesso negado.' });
+    }
+
+    const publica = contaService.paraContratoPublico(conta);
+    return res.status(200).json(addLinks(req, publica, {
+      self: `/contas/${publica.numero}`,
+      cliente: `/clientes/${publica.cpfCliente}`,
+      deposito: { href: `/contas/${publica.numero}/deposito`, method: 'POST' },
+      saque: { href: `/contas/${publica.numero}/saque`, method: 'POST' },
+      transferencia: { href: `/contas/${publica.numero}/transferencia`, method: 'POST' },
+      extrato: `/contas/${publica.numero}/extrato`
+    }));
+  });
+
+  router.post('/contas/:numero/deposito', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.realizarOperacaoPublica(
+      'DEPOSITO', req.params.numero, req.body, req.usuario
+    );
+    return res.status(201).json(addLinks(req, resultado, {
+      conta: `/contas/${req.params.numero}`,
+      extrato: `/contas/${req.params.numero}/extrato`
+    }));
+  });
+
+  router.post('/contas/:numero/saque', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.realizarOperacaoPublica(
+      'SAQUE', req.params.numero, req.body, req.usuario
+    );
+    return res.status(201).json(addLinks(req, resultado, {
+      conta: `/contas/${req.params.numero}`,
+      extrato: `/contas/${req.params.numero}/extrato`
+    }));
+  });
+
+  router.post('/contas/:numero/transferencia', ...somenteCliente, async (req, res) => {
+    const resultado = await contaService.transferirPublico(
+      req.params.numero, req.body, req.usuario
+    );
+    return res.status(201).json(addLinks(req, resultado, {
+      conta: `/contas/${req.params.numero}`,
+      extrato: `/contas/${req.params.numero}/extrato`
+    }));
+  });
+
+  router.get('/contas/:numero/extrato', autenticar, async (req, res) => {
+    const conta = await contaService.buscarPorNumero(req.params.numero, req.usuario);
+    if (
+      req.usuario.tipo.toUpperCase() === 'CLIENTE'
+      && String(conta.client_cpf) !== String(req.usuario.cpf)
+    ) {
+      return res.status(403).json({ message: 'Acesso negado.' });
+    }
+    const extrato = await contaService.buscarExtrato(
+      req.params.numero, req.usuario, req.query
+    );
+    return res.status(200).json(addLinks(req, extrato, {
+      self: `/contas/${req.params.numero}/extrato`,
+      conta: `/contas/${req.params.numero}`
+    }));
+  });
   router.get('/account/findByCpf/:cpf', autenticar, async (req, res) => {
     if (
       req.usuario.tipo.toUpperCase() === 'CLIENTE'
@@ -394,10 +493,15 @@ export function createRoutes({
     const message = status === 500
       ? 'Erro interno do Gateway.'
       : error.message;
-    const body = { message };
+    const body = {
+      status,
+      erro: status === 500 ? 'Internal Server Error' : 'Erro',
+      mensagem: message
+    };
 
     if (status === 401) {
       body.auth = false;
+      body.message = message;
     }
 
     return res.status(status).json(body);

@@ -76,7 +76,6 @@ public class SolicitacaoEntity {
             Integer numero,
             String complemento,
             String cep,
-            String bairro,
             String cidade,
             String uf)  {
 
@@ -89,7 +88,7 @@ public class SolicitacaoEntity {
         this.numero = numero;
         this.complemento = complemento;
         this.cep = cep;
-        this.bairro = bairro;
+        this.bairro = "";
         this.cidade = cidade;
         this.uf = uf;
         this.status = StatusSolicitacao.PENDENTE;
@@ -126,7 +125,6 @@ public class SolicitacaoEntity {
                 this.logradouro,
                 String.valueOf(this.numero),
                 this.complemento,
-                this.bairro,
                 this.cidade,
                 this.uf
         );

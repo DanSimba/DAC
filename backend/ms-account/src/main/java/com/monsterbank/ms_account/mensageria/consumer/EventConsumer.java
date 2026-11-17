@@ -69,6 +69,17 @@ public class EventConsumer {
             acc.setCreatedAt(Integer.parseInt(ldt.format(DateTimeFormatter.BASIC_ISO_DATE)));
 
             accountReadRepository.save(acc);
+            return;
         }
+
+        accountReadRepository.findById(message.getObjetoId()).ifPresent(acc -> {
+            acc.setBalanco(readService.getBalancoAtual(message.getObjetoId()));
+
+            if (message.getTipo() == EventType.GERENTE_ALTERADO) {
+                acc.setManagerId(readService.getLastGerente(message.getObjetoId()));
+            }
+
+            accountReadRepository.save(acc);
+        });
     }
 }

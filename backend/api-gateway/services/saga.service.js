@@ -68,7 +68,8 @@ export async function iniciarSaga({
   }
 
   return {
-    jobId: sagaId
+    jobId: sagaId,
+    status: 'PENDENTE'
   };
 }
 

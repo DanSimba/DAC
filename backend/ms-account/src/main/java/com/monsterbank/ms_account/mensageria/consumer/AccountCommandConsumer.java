@@ -100,6 +100,24 @@ public class AccountCommandConsumer {
                     readService.removerContaPorCpf(cpf);
                     enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
                 }
+                case "conta.redistribuir-gerente" -> {
+                    Long cpfRemovido = command.payload().get("cpf").asLong();
+                    List<Long> cpfsAtivos = new ArrayList<>();
+                    JsonNode gerentes = command.payload().get("gerentes");
+
+                    if (gerentes != null && gerentes.isArray()) {
+                        for (JsonNode gerente : gerentes) {
+                            cpfsAtivos.add(gerente.get("cpf").asLong());
+                        }
+                    }
+
+                    Long novoGerente = accountService.redistribuirContas(cpfRemovido, cpfsAtivos);
+                    enviarRespostaSucesso(
+                            command,
+                            replyQueue,
+                            objectMapper.createObjectNode().put("novoGerenteCpf", novoGerente)
+                    );
+                }
 
                 default -> {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", AccountCommandConsumer.class);

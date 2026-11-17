@@ -1,10 +1,10 @@
 export interface RelatorioCliente {
-  cpfCliente: string;
-  nomeCliente: string;
-  emailCliente: string;
+  cpf: string;
+  nome: string;
+  email: string;
   salario: string;
   numeroConta: string;
-  saldoConta: string;
+  saldo: string;
   cpfGerente: string;
   nomeGerente: string;
 }

@@ -13,13 +13,13 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ErrorResponse> handleSaldoInsuficiente(SaldoInsuficienteException e) {
 
                 ErrorResponse error = new ErrorResponse(
-                        403, //403: forbidden, nao tem dinheiro bro
+                        422,
                         "SALDO_INSUFICIENTE",
                         e.getMessage()
                 );
 
                 return ResponseEntity
-                        .status(HttpStatus.FORBIDDEN)
+                        .status(HttpStatus.UNPROCESSABLE_ENTITY)
                         .body(error);
         }
 
@@ -42,13 +42,13 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(ErroContaNaoEncontradaException.class)
         public ResponseEntity<ErrorResponse> handleErroContaNaoEncontrada(ErroContaNaoEncontradaException e) {
                 ErrorResponse error = new ErrorResponse(
-                        400, //bad request: mandou um cona que nao existe
+                        404,
                         "ERRO_AO_BUSCAR_CONTA",
                         e.getMessage()
                 );
 
                 return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
+                        .status(HttpStatus.NOT_FOUND)
                         .body(error);
         }
 
@@ -56,13 +56,13 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(MalabarismoException.class)
         public ResponseEntity<ErrorResponse> handleMalabarismoException(MalabarismoException e) {
                 ErrorResponse error = new ErrorResponse(
-                        403, //forbidden: pode não man
+                        422,
                         "ERRO_MALABARISMO",
                         e.getMessage()
                 );
 
                 return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
+                        .status(HttpStatus.UNPROCESSABLE_ENTITY)
                         .body(error);
         }
 

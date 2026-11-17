@@ -13,6 +13,14 @@ public enum AuthReplyQueue {
         "auth.compensar-criacao",
         "ms.auth.compensar-criacao.reply"
     ),
+    CRIAR_GERENTE(
+        "auth.criar-gerente",
+        "ms.auth.criar-gerente.reply"
+    ),
+    REMOVER_GERENTE(
+        "auth.remover-gerente",
+        "ms.auth.remover-gerente.reply"
+    ),
     COMANDO_DESCONHECIDO(
             null,
             "ms.auth.comando-desconhecido.reply"

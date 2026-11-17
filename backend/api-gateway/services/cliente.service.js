@@ -28,9 +28,10 @@ async function buscarClientes(field) {
   return data ?? [];
 }
 
-export async function listar({ field } = {}) {
+export async function listar({ busca, field } = {}) {
+  const filtro = busca ?? field;
   const [clientes, contas] = await Promise.all([
-    buscarClientes(field),
+    buscarClientes(filtro),
     buscarContas()
   ]);
 
@@ -47,7 +48,7 @@ export async function listar({ field } = {}) {
         nome: cliente.nome,
         cidade: cliente.cidade,
         estado: cliente.estado,
-        saldo: String(conta?.balanco ?? '0')
+        saldo: Number(conta?.balanco ?? 0).toFixed(2)
       };
     })
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
@@ -59,8 +60,21 @@ export async function buscarPorCpf(cpf) {
     { unavailableMessage: 'MS Cliente indisponível.' }
   );
 
-  const { _links, ...cliente } = data;
-  return cliente;
+  return {
+    cpf: data.cpf,
+    nome: data.nome,
+    email: data.email,
+    telefone: data.telefone,
+    salario: Number(data.salario ?? 0).toFixed(2),
+    endereco: {
+      logradouro: data.logradouro,
+      numero: String(data.numero),
+      complemento: data.complemento ?? null,
+      cep: data.cep,
+      cidade: data.cidade,
+      uf: data.estado
+    }
+  };
 }
 
 async function montarRelatorio() {
@@ -90,12 +104,12 @@ async function montarRelatorio() {
       : undefined;
 
     return {
-      cpfCliente: cliente.cpf,
-      nomeCliente: cliente.nome,
-      emailCliente: cliente.email,
-      salario: String(cliente.salario ?? '0'),
+      cpf: cliente.cpf,
+      nome: cliente.nome,
+      email: cliente.email,
+      salario: Number(cliente.salario ?? 0).toFixed(2),
       numeroConta: conta?.number ?? '-',
-      saldoConta: String(conta?.balanco ?? '0'),
+      saldo: Number(conta?.balanco ?? 0).toFixed(2),
       cpfGerente: gerente?.cpf ?? '-',
       nomeGerente: gerente?.nome ?? '-'
     };
@@ -104,7 +118,7 @@ async function montarRelatorio() {
 
 async function processarRelatorio(jobId) {
   try {
-    const resultado = await montarRelatorio();
+    const clientes = await montarRelatorio();
     const redisClient = await redis.getClient();
 
     await redisClient.set(
@@ -115,7 +129,9 @@ async function processarRelatorio(jobId) {
         resultType: 'inline',
         dominio: 'clientes',
         resourceId: null,
-        resultado,
+        resultado: { clientes: clientes.sort(
+          (a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
+        ) },
         erro: null
       }),
       { EX: JOB_TTL_SECONDS }
@@ -168,5 +184,5 @@ export async function gerarRelatorio() {
 
   processarRelatorio(jobId);
 
-  return { jobId };
+  return { jobId, status: 'PENDENTE' };
 }

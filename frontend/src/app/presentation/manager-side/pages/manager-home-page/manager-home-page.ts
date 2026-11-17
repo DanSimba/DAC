@@ -27,7 +27,7 @@ export class ManagerHomePage implements OnInit {
   public motivoErro: string = '';
 
   // Filtros e Paginação
-  public filtroAtual: 'PENDENTE' | 'APROVADO' | 'NAO_APROVADO' = 'PENDENTE';
+  public filtroAtual: 'PENDENTE' | 'APROVADA' | 'NAO_APROVADA' = 'PENDENTE';
   public paginaAtual: number = 1;
   public itensPorPagina: number = 5;
 
@@ -63,7 +63,7 @@ export class ManagerHomePage implements OnInit {
 
     this.mensagemSucesso = '';
     this.mensagemErro = '';
-    solicitacao.status = 'APROVADO';
+    solicitacao.status = 'APROVADA';
     this.ajustarPaginaAposRemocao();
 
     const cpfLimpo = solicitacao.cpf.replace(/\D/g, '');
@@ -138,7 +138,7 @@ export class ManagerHomePage implements OnInit {
     return Math.ceil(this.getSolicitacoesFiltradas.length / this.itensPorPagina) || 1;
   }
 
-  public mudarFiltro(filtro: 'PENDENTE' | 'APROVADO' | 'NAO_APROVADO'): void {
+  public mudarFiltro(filtro: 'PENDENTE' | 'APROVADA' | 'NAO_APROVADA'): void {
     this.filtroAtual = filtro;
     this.paginaAtual = 1;
   }

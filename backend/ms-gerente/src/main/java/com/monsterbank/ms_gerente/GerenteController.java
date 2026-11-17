@@ -14,6 +14,7 @@ import com.monsterbank.ms_gerente.aprovacao.AprovacaoService;
 import com.monsterbank.ms_gerente.gerente.GerenteDTO;
 import com.monsterbank.ms_gerente.gerente.GerenteService;
 import com.monsterbank.ms_gerente.mensageria.publisher.RabbitMQProducer;
+import com.monsterbank.ms_gerente.config.RebootService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,11 +29,19 @@ public class GerenteController {
     private final GerenteService gerenteService;
     private final AprovacaoService aprovacaoService;
     private final RabbitMQProducer rabbitMQProducer;
+    private final RebootService rebootService;
 
-    GerenteController(GerenteService gerenteService, AprovacaoService aprovacaoService, RabbitMQProducer rabbitMQProducer) {
+    GerenteController(GerenteService gerenteService, AprovacaoService aprovacaoService, RabbitMQProducer rabbitMQProducer, RebootService rebootService) {
         this.gerenteService = gerenteService;
         this.aprovacaoService = aprovacaoService;
         this.rabbitMQProducer = rabbitMQProducer;
+        this.rebootService = rebootService;
+    }
+
+    @PostMapping("/reboot")
+    public ResponseEntity<Void> reboot() {
+        rebootService.recriarDados();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping
