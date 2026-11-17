@@ -69,6 +69,11 @@ public class GerenteCommandConsumer {
                     gerenteService.removerPorCpf(cpf);
                     enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
                 }
+                case "gerente.compensar-criacao" -> {
+                    String cpf = command.payload().get("cpf").asString();
+                    gerenteService.excluirPorCpf(cpf);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
+                }
             
                 default -> {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", GerenteCommandConsumer.class);

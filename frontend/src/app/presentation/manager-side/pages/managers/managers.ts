@@ -22,7 +22,7 @@ export class Managers implements OnInit{
   public mensagemErro: string = '';
 
   private formVazio(): ManagerDTO{
-    return {nome: '', cpf:'', email:'', telefone:''};
+    return {nome: '', cpf:'', email:'', telefone:'', senha:''};
   } //famosa GAMBIARRA, confie
 
   form: ManagerDTO = this.formVazio();
@@ -91,6 +91,7 @@ export class Managers implements OnInit{
       cpf: manager.cpf,
       email: manager.email,
       telefone: manager.telefone,
+      senha: '',
     }
     this.mensagemErro= '';
     this.formAberto.set(true);
@@ -113,7 +114,7 @@ export class Managers implements OnInit{
   }
 
   salvar() {
-    if(!this.form.nome || !this.form.cpf || !this.form.email){
+    if(!this.form.nome || !this.form.cpf || !this.form.email || (this.editandoID() === null && !this.form.senha)){
       this.mensagemErro = 'Preencha todos os campos obrigatórios (*).';
       // a validação mais porca q vc já viu
       return;

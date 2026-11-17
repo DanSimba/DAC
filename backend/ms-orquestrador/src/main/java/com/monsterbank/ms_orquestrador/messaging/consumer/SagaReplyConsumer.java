@@ -69,6 +69,11 @@ public class SagaReplyConsumer {
         sagaService.processarResposta("gerente.desativar", reply);
     }
 
+    @RabbitListener(queues = RabbitConfig.GERENTE_COMPENSAR_CRIACAO_REPLY_QUEUE)
+    public void receberCompensacaoCriacaoGerente(SagaReply reply) {
+        sagaService.processarResposta("gerente.compensar-criacao", reply);
+    }
+
     @RabbitListener(queues = RabbitConfig.CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE)
     public void receberGerenteIdentificado(SagaReply reply) {
         sagaService.processarResposta("conta.identificar-gerente", reply);

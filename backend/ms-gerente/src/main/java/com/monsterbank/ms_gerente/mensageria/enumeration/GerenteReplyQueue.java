@@ -21,6 +21,10 @@ public enum GerenteReplyQueue {
         "gerente.desativar",
         "ms.gerente.desativar.reply"
     ),
+    COMPENSAR_CRIACAO(
+        "gerente.compensar-criacao",
+        "ms.gerente.compensar-criacao.reply"
+    ),
     COMANDO_DESCONHECIDO(
             null,
             "ms.cliente.comando-desconhecido.reply"

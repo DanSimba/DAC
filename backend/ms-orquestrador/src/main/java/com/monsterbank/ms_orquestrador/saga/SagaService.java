@@ -36,6 +36,7 @@ public class SagaService {
     public static final String MARCAR_NAO_APROVADA = "cliente.marcar-nao-aprovada";
     public static final String CRIAR_GERENTE = "gerente.criar";
     public static final String DESATIVAR_GERENTE = "gerente.desativar";
+    public static final String COMPENSAR_CRIACAO_GERENTE = "gerente.compensar-criacao";
     public static final String CRIAR_USUARIO_GERENTE = "auth.criar-gerente";
     public static final String REMOVER_USUARIO_GERENTE = "auth.remover-gerente";
     public static final String REDISTRIBUIR_GERENTE = "conta.redistribuir-gerente";
@@ -111,6 +112,7 @@ public class SagaService {
             case MARCAR_NAO_APROVADA -> finalizarCompensacao(state, reply, "reprovacao da solicitacao");
             case CRIAR_GERENTE -> processarCriacaoGerente(state, reply);
             case DESATIVAR_GERENTE -> processarDesativacaoGerente(state, reply);
+            case COMPENSAR_CRIACAO_GERENTE -> finalizarCompensacaoGerente(state, reply);
             case CRIAR_USUARIO_GERENTE -> processarCriacaoUsuarioGerente(state, reply);
             case REMOVER_USUARIO_GERENTE -> processarRemocaoUsuarioGerente(state, reply);
             case REDISTRIBUIR_GERENTE -> processarRedistribuicaoGerente(state, reply);
@@ -134,6 +136,7 @@ public class SagaService {
             case CRIAR_CLIENTE -> iniciarCompensacaoCliente(state, erro);
             case CRIAR_CONTA -> iniciarCompensacaoConta(state, erro);
             case CRIAR_USUARIO -> iniciarCompensacaoUsuario(state, erro);
+            case CRIAR_USUARIO_GERENTE -> iniciarCompensacaoCriacaoGerente(state, erro);
             default -> falharSaga(state, erro);
         }
     }
@@ -183,11 +186,15 @@ public class SagaService {
 
     private void processarCriacaoUsuarioGerente(SagaState state, SagaReply reply) {
         if (!reply.sucesso()) {
-            compensar(state, DESATIVAR_GERENTE, reply.erro());
-            enviar(gerenteProducer, state, DESATIVAR_GERENTE, state.getPayload());
+            iniciarCompensacaoCriacaoGerente(state, reply.erro());
             return;
         }
         concluirSagaGerente(state);
+    }
+
+    private void iniciarCompensacaoCriacaoGerente(SagaState state, String erro) {
+        compensar(state, COMPENSAR_CRIACAO_GERENTE, erro);
+        enviar(gerenteProducer, state, COMPENSAR_CRIACAO_GERENTE, state.getPayload());
     }
 
     private void processarDesativacaoGerente(SagaState state, SagaReply reply) {

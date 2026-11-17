@@ -64,6 +64,12 @@
                 <input type="text" name="telefone" [(ngModel)]="form.telefone" (keydown)="bloquearNaoNumeros($event)" (input)="formatarTelefone()" maxlength="15"
                 class="w-full rounded-lg text-black font-display focus:outline-none" placeholder="(99) 99999-9999" />
 
+                @if (editandoID() === null) {
+                    <label class="text-lg font-display">Senha *</label>
+                    <input type="password" name="senha" [(ngModel)]="form.senha"
+                    class="w-full rounded-lg text-black font-display focus:outline-none" placeholder="Senha do gerente" />
+                }
+
                 <div class="flex flex-row w-full gap-x-4 mt-4">
                     <button type="button" (click)="fecharForm()"
                     class="flex-1 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-all duration-130">Cancelar</button>
