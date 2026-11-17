@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import com.monsterbank.ms_cliente.cliente.clienteDTOs.ClienteRetorno;
+import com.monsterbank.ms_cliente.config.RebootService;
 
 @RestController
 @RequestMapping("/clientes")
@@ -15,14 +16,23 @@ public class ClienteController {
     //private final SolicitacaoService solicitacaoService;
 
     private final ClienteService clienteService;
+    private final RebootService rebootService;
 
     public ClienteController(
-            ClienteService clienteService
+            ClienteService clienteService,
+            RebootService rebootService
             //, SolicitacaoService solicitacaoService
 
     ) {
         this.clienteService = clienteService;
+        this.rebootService = rebootService;
         //this.solicitacaoService = solicitacaoService;
+    }
+
+    @PostMapping("/reboot")
+    public ResponseEntity<Void> reboot() {
+        rebootService.recriarDados();
+        return ResponseEntity.ok().build();
     }
 
 

@@ -20,6 +20,7 @@ import java.util.Optional;
 import com.monsterbank.ms_account.query.services.*;
 
 import com.monsterbank.ms_account.query.entities.*;
+import com.monsterbank.ms_account.config.AccountSeedRunner;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,10 +34,18 @@ public class AccountController {
 
      private AccountService accountService;
      private ReadService readService;
+     private AccountSeedRunner accountSeedRunner;
 
-     public  AccountController(AccountService as, ReadService rs){
+     public AccountController(AccountService as, ReadService rs, AccountSeedRunner accountSeedRunner){
           this.accountService = as;
           this.readService = rs;
+          this.accountSeedRunner = accountSeedRunner;
+     }
+
+     @PostMapping("/reboot")
+     public ResponseEntity<Void> reboot() {
+          accountSeedRunner.recriarDados();
+          return ResponseEntity.ok().build();
      }
 
      @GetMapping("/health")

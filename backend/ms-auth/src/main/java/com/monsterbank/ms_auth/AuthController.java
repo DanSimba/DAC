@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.monsterbank.ms_auth.Repository.UserRepository;
 import com.monsterbank.ms_auth.auth.AuthService;
+import com.monsterbank.ms_auth.auth.AuthSeedService;
 import com.monsterbank.ms_auth.authDTO.ErrorDTO;
 import com.monsterbank.ms_auth.authDTO.LoginRequestDTO;
 import com.monsterbank.ms_auth.authDTO.LoginResponseDTO;
@@ -23,10 +24,12 @@ public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final AuthSeedService authSeedService;
 
-    AuthController(AuthService authService,UserRepository userRepository){
+    AuthController(AuthService authService, UserRepository userRepository, AuthSeedService authSeedService){
         this.authService = authService;
         this.userRepository = userRepository;
+        this.authSeedService = authSeedService;
     }
 
     @PostMapping("/login")
@@ -44,5 +47,11 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(new ErrorDTO(e.getMessage()));
         }
+    }
+
+    @PostMapping("/reboot")
+    public ResponseEntity<Void> reboot() {
+        authSeedService.recriarDados();
+        return ResponseEntity.ok().build();
     }
 }

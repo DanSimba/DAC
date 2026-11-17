@@ -3,7 +3,7 @@ export interface SolicitacaoCadastro {
   cpf: string; // Exibido formatado como 123.456.789-00
   nome: string;
   salario: string;
-  status: 'PENDENTE' | 'APROVADO' | 'NAO_APROVADO';
+  status: 'PENDENTE' | 'APROVADA' | 'NAO_APROVADA';
   motivo?: string;
   dataHoraProcessamento?: string;
 }

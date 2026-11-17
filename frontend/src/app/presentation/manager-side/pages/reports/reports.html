@@ -19,14 +19,14 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-white/10">
-          @for (linha of getRelatorioPaginado; track linha.cpfCliente) {
+          @for (linha of getRelatorioPaginado; track linha.cpf) {
             <tr class="hover:bg-white/5 transition-colors">
-              <td class="p-4 text-center whitespace-nowrap">{{ linha.cpfCliente }}</td>
-              <td class="p-4 font-bold">{{ linha.nomeCliente }}</td>
-              <td class="p-4">{{ linha.emailCliente }}</td>
+              <td class="p-4 text-center whitespace-nowrap">{{ linha.cpf }}</td>
+              <td class="p-4 font-bold">{{ linha.nome }}</td>
+              <td class="p-4">{{ linha.email }}</td>
               <td class="p-4 text-right whitespace-nowrap">{{ linha.salario }}</td>
               <td class="p-4 text-center whitespace-nowrap">{{ linha.numeroConta }}</td>
-              <td class="p-4 text-right font-bold whitespace-nowrap">{{ linha.saldoConta }}</td>
+              <td class="p-4 text-right font-bold whitespace-nowrap">{{ linha.saldo }}</td>
               <td class="p-4 text-center whitespace-nowrap">{{ linha.cpfGerente }}</td>
               <td class="p-4">{{ linha.nomeGerente }}</td>
             </tr>

@@ -37,7 +37,7 @@ export class Reports implements OnInit {
 
   // continua ordenando de forma crescente por nome do cliente
   public get getRelatorioOrdenado(): RelatorioCliente[] {
-    return [...this.relatorio].sort((a, b) => a.nomeCliente.localeCompare(b.nomeCliente));
+    return [...this.relatorio].sort((a, b) => a.nome.localeCompare(b.nome));
   }
 
   // paginação de 5 em 5 igual as outras telas do gerente

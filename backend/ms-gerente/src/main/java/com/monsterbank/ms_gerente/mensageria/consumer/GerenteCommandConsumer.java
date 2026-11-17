@@ -59,6 +59,16 @@ public class GerenteCommandConsumer {
                     enviarRespostaSucesso(command, replyQueue, payload);
 
                 }
+                case "gerente.criar" -> {
+                    GerenteDTO gerente = objectMapper.treeToValue(command.payload(), GerenteDTO.class);
+                    GerenteDTO criado = gerenteService.salvar(gerente);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.valueToTree(criado));
+                }
+                case "gerente.desativar" -> {
+                    String cpf = command.payload().get("cpf").asString();
+                    gerenteService.removerPorCpf(cpf);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
+                }
             
                 default -> {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", GerenteCommandConsumer.class);

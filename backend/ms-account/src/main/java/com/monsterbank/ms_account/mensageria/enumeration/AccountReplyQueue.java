@@ -29,6 +29,10 @@ public enum AccountReplyQueue {
             "conta.compensar-criacao",
             "ms.conta.compensar-criacao.reply"
     ),
+    REDISTRIBUIR_GERENTE(
+            "conta.redistribuir-gerente",
+            "ms.conta.redistribuir-gerente.reply"
+    ),
     COMANDO_DESCONHECIDO(
             null,
             "ms.conta.comando-desconhecido.reply"

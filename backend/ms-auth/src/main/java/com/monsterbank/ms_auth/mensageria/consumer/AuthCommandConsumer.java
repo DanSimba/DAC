@@ -65,6 +65,18 @@ public class AuthCommandConsumer {
                     authService.removerUsuarioCliente(cpf);
                     enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
                 }
+                case "auth.criar-gerente" -> {
+                    String email = command.payload().get("email").asString();
+                    String cpf = command.payload().get("cpf").asString();
+                    String senha = command.payload().get("senha").asString();
+                    authService.criarUsuarioGerente(email, cpf, senha);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
+                }
+                case "auth.remover-gerente" -> {
+                    String cpf = command.payload().get("cpf").asString();
+                    authService.removerUsuarioGerente(cpf);
+                    enviarRespostaSucesso(command, replyQueue, objectMapper.createObjectNode());
+                }
             
                 default -> {
                     log.warn("{} --- Erro: COMANDO_DESCONHECIDO", AuthCommandConsumer.class);

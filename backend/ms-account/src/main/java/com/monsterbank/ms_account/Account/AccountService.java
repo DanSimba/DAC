@@ -85,6 +85,21 @@ private static final Logger log = LoggerFactory.getLogger(AccountService.class);
     }
 
     @Transactional
+    public Long redistribuirContas(Long cpfGerenteRemovido, List<Long> cpfsGerentesAtivos) {
+        Long novoGerente = findLeastBusyManager(cpfsGerentesAtivos);
+
+        accountRepository.findAll().stream()
+                .filter(conta -> cpfGerenteRemovido.equals(conta.getManagerId()))
+                .forEach(conta -> {
+                    conta.setManagerId(novoGerente);
+                    accountRepository.save(conta);
+                    eventService.createGerenteAlteradoEvent(conta.getNumber(), novoGerente);
+                });
+
+        return novoGerente;
+    }
+
+    @Transactional
     public AccountDTO createAccount(String cpf, Long managerId) {
         log.info("{} --- Iniciando criação de conta para o CPF: {} e ID gerente: {}", AccountService.class, cpf, managerId);
         try {

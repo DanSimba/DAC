@@ -69,4 +69,26 @@ public class AuthService {
             userRepository.delete(usuario);
         }
     }
+
+    public void criarUsuarioGerente(String email, String cpf, String senha) {
+        AuthEntity novoUsuario = new AuthEntity(
+                email,
+                cpf,
+                argon2Encoder.encode(senha),
+                UserType.GERENTE
+        );
+
+        try {
+            userRepository.save(novoUsuario);
+        } catch (DuplicateKeyException e) {
+            throw new EmailJaCadastradoException();
+        }
+    }
+
+    public void removerUsuarioGerente(String cpf) {
+        AuthEntity usuario = userRepository.findByCpf(cpf);
+        if (usuario != null && usuario.getTipo() == UserType.GERENTE) {
+            userRepository.delete(usuario);
+        }
+    }
 }

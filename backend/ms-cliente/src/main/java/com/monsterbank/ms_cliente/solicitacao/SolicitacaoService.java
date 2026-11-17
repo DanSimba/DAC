@@ -67,7 +67,6 @@ public class SolicitacaoService {
                 Integer.parseInt(dto.endereco().numero()),
                 dto.endereco().complemento(),
                 dto.endereco().cep(),
-                dto.endereco().bairro(),
                 dto.endereco().cidade(),
                 dto.endereco().uf()
                 );
@@ -81,7 +80,7 @@ public class SolicitacaoService {
 
     @Transactional
     public SolicitacaoSagaDTO aprovar(String cpf) {
-        if(!CpfUtils.validar(cpf)){
+        if(cpf == null || !cpf.matches("\\d{11}")){
             log.error("{} --- CPF {} Inválido", SolicitacaoService.class, cpf);
             throw new CpfInvalidoException();
         }
@@ -110,7 +109,7 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoEntity rejeitar(String cpf, RecusarSolicitacaoRequest dto) {
         log.info("{} --- Iniciando rejeicao da solicitacao para o CPF {}", SolicitacaoService.class, cpf);
-        if(!CpfUtils.validar(cpf)) {
+        if(cpf == null || !cpf.matches("\\d{11}")) {
             log.error("CPF {} invalido", cpf);
             throw new CpfInvalidoException();
         }
@@ -158,9 +157,6 @@ public class SolicitacaoService {
     }
 
     private void validarPorCPF(String cpf){
-        if (!CpfUtils.validar(cpf)) {
-            throw new CpfInvalidoException();
-        }
         if(solicitacaoRepository.findByCpf(cpf).isPresent()){
             throw new CpfUtilizadoException();
         }

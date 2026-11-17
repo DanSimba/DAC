@@ -59,6 +59,16 @@ public class SagaReplyConsumer {
         sagaService.processarResposta("gerente.listar-ativos", reply);
     }
 
+    @RabbitListener(queues = RabbitConfig.GERENTE_CRIAR_REPLY_QUEUE)
+    public void receberCriacaoGerente(SagaReply reply) {
+        sagaService.processarResposta("gerente.criar", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.GERENTE_DESATIVAR_REPLY_QUEUE)
+    public void receberDesativacaoGerente(SagaReply reply) {
+        sagaService.processarResposta("gerente.desativar", reply);
+    }
+
     @RabbitListener(queues = RabbitConfig.CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE)
     public void receberGerenteIdentificado(SagaReply reply) {
         sagaService.processarResposta("conta.identificar-gerente", reply);
@@ -72,6 +82,16 @@ public class SagaReplyConsumer {
     @RabbitListener(queues = RabbitConfig.AUTH_COMPENSAR_CRIACAO_REPLY_QUEUE)
     public void receberCompensacaoCriacaoUsuario(SagaReply reply) {
         sagaService.processarResposta("auth.compensar-criacao", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.AUTH_CRIAR_GERENTE_REPLY_QUEUE)
+    public void receberCriacaoUsuarioGerente(SagaReply reply) {
+        sagaService.processarResposta("auth.criar-gerente", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.AUTH_REMOVER_GERENTE_REPLY_QUEUE)
+    public void receberRemocaoUsuarioGerente(SagaReply reply) {
+        sagaService.processarResposta("auth.remover-gerente", reply);
     }
 
     @RabbitListener(queues = RabbitConfig.CONTA_CRIAR_REPLY_QUEUE)
@@ -103,5 +123,10 @@ public class SagaReplyConsumer {
     public void receberComandoDesconhecidoConta(SagaReply reply) {
         // Opcional: Como o tipo é nulo no Enum, passamos uma string de fallback pro SagaService
         sagaService.processarResposta("conta.comando-desconhecido", reply);
+    }
+
+    @RabbitListener(queues = RabbitConfig.CONTA_REDISTRIBUIR_GERENTE_REPLY_QUEUE)
+    public void receberRedistribuicaoGerente(SagaReply reply) {
+        sagaService.processarResposta("conta.redistribuir-gerente", reply);
     }
 }

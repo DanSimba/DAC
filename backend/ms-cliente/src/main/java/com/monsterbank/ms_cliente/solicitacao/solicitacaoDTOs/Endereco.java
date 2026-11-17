@@ -14,8 +14,6 @@ public record Endereco(
     @Size(max = 100)
     String complemento,
     @NotBlank @Size(max = 100)
-    String bairro,
-    @NotBlank @Size(max = 100)
     String cidade,
     @NotBlank @Pattern(regexp = "[A-Za-z]{2}")
     String uf

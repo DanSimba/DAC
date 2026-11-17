@@ -22,10 +22,14 @@ public class RabbitConfig {
 
     public static final String GERENTE_COMMAND_QUEUE = "ms.gerente.cmd";
     public static final String GERENTE_LISTAR_ATIVOS_REPLY_QUEUE = "ms.gerente.listar-ativos.reply";
+    public static final String GERENTE_CRIAR_REPLY_QUEUE = "ms.gerente.criar.reply";
+    public static final String GERENTE_DESATIVAR_REPLY_QUEUE = "ms.gerente.desativar.reply";
 
     public static final String AUTH_COMMAND_QUEUE = "ms.auth.cmd";
     public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
     public static final String AUTH_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.auth.compensar-criacao.reply";
+    public static final String AUTH_CRIAR_GERENTE_REPLY_QUEUE = "ms.auth.criar-gerente.reply";
+    public static final String AUTH_REMOVER_GERENTE_REPLY_QUEUE = "ms.auth.remover-gerente.reply";
     
     public static final String CONTA_IDENTIFICAR_GERENTE_REPLY_QUEUE = "ms.conta.identificar-gerente.reply";
     public static final String CONTA_COMMAND_QUEUE = "ms.conta.cmd";
@@ -35,6 +39,7 @@ public class RabbitConfig {
     public static final String CONTA_MARCAR_NAO_APROVADA_REPLY_QUEUE = "ms.conta.marcar-nao-aprovada.reply";
     public static final String CONTA_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.conta.compensar-criacao.reply";
     public static final String CONTA_COMANDO_DESCONHECIDO_REPLY_QUEUE = "ms.conta.comando-desconhecido.reply";
+    public static final String CONTA_REDISTRIBUIR_GERENTE_REPLY_QUEUE = "ms.conta.redistribuir-gerente.reply";
 
     public static final String EMAIL_COMMAND_QUEUE = "ms.email.cmd";
 
@@ -88,6 +93,16 @@ public class RabbitConfig {
         return new Queue(GERENTE_LISTAR_ATIVOS_REPLY_QUEUE, true);
     }
 
+    @Bean
+    public Queue gerenteCriarReplyQueue() {
+        return new Queue(GERENTE_CRIAR_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue gerenteDesativarReplyQueue() {
+        return new Queue(GERENTE_DESATIVAR_REPLY_QUEUE, true);
+    }
+
     @Bean 
     public Queue gerenteCmdQueue() {
         return new Queue(GERENTE_COMMAND_QUEUE, true);
@@ -111,6 +126,16 @@ public class RabbitConfig {
     @Bean
     public Queue authCompensarCriacaoReplyQueue() {
         return new Queue(AUTH_COMPENSAR_CRIACAO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authCriarGerenteReplyQueue() {
+        return new Queue(AUTH_CRIAR_GERENTE_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authRemoverGerenteReplyQueue() {
+        return new Queue(AUTH_REMOVER_GERENTE_REPLY_QUEUE, true);
     }
 
     @Bean 
@@ -146,6 +171,11 @@ public class RabbitConfig {
     @Bean
     public Queue contaComandoDesconhecidoReplyQueue() {
         return new Queue(CONTA_COMANDO_DESCONHECIDO_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue contaRedistribuirGerenteReplyQueue() {
+        return new Queue(CONTA_REDISTRIBUIR_GERENTE_REPLY_QUEUE, true);
     }
 
     @Bean

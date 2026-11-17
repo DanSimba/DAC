@@ -13,6 +13,14 @@ public enum GerenteReplyQueue {
         "gerente.listar-ativos",
         "ms.gerente.listar-ativos.reply"
     ),
+    CRIAR(
+        "gerente.criar",
+        "ms.gerente.criar.reply"
+    ),
+    DESATIVAR(
+        "gerente.desativar",
+        "ms.gerente.desativar.reply"
+    ),
     COMANDO_DESCONHECIDO(
             null,
             "ms.cliente.comando-desconhecido.reply"
