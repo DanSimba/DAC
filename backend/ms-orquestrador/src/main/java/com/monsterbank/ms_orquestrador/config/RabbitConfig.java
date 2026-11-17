@@ -24,6 +24,7 @@ public class RabbitConfig {
     public static final String GERENTE_LISTAR_ATIVOS_REPLY_QUEUE = "ms.gerente.listar-ativos.reply";
     public static final String GERENTE_CRIAR_REPLY_QUEUE = "ms.gerente.criar.reply";
     public static final String GERENTE_DESATIVAR_REPLY_QUEUE = "ms.gerente.desativar.reply";
+    public static final String GERENTE_COMPENSAR_CRIACAO_REPLY_QUEUE = "ms.gerente.compensar-criacao.reply";
 
     public static final String AUTH_COMMAND_QUEUE = "ms.auth.cmd";
     public static final String AUTH_CRIAR_USUARIO_REPLY_QUEUE = "ms.auth.criar-usuario.reply";
@@ -101,6 +102,11 @@ public class RabbitConfig {
     @Bean
     public Queue gerenteDesativarReplyQueue() {
         return new Queue(GERENTE_DESATIVAR_REPLY_QUEUE, true);
+    }
+
+    @Bean
+    public Queue gerenteCompensarCriacaoReplyQueue() {
+        return new Queue(GERENTE_COMPENSAR_CRIACAO_REPLY_QUEUE, true);
     }
 
     @Bean 

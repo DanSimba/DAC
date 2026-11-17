@@ -5,6 +5,7 @@ export interface ManagerDTO{
     cpf : string;
     email : string;
     telefone : string;
+    senha?: string;
     quantidadeClientes?: number;
     
 
